@@ -157,7 +157,7 @@ public class WebviewConnectActivity extends BaseActivity {
                         @Override
                         public void run() {
                             try {
-                                final String response = new HttpsConnection(WebviewConnectActivity.this).post(Helper.instanceWithProtocol(instance) + action, 30, parameters, null);
+                                final String response = new HttpsConnection(WebviewConnectActivity.this).post(Helper.instanceWithProtocol(instance) + action, 30, new JSONObject(parameters), null);
                                 JSONObject resobj;
                                 try {
                                     resobj = new JSONObject(response);

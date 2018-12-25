@@ -192,7 +192,12 @@ public class Helper {
     @SuppressWarnings({"unused", "WeakerAccess"})
     public static  final String TAG = "mastodon_etalab";
     public static final String CLIENT_NAME_VALUE = "Mastalab";
-    public static final String OAUTH_SCOPES = "read write follow";
+    public static final String CLIENT_DESCRIPTION_VALUE = "Mastalab";
+    public static final String[] OAUTH_SCOPES = {"account-read","account-write","note-read",
+            "note-write","reaction-read","reaction-write","following-read","following-write",
+            "drive-read","drive-write","notification-read","notification-write","favorite-read",
+            "favorites-read","favorite-write","account/read","account/write","messaging-read",
+            "messaging-write","vote-read","vote-write"};
     public static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";
     public static final String PREF_KEY_ID = "userID";
     public static final String PREF_INSTANCE = "instance";
@@ -206,16 +211,17 @@ public class Helper {
     public static final String YANDEX_KEY = "trnsl.1.1.20170703T074828Z.a95168c920f61b17.699437a40bbfbddc4cd57f345a75c83f0f30c420";
 
     //Some definitions
-    public static final String CLIENT_NAME = "client_name";
+    public static final String CLIENT_NAME = "name";
+    public static final String CLIENT_DESCRIPTION = "description";
     public static final String APP_PREFS = "app_prefs";
     public static final String ID = "id";
-    public static final String CLIENT_ID = "client_id";
-    public static final String CLIENT_SECRET = "client_secret";
+    public static final String CLIENT_ID = "id";
+    public static final String CLIENT_SECRET = "secret";
     public static final String REDIRECT_URI = "redirect_uri";
-    public static final String REDIRECT_URIS = "redirect_uris";
+    public static final String REDIRECT_URIS = "callbackUrl";
     public static final String RESPONSE_TYPE = "response_type";
     public static final String SCOPE = "scope";
-    public static final String SCOPES = "scopes";
+    public static final String SCOPES = "permission";
     public static final String WEBSITE = "website";
     public static final String WEBSITE_VALUE = "https://mastalab.app";
     public static final String SHOW_BATTERY_SAVER_MESSAGE = "show_battery_saver_message";

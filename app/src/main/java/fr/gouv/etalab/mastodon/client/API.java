@@ -167,7 +167,7 @@ public class API {
      */
     public APIResponse getInstance() {
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl("/instance"), 30, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).get(getAbsoluteUrl("/meta"), 30, null, prefKeyOauthTokenT);
             Instance instanceEntity = parseInstance(new JSONObject(response));
             apiResponse.setInstance(instanceEntity);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -1483,7 +1483,7 @@ public class API {
         params.put("notifications", Boolean.toString(muteNotifications));
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            httpsConnection.post(getAbsoluteUrl(String.format("/accounts/%s/mute", targetedId)), 60, params, prefKeyOauthTokenT);
+            httpsConnection.post(getAbsoluteUrl(String.format("/accounts/%s/mute", targetedId)), 60, new JSONObject(params), prefKeyOauthTokenT);
             actionCode = httpsConnection.getActionCode();
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -1497,6 +1497,7 @@ public class API {
         }
         return actionCode;
     }
+
 
     /**
      * Makes the post action
@@ -1637,7 +1638,7 @@ public class API {
 
             try {
                 HttpsConnection httpsConnection = new HttpsConnection(context);
-                httpsConnection.post(getAbsoluteUrl(action), 60, params, prefKeyOauthTokenT);
+                httpsConnection.post(getAbsoluteUrl(action), 60, new JSONObject(params), prefKeyOauthTokenT);
                 actionCode = httpsConnection.getActionCode();
             } catch (HttpsConnection.HttpsConnectionException e) {
                 setError(e.getStatusCode(), e);
@@ -1702,7 +1703,7 @@ public class API {
 
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/statuses"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/statuses"), 60, new JSONObject(params), prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             Status statusreturned = parseStatuses(context, new JSONObject(response));
@@ -1740,7 +1741,7 @@ public class API {
             action = "/notifications/dismiss";
         }
         try {
-            new HttpsConnection(context).post(getAbsoluteUrl(action), 60, params, prefKeyOauthTokenT);
+            new HttpsConnection(context).post(getAbsoluteUrl(action), 60, new JSONObject(params), prefKeyOauthTokenT);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -2080,7 +2081,7 @@ public class API {
         params.put("expires_in", String.valueOf(filter.getExpires_in()));
         ArrayList<Filters> filters = new ArrayList<>();
         try {
-            String response = new HttpsConnection(context).post(getAbsoluteUrl("/filters"), 60, params, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/filters"), 60, new JSONObject(params), prefKeyOauthTokenT);
             Filters resfilter = parseFilter(new JSONObject(response));
             filters.add(resfilter);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -2341,7 +2342,7 @@ public class API {
             params.put("account_ids[]", parameters.toString());
         }
         try {
-            new HttpsConnection(context).post(getAbsoluteUrl(String.format("/lists/%s/accounts", id)), 60, params, prefKeyOauthTokenT);
+            new HttpsConnection(context).post(getAbsoluteUrl(String.format("/lists/%s/accounts", id)), 60, new JSONObject(params), prefKeyOauthTokenT);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -2398,7 +2399,7 @@ public class API {
         List<fr.gouv.etalab.mastodon.client.Entities.List> lists = new ArrayList<>();
         fr.gouv.etalab.mastodon.client.Entities.List list;
         try {
-            String response = new HttpsConnection(context).post(getAbsoluteUrl("/lists"), 60, params, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/lists"), 60, new JSONObject(params), prefKeyOauthTokenT);
             list = parseList(new JSONObject(response));
             lists.add(list);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -3591,16 +3592,16 @@ public class API {
 
 
     private String getAbsoluteUrl(String action) {
-        return Helper.instanceWithProtocol(this.instance) + "/api/v1" + action;
+        return Helper.instanceWithProtocol(this.instance) + "/api" + action;
     }
 
 
     private String getAbsoluteUrlRemoteInstance(String instanceName) {
-        return "https://" + instanceName + "/api/v1/timelines/public?local=true";
+        return "https://" + instanceName + "/notes/local-timeline";
     }
 
     private String getAbsoluteUrlCommunitywiki(String action) {
-        return "https://communitywiki.org/trunk/api/v1"  + action;
+        return "https://communitywiki.org/trunk"  + action;
     }
 
 }

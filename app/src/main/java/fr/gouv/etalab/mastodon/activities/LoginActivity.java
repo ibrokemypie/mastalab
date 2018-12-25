@@ -35,6 +35,7 @@ import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.UnderlineSpan;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -71,6 +72,9 @@ import fr.gouv.etalab.mastodon.helper.Helper;
 import static fr.gouv.etalab.mastodon.helper.Helper.THEME_LIGHT;
 import static fr.gouv.etalab.mastodon.helper.Helper.changeDrawableColor;
 import static fr.gouv.etalab.mastodon.helper.Helper.convertDpToPixel;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 
 /**
@@ -102,12 +106,18 @@ public class LoginActivity extends BaseActivity {
             String code = val[1];
 
             final String action = "/oauth/token";
-            final HashMap<String, String> parameters = new HashMap<>();
-            parameters.put(Helper.CLIENT_ID, client_id);
-            parameters.put(Helper.CLIENT_SECRET, client_secret);
-            parameters.put(Helper.REDIRECT_URI,Helper.REDIRECT_CONTENT_WEB);
-            parameters.put("grant_type", "authorization_code");
-            parameters.put("code",code);
+
+            final JSONObject parameters = new JSONObject();
+            try {
+                parameters.put(Helper.CLIENT_ID, client_id);
+                parameters.put(Helper.CLIENT_SECRET, client_secret);
+                parameters.put(Helper.REDIRECT_URI,Helper.REDIRECT_CONTENT_WEB);
+                parameters.put("grant_type", "authorization_code");
+                parameters.put("code",code);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             new Thread(new Runnable(){
                 @Override
                 public void run() {
@@ -384,12 +394,22 @@ public class LoginActivity extends BaseActivity {
         } catch (UnsupportedEncodingException e) {
             Toasty.error(LoginActivity.this,getString(R.string.client_error), Toast.LENGTH_LONG).show();
         }
-        final String action = "/api/v1/apps";
-        final HashMap<String, String> parameters = new HashMap<>();
-        parameters.put(Helper.CLIENT_NAME, Helper.CLIENT_NAME_VALUE);
-        parameters.put(Helper.REDIRECT_URIS, client_id_for_webview?Helper.REDIRECT_CONTENT_WEB:Helper.REDIRECT_CONTENT);
-        parameters.put(Helper.SCOPES, Helper.OAUTH_SCOPES);
-        parameters.put(Helper.WEBSITE, Helper.WEBSITE_VALUE);
+        final String action = "/api/app/create";
+        final JSONArray perms = new JSONArray();
+            for (String perm : Helper.OAUTH_SCOPES) {
+                perms.put(perm);
+            }
+
+        final JSONObject parameters = new JSONObject();
+        try {
+            parameters.put(Helper.CLIENT_NAME, Helper.CLIENT_NAME_VALUE);
+            parameters.put(Helper.CLIENT_DESCRIPTION, Helper.CLIENT_DESCRIPTION_VALUE);
+            parameters.put(Helper.REDIRECT_URIS, client_id_for_webview ? Helper.REDIRECT_CONTENT_WEB : Helper.REDIRECT_CONTENT);
+            parameters.put(Helper.SCOPES, perms);
+            parameters.put(Helper.WEBSITE, Helper.WEBSITE_VALUE);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         new Thread(new Runnable(){
             @Override
@@ -401,6 +421,7 @@ public class LoginActivity extends BaseActivity {
                           JSONObject resobj;
                           try {
                               resobj = new JSONObject(response);
+                              Log.d("resp", resobj.toString());
                               client_id = resobj.get(Helper.CLIENT_ID).toString();
                               client_secret = resobj.get(Helper.CLIENT_SECRET).toString();
                               String id = resobj.get(Helper.ID).toString();
@@ -456,22 +477,28 @@ public class LoginActivity extends BaseActivity {
                     return;
                 }
 
-                final HashMap<String, String> parameters = new HashMap<>();
                 SharedPreferences sharedpreferences = getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
-                parameters.put(Helper.CLIENT_ID, sharedpreferences.getString(Helper.CLIENT_ID, null));
-                parameters.put(Helper.CLIENT_SECRET, sharedpreferences.getString(Helper.CLIENT_SECRET, null));
-                parameters.put("grant_type", "password");
+
+                final JSONObject parameters = new JSONObject();
                 try {
-                    parameters.put("username",URLEncoder.encode(login_uid.getText().toString().trim().toLowerCase(), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    parameters.put("username",login_uid.getText().toString().trim().toLowerCase());
+                    parameters.put(Helper.CLIENT_ID, sharedpreferences.getString(Helper.CLIENT_ID, null));
+                    parameters.put(Helper.CLIENT_SECRET, sharedpreferences.getString(Helper.CLIENT_SECRET, null));
+                    parameters.put("grant_type", "password");
+                    try {
+                        parameters.put("username",URLEncoder.encode(login_uid.getText().toString().trim().toLowerCase(), "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        parameters.put("username",login_uid.getText().toString().trim().toLowerCase());
+                    }
+                    try {
+                        parameters.put("password",URLEncoder.encode(login_passwd.getText().toString(), "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        parameters.put("password",login_passwd.getText().toString());
+                    }
+                    parameters.put("scope"," read write follow");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                try {
-                    parameters.put("password",URLEncoder.encode(login_passwd.getText().toString(), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    parameters.put("password",login_passwd.getText().toString());
-                }
-                parameters.put("scope"," read write follow");
 
                 new Thread(new Runnable(){
                     @Override

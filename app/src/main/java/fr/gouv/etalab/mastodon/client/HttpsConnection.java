@@ -21,6 +21,8 @@ import android.text.Html;
 import android.text.SpannableString;
 
 import com.google.common.io.ByteStreams;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -294,26 +296,11 @@ public class HttpsConnection {
 
 
 
-    public String post(String urlConnection, int timeout, HashMap<String, String> paramaters, String token) throws IOException, NoSuchAlgorithmException, KeyManagementException, HttpsConnectionException {
+    public String post(String urlConnection, int timeout, JSONObject paramaters, String token) throws IOException, NoSuchAlgorithmException, KeyManagementException, HttpsConnectionException {
         if( urlConnection.startsWith("https://")) {
             URL url = new URL(urlConnection);
-            Map<String, Object> params = new LinkedHashMap<>();
-            if (paramaters != null) {
-                Iterator it = paramaters.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry pair = (Map.Entry) it.next();
-                    params.put(pair.getKey().toString(), pair.getValue());
-                    it.remove();
-                }
-            }
-            StringBuilder postData = new StringBuilder();
-            for (Map.Entry<String, Object> param : params.entrySet()) {
-                if (postData.length() != 0) postData.append('&');
-                postData.append(param.getKey());
-                postData.append('=');
-                postData.append(String.valueOf(param.getValue()));
-            }
-            byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+            String postData = paramaters.toString();
+            byte[] postDataBytes = postData.getBytes("UTF-8");
 
             if (proxy != null)
                 httpsURLConnection = (HttpsURLConnection) url.openConnection(proxy);
@@ -356,7 +343,7 @@ public class HttpsConnection {
             URL url = new URL(urlConnection);
             Map<String, Object> params = new LinkedHashMap<>();
             if (paramaters != null) {
-                Iterator it = paramaters.entrySet().iterator();
+                Iterator it = paramaters.keys();
                 while (it.hasNext()) {
                     Map.Entry pair = (Map.Entry) it.next();
                     params.put(pair.getKey().toString(), pair.getValue());
