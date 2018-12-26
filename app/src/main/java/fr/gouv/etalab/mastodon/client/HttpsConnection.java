@@ -19,6 +19,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.text.Html;
 import android.text.SpannableString;
+import android.util.Log;
 
 import com.google.common.io.ByteStreams;
 
@@ -299,7 +300,20 @@ public class HttpsConnection {
     public String post(String urlConnection, int timeout, JSONObject paramaters, String token) throws IOException, NoSuchAlgorithmException, KeyManagementException, HttpsConnectionException {
         if( urlConnection.startsWith("https://")) {
             URL url = new URL(urlConnection);
-            String postData = paramaters.toString();
+            JSONObject param = new JSONObject();
+            if (paramaters!=null)
+                param = paramaters;
+
+            if (token != null)
+                try {
+                    param.put("accessToken", token);
+                } catch (JSONException e) {
+                e.printStackTrace();
+                }
+
+            String postData = param.toString();
+            Log.d("param", postData);
+
             byte[] postDataBytes = postData.getBytes("UTF-8");
 
             if (proxy != null)
@@ -311,8 +325,7 @@ public class HttpsConnection {
             httpsURLConnection.setDoOutput(true);
             httpsURLConnection.setSSLSocketFactory(new TLSSocketFactory());
             httpsURLConnection.setRequestMethod("POST");
-            if (token != null)
-                httpsURLConnection.setRequestProperty("Authorization", "Bearer " + token);
+
             httpsURLConnection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
 
 

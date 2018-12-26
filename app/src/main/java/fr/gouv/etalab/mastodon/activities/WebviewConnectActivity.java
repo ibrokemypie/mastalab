@@ -26,12 +26,14 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
@@ -61,8 +63,7 @@ public class WebviewConnectActivity extends BaseActivity {
 
     private WebView webView;
     private AlertDialog alert;
-    private String clientId, clientSecret;
-    private String instance;
+    private String auth_url, app_token, instance;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,8 +89,7 @@ public class WebviewConnectActivity extends BaseActivity {
             instance = b.getString("instance");
         if( instance == null)
             finish();
-        clientId = sharedpreferences.getString(Helper.CLIENT_ID, null);
-        clientSecret = sharedpreferences.getString(Helper.CLIENT_SECRET, null);
+
         ActionBar actionBar = getSupportActionBar();
         if( actionBar != null ) {
             LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -112,6 +112,11 @@ public class WebviewConnectActivity extends BaseActivity {
             }
         }
         webView = findViewById(R.id.webviewConnect);
+
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+
         clearCookies(getApplicationContext());
         final ProgressBar pbar = findViewById(R.id.progress_bar);
         webView.setWebChromeClient(new WebChromeClient() {
@@ -126,58 +131,69 @@ public class WebviewConnectActivity extends BaseActivity {
                 }
             }
         });
-
-
+        auth_url = sharedpreferences.getString(Helper.AUTH_URL, null);
+        app_token = sharedpreferences.getString(Helper.APP_TOKEN, null);
         webView.setWebViewClient(new WebViewClient() {
-            @SuppressWarnings("deprecation")
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url){
-                super.shouldOverrideUrlLoading(view,url);
-                if( url.contains(Helper.REDIRECT_CONTENT_WEB)){
+            public boolean shouldOverrideUrlLoading(WebView view, String url)
+            {
+                Log.d("redirect?",Helper.REDIRECT_CONTENT_WEB + "?token=" + app_token);
+                if (url.startsWith(Helper.REDIRECT_CONTENT_WEB))
+                {
+                    // user granted permission
+                    // get /api/auth/session/userkey
+                    // get the accessToken
+                    final String action = "/api/auth/session/userKey";
 
-                    String val[] = url.split("code=");
-                    if (val.length< 2){
-                        Toasty.error(getApplicationContext(), getString(R.string.toast_code_error), Toast.LENGTH_LONG).show();
-                        Intent myIntent = new Intent(WebviewConnectActivity.this, LoginActivity.class);
-                        startActivity(myIntent);
-                        finish();
-                        return false;
+                    final JSONObject parameters = new JSONObject();
+                    try {
+                        parameters.put(Helper.APP_SECRET, sharedpreferences.getString(Helper.APP_SECRET, null));
+                        parameters.put(Helper.APP_TOKEN, sharedpreferences.getString(Helper.APP_TOKEN, null));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    String code = val[1];
 
-                    final String action = "/oauth/token";
-                    final HashMap<String, String> parameters = new HashMap<>();
-                    parameters.put(Helper.CLIENT_ID, clientId);
-                    parameters.put(Helper.CLIENT_SECRET, clientSecret);
-                    parameters.put(Helper.REDIRECT_URI,Helper.REDIRECT_CONTENT_WEB);
-                    parameters.put("grant_type", "authorization_code");
-                    parameters.put("code",code);
-
-                    new Thread(new Runnable(){
+                    new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                final String response = new HttpsConnection(WebviewConnectActivity.this).post(Helper.instanceWithProtocol(instance) + action, 30, new JSONObject(parameters), null);
-                                JSONObject resobj;
-                                try {
-                                    resobj = new JSONObject(response);
-                                    String token = resobj.get("access_token").toString();
-                                    SharedPreferences sharedpreferences = getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
-                                    SharedPreferences.Editor editor = sharedpreferences.edit();
-                                    editor.putString(Helper.PREF_KEY_OAUTH_TOKEN, token);
-                                    editor.apply();
-                                    //Update the account with the token;
-                                    new UpdateAccountInfoAsyncTask(WebviewConnectActivity.this, token, instance).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                                } catch (JSONException ignored) {}
-                            } catch (Exception ignored) {}
-                        }}).start();
-                    return true;
-                }
-                return false;
-            }
+                                final String response = new HttpsConnection(WebviewConnectActivity.this).post(Helper.instanceWithProtocol(instance) + action, 30, parameters, null);
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        JSONObject resobj;
+                                        try {
+                                            SharedPreferences.Editor editor = sharedpreferences.edit();
 
+                                            resobj = new JSONObject(response);
+                                            Log.d("resp", resobj.toString());
+                                            String access_token = resobj.get(Helper.ACCESS_TOKEN).toString();
+
+                                            editor.putString(Helper.ACCESS_TOKEN, access_token);
+                                            editor.putString(Helper.PREF_KEY_OAUTH_TOKEN, access_token);
+                                            editor.apply();
+                                            new UpdateAccountInfoAsyncTask(WebviewConnectActivity.this, access_token, instance).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                            } catch (final Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+
+                }
+                else
+                {
+                    // Load the page via the webview
+                    view.loadUrl(url);
+                }
+                return true;
+            }
         });
-        webView.loadUrl(LoginActivity.redirectUserToAuthorizeAndLogin(clientId, instance));
+        Log.d("web", auth_url);
+        webView.loadUrl(auth_url);
     }
 
 
@@ -189,8 +205,6 @@ public class WebviewConnectActivity extends BaseActivity {
             super.onBackPressed();
         }
     }
-
-
 
 
     @Override

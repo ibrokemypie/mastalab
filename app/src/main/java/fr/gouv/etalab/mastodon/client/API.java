@@ -17,6 +17,7 @@ package fr.gouv.etalab.mastodon.client;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -239,8 +240,11 @@ public class API {
      */
     public Account verifyCredentials() {
         account = new Account();
+        Log.d("resp", prefKeyOauthTokenT);
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl("/accounts/verify_credentials"), 60, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/auth/session/show"), 60, null, prefKeyOauthTokenT);
+            JSONObject resobj = new JSONObject(response);
+            Log.d("resp", resobj.toString());
             account = parseAccountResponse(context, new JSONObject(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -3307,7 +3311,7 @@ public class API {
 
         Account account = new Account();
         try {
-            account.setId(resobj.get("id").toString());
+            account.setId(resobj.get("userId").toString());
             account.setUsername(resobj.get("username").toString());
             account.setAcct(resobj.get("acct").toString());
             account.setDisplay_name(resobj.get("display_name").toString());

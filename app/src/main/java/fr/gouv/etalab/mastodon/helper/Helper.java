@@ -199,6 +199,7 @@ public class Helper {
             "favorites-read","favorite-write","account/read","account/write","messaging-read",
             "messaging-write","vote-read","vote-write"};
     public static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";
+    public static final String PREF_KEY_APP_TOKEN = "app_token";
     public static final String PREF_KEY_ID = "userID";
     public static final String PREF_INSTANCE = "instance";
     public static final String REDIRECT_CONTENT = "urn:ietf:wg:oauth:2.0:oob";
@@ -215,8 +216,12 @@ public class Helper {
     public static final String CLIENT_DESCRIPTION = "description";
     public static final String APP_PREFS = "app_prefs";
     public static final String ID = "id";
-    public static final String CLIENT_ID = "id";
-    public static final String CLIENT_SECRET = "secret";
+    public static final String APP_ID = "id";
+    public static final String SECRET = "secret";
+    public static final String APP_SECRET = "appSecret";
+    public static final String APP_TOKEN = "token";
+    public static final String ACCESS_TOKEN = "accessToken";
+    public static final String AUTH_URL = "url";
     public static final String REDIRECT_URI = "redirect_uri";
     public static final String REDIRECT_URIS = "callbackUrl";
     public static final String RESPONSE_TYPE = "response_type";
@@ -520,8 +525,8 @@ public class Helper {
         SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putString(Helper.PREF_KEY_OAUTH_TOKEN, null);
-        editor.putString(Helper.CLIENT_ID, null);
-        editor.putString(Helper.CLIENT_SECRET, null);
+        editor.putString(Helper.APP_ID, null);
+        editor.putString(Helper.APP_SECRET, null);
         editor.putString(Helper.PREF_KEY_ID, null);
         editor.putString(Helper.PREF_INSTANCE, null);
         editor.putString(Helper.ID, null);
