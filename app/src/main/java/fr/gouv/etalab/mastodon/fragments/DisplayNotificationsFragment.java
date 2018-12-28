@@ -235,9 +235,9 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
             }
             if( firstLoad) {
                 //Update the id of the last notification retrieved
-                if( MainActivity.lastNotificationId == null || Long.parseLong(notifications.get(0).getId()) > Long.parseLong(MainActivity.lastNotificationId))
-                    MainActivity.lastNotificationId = notifications.get(0).getId();
-                updateNotificationLastId(notifications.get(0).getId());
+//                if( MainActivity.lastNotificationId == null || Long.parseLong(notifications.get(0).getId()) > Long.parseLong(MainActivity.lastNotificationId))
+//                    MainActivity.lastNotificationId = notifications.get(0).getId();
+//                updateNotificationLastId(notifications.get(0).getId());
             }
             notificationsListAdapter.notifyItemRangeInserted(previousPosition, notifications.size());
         }else {
@@ -320,11 +320,11 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
 
         if( notifications != null && notifications.size() > 0) {
             for (int i = notifications.size()-1 ; i >= 0 ; i--) {
-                if (this.notifications.size() == 0 ||
-                        Long.parseLong(notifications.get(i).getId()) > Long.parseLong(this.notifications.get(0).getId())) {
-                    MainActivity.countNewNotifications++;
-                    this.notifications.add(0, notifications.get(i));
-                }
+//                if (this.notifications.size() == 0 ||
+//                        Long.parseLong(notifications.get(i).getId()) > Long.parseLong(this.notifications.get(0).getId())) {
+//                    MainActivity.countNewNotifications++;
+//                    this.notifications.add(0, notifications.get(i));
+//                }
             }
             notificationsListAdapter.notifyDataSetChanged();
             try {
