@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
@@ -69,10 +70,13 @@ public class UpdateAccountInfoAsyncTask extends AsyncTask<Void, Void, Void> {
         editor.putString(Helper.PREF_KEY_ID, account.getId());
         editor.putString(Helper.PREF_INSTANCE, instance);
         editor.apply();
-        if( userExists)
+        if( userExists) {
+            Log.d("userexist", "true");
             new AccountDAO(this.contextReference.get(), db).updateAccount(account);
-        else {
-            if( account.getUsername() != null && account.getCreated_at() != null)
+        } else {
+            Log.d("userexist", "false");
+            if (account.getUsername() != null && account.getCreated_at() != null)
+                Log.d("usernamecreatedatt", "true");
                 new AccountDAO(this.contextReference.get(), db).insertAccount(account);
         }
 

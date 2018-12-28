@@ -132,6 +132,10 @@ public class HttpsConnection {
                     it.remove();
                 }
             }
+            if (token != null) {
+                params.put("i", token);
+            }
+
             StringBuilder postData = new StringBuilder();
             for (Map.Entry<String, Object> param : params.entrySet()) {
                 if (postData.length() != 0) postData.append('&');
@@ -306,13 +310,12 @@ public class HttpsConnection {
 
             if (token != null)
                 try {
-                    param.put("accessToken", token);
+                    param.put("i", token);
                 } catch (JSONException e) {
                 e.printStackTrace();
                 }
 
             String postData = param.toString();
-            Log.d("param", postData);
 
             byte[] postDataBytes = postData.getBytes("UTF-8");
 

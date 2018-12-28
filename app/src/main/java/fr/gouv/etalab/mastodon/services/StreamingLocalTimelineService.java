@@ -145,11 +145,14 @@ public class StreamingLocalTimelineService extends IntentService {
     public void onRetrieveStreaming(Account account, JSONObject response) {
         if(  response == null )
             return;
+        String instance = "";
+        if( Helper.getLiveInstance(this) != null)
+            instance = Helper.getLiveInstance(this);
         Status status ;
         Bundle b = new Bundle();
         try {
             if( response.get("event").toString().equals("update")){
-                status = API.parseStatuses(getApplicationContext(), new JSONObject(response.get("payload").toString()));
+                status = API.parseStatuses(getApplicationContext(), new JSONObject(response.get("payload").toString()),instance);
                 status.setNew(true);
                 b.putParcelable("data", status);
                 if( account != null)

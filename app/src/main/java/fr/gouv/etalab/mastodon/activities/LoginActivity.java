@@ -389,7 +389,6 @@ public class LoginActivity extends BaseActivity {
                             JSONObject resobj;
                             try {
                                 resobj = new JSONObject(response);
-                                Log.d("resp", resobj.toString());
                                 app_secret = resobj.get(Helper.SECRET).toString();
 
                                 SharedPreferences sharedpreferences = getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
@@ -417,7 +416,6 @@ public class LoginActivity extends BaseActivity {
                                                     JSONObject resobj;
                                                     try {
                                                         resobj = new JSONObject(response);
-                                                        Log.d("resp", resobj.toString());
                                                         String app_token = resobj.get(Helper.APP_TOKEN).toString();
                                                         String auth_url = resobj.get(Helper.AUTH_URL).toString();
 

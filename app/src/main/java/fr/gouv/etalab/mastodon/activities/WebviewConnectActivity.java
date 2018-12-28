@@ -44,6 +44,10 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 import es.dmoral.toasty.Toasty;
@@ -63,7 +67,7 @@ public class WebviewConnectActivity extends BaseActivity {
 
     private WebView webView;
     private AlertDialog alert;
-    private String auth_url, app_token, instance;
+    private String auth_url, app_token, instance, app_secret;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -133,11 +137,12 @@ public class WebviewConnectActivity extends BaseActivity {
         });
         auth_url = sharedpreferences.getString(Helper.AUTH_URL, null);
         app_token = sharedpreferences.getString(Helper.APP_TOKEN, null);
+        app_secret = sharedpreferences.getString(Helper.APP_SECRET,null);
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url)
             {
-                Log.d("redirect?",Helper.REDIRECT_CONTENT_WEB + "?token=" + app_token);
                 if (url.startsWith(Helper.REDIRECT_CONTENT_WEB))
                 {
                     // user granted permission
@@ -147,8 +152,8 @@ public class WebviewConnectActivity extends BaseActivity {
 
                     final JSONObject parameters = new JSONObject();
                     try {
-                        parameters.put(Helper.APP_SECRET, sharedpreferences.getString(Helper.APP_SECRET, null));
-                        parameters.put(Helper.APP_TOKEN, sharedpreferences.getString(Helper.APP_TOKEN, null));
+                        parameters.put(Helper.APP_SECRET, app_secret);
+                        parameters.put(Helper.APP_TOKEN, app_token);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -165,14 +170,31 @@ public class WebviewConnectActivity extends BaseActivity {
                                             SharedPreferences.Editor editor = sharedpreferences.edit();
 
                                             resobj = new JSONObject(response);
-                                            Log.d("resp", resobj.toString());
                                             String access_token = resobj.get(Helper.ACCESS_TOKEN).toString();
 
                                             editor.putString(Helper.ACCESS_TOKEN, access_token);
-                                            editor.putString(Helper.PREF_KEY_OAUTH_TOKEN, access_token);
+
+                                            // this is how you get the auth parameter "i" for misskey, hash the accessToken + appSecret
+                                            String i_auth = access_token + app_secret;
+
+                                            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                                            byte[] hash = digest.digest(i_auth.getBytes(Charset.forName("UTF-8")));
+
+                                            StringBuffer hash_buffer = new StringBuffer();
+                                            for (byte aHash : hash) {
+                                                String hex = Integer.toHexString(0xff & aHash);
+                                                if (hex.length() == 1) hash_buffer.append('0');
+                                                hash_buffer.append(hex);
+                                            }
+                                            String i_string = hash_buffer.toString();
+
+                                            editor.putString(Helper.PREF_KEY_OAUTH_TOKEN, i_string);
+
                                             editor.apply();
-                                            new UpdateAccountInfoAsyncTask(WebviewConnectActivity.this, access_token, instance).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                            new UpdateAccountInfoAsyncTask(WebviewConnectActivity.this, i_string, instance).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                                         } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        } catch (NoSuchAlgorithmException e) {
                                             e.printStackTrace();
                                         }
                                     }
@@ -192,7 +214,6 @@ public class WebviewConnectActivity extends BaseActivity {
                 return true;
             }
         });
-        Log.d("web", auth_url);
         webView.loadUrl(auth_url);
     }
 

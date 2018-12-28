@@ -143,13 +143,16 @@ public class StreamingHomeTimelineService extends IntentService {
     }
 
     public void onRetrieveStreaming(Account account, JSONObject response) {
+        String instance = "";
+        if( Helper.getLiveInstance(this) != null)
+            instance = Helper.getLiveInstance(this);
         if(  response == null )
             return;
         Status status ;
         Bundle b = new Bundle();
         try {
             if( response.get("event").toString().equals("update")){
-                status = API.parseStatuses(getApplicationContext(), new JSONObject(response.get("payload").toString()));
+                status = API.parseStatuses(getApplicationContext(), new JSONObject(response.get("payload").toString()),instance);
                 status.setNew(true);
                 b.putParcelable("data", status);
                 if( account != null)

@@ -284,6 +284,9 @@ public class LiveNotificationService extends Service implements NetworkStateRece
     private void onRetrieveStreaming(Account account, JSONObject response) {
         if(  response == null )
             return;
+        String instance = "";
+        if( Helper.getLiveInstance(this) != null)
+            instance = Helper.getLiveInstance(this);
         fr.gouv.etalab.mastodon.client.Entities.Status status ;
         final Notification notification;
         String dataId;
@@ -296,7 +299,7 @@ public class LiveNotificationService extends Service implements NetworkStateRece
             switch (response.get("event").toString()) {
                 case "notification":
                     event = Helper.EventStreaming.NOTIFICATION;
-                    notification = API.parseNotificationResponse(getApplicationContext(), new JSONObject(response.get("payload").toString()));
+                    notification = API.parseNotificationResponse(getApplicationContext(), new JSONObject(response.get("payload").toString()),instance);
                     b.putParcelable("data", notification);
                     boolean liveNotifications = sharedpreferences.getBoolean(Helper.SET_LIVE_NOTIFICATIONS, true);
                     boolean canNotify = Helper.canNotify(getApplicationContext());

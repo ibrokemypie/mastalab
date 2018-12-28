@@ -240,12 +240,10 @@ public class API {
      */
     public Account verifyCredentials() {
         account = new Account();
-        Log.d("resp", prefKeyOauthTokenT);
         try {
-            String response = new HttpsConnection(context).post(getAbsoluteUrl("/auth/session/show"), 60, null, prefKeyOauthTokenT);
-            JSONObject resobj = new JSONObject(response);
-            Log.d("resp", resobj.toString());
-            account = parseAccountResponse(context, new JSONObject(response));
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/i"), 60, null, prefKeyOauthTokenT);
+            Log.d("verif",response.toString());
+            account = parseAccountResponse(context, new JSONObject(response),instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
             e.printStackTrace();
@@ -271,7 +269,7 @@ public class API {
         account = new Account();
         try {
             String response = new HttpsConnection(context).get(getAbsoluteUrl(String.format("/accounts/%s",accountId)), 60, null, prefKeyOauthTokenT);
-            account = parseAccountResponse(context, new JSONObject(response));
+            account = parseAccountResponse(context, new JSONObject(response),instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -443,7 +441,7 @@ public class API {
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             String response = httpsConnection.get(getAbsoluteUrl(String.format("/accounts/%s/statuses", accountId)), 60, params, prefKeyOauthTokenT);
-            statuses = parseStatuses(context, new JSONArray(response));
+            statuses = parseStatuses(context, new JSONArray(response),instance);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -552,7 +550,7 @@ public class API {
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             String response = httpsConnection.get(getAbsoluteUrl(String.format("/statuses/%s", statusId)), 60, null, prefKeyOauthTokenT);
-            Status status = parseStatuses(context, new JSONObject(response));
+            Status status = parseStatuses(context, new JSONObject(response),instance);
             statuses.add(status);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -692,7 +690,7 @@ public class API {
             String response = httpsConnection.get(getAbsoluteUrl("/timelines/direct"), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
-            statuses = parseStatuses(context, new JSONArray(response));
+            statuses = parseStatuses(context, new JSONArray(response),instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -761,7 +759,7 @@ public class API {
             String response = httpsConnection.get(getAbsoluteUrl("/timelines/home"), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
-            statuses = parseStatuses(context, new JSONArray(response));
+            statuses = parseStatuses(context, new JSONArray(response),instance);
             /*if( response != null) {
                 Thread thread = new Thread() {
                     @Override
@@ -1082,7 +1080,7 @@ public class API {
             String response = httpsConnection.get(url, 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
-            statuses = parseStatuses(context, new JSONArray(response));
+            statuses = parseStatuses(context, new JSONArray(response),instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -1201,7 +1199,7 @@ public class API {
             String response = httpsConnection.get(getAbsoluteUrl(String.format("/timelines/tag/%s",tag.trim())), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
-            statuses = parseStatuses(context, new JSONArray(response));
+            statuses = parseStatuses(context, new JSONArray(response),instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -1448,7 +1446,7 @@ public class API {
             String response = httpsConnection.get(getAbsoluteUrl("/favourites"), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
-            statuses = parseStatuses(context, new JSONArray(response));
+            statuses = parseStatuses(context, new JSONArray(response),instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -1710,7 +1708,7 @@ public class API {
             String response = httpsConnection.post(getAbsoluteUrl("/statuses"), 60, new JSONObject(params), prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
-            Status statusreturned = parseStatuses(context, new JSONObject(response));
+            Status statusreturned = parseStatuses(context, new JSONObject(response),instance);
             statuses.add(statusreturned);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -2241,7 +2239,7 @@ public class API {
             String response = httpsConnection.get(getAbsoluteUrl(String.format("/timelines/list/%s",list_id)), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
-            statuses = parseStatuses(context, new JSONArray(response));
+            statuses = parseStatuses(context, new JSONArray(response),instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
             e.printStackTrace();
@@ -2547,7 +2545,7 @@ public class API {
         Results results = new Results();
         try {
             results.setAccounts(parseAccountResponse(resobj.getJSONArray("accounts")));
-            results.setStatuses(parseStatuses(context, resobj.getJSONArray("statuses")));
+            results.setStatuses(parseStatuses(context, resobj.getJSONArray("statuses"),instance));
             results.setHashtags(parseTags(resobj.getJSONArray("hashtags")));
         } catch (JSONException e) {
             setDefaultError(e);
@@ -2913,7 +2911,7 @@ public class API {
             conversation.setId(resobj.get("id").toString());
             conversation.setUnread(Boolean.parseBoolean(resobj.get("unread").toString()));
             conversation.setAccounts(parseAccountResponse(resobj.getJSONArray("accounts")));
-            conversation.setLast_status(parseStatuses(context, resobj.getJSONObject("last_status")));
+            conversation.setLast_status(parseStatuses(context, resobj.getJSONObject("last_status"),instance));
         }catch (JSONException ignored) {}
         return conversation;
     }
@@ -2922,7 +2920,7 @@ public class API {
      * @param jsonArray JSONArray
      * @return List<Status>
      */
-    public static List<Status> parseStatuses(Context context, JSONArray jsonArray){
+    public static List<Status> parseStatuses(Context context, JSONArray jsonArray, String instance){
 
         List<Status> statuses = new ArrayList<>();
         try {
@@ -2930,7 +2928,7 @@ public class API {
             while (i < jsonArray.length() ){
 
                 JSONObject resobj = jsonArray.getJSONObject(i);
-                Status status = parseStatuses(context, resobj);
+                Status status = parseStatuses(context, resobj,instance);
                 i++;
                 statuses.add(status);
             }
@@ -2947,7 +2945,7 @@ public class API {
      * @return Status
      */
     @SuppressWarnings("InfiniteRecursion")
-    public static Status parseStatuses(Context context, JSONObject resobj){
+    public static Status parseStatuses(Context context, JSONObject resobj,String instance){
         Status status = new Status();
         try {
             status.setId(resobj.get("id").toString());
@@ -3049,7 +3047,7 @@ public class API {
             status.setApplication(application);
 
 
-            status.setAccount(parseAccountResponse(context, resobj.getJSONObject("account")));
+            status.setAccount(parseAccountResponse(context, resobj.getJSONObject("account"),instance));
             status.setContent(resobj.get("content").toString());
             status.setFavourites_count(Integer.valueOf(resobj.get("favourites_count").toString()));
             status.setReblogs_count(Integer.valueOf(resobj.get("reblogs_count").toString()));
@@ -3079,7 +3077,7 @@ public class API {
                 status.setPinned(false);
             }
             try{
-                status.setReblog(parseStatuses(context, resobj.getJSONObject("reblog")));
+                status.setReblog(parseStatuses(context, resobj.getJSONObject("reblog"),instance));
             }catch (Exception ignored){}
         } catch (JSONException ignored) {} catch (ParseException e) {
             e.printStackTrace();
@@ -3307,33 +3305,35 @@ public class API {
      * @return Account
      */
     @SuppressWarnings("InfiniteRecursion")
-    private static Account parseAccountResponse(Context context, JSONObject resobj){
+    private static Account parseAccountResponse(Context context, JSONObject resobj, String instance){
 
         Account account = new Account();
+        Log.d("accountresp",resobj.toString());
         try {
-            account.setId(resobj.get("userId").toString());
+            account.setId(resobj.get("id").toString());
             account.setUsername(resobj.get("username").toString());
-            account.setAcct(resobj.get("acct").toString());
-            account.setDisplay_name(resobj.get("display_name").toString());
-            account.setLocked(Boolean.parseBoolean(resobj.get("locked").toString()));
-            account.setCreated_at(Helper.mstStringToDate(context, resobj.get("created_at").toString()));
-            account.setFollowers_count(Integer.valueOf(resobj.get("followers_count").toString()));
-            account.setFollowing_count(Integer.valueOf(resobj.get("following_count").toString()));
-            account.setStatuses_count(Integer.valueOf(resobj.get("statuses_count").toString()));
-            account.setNote(resobj.get("note").toString());
+            account.setAcct(resobj.get("username").toString() + "@" + instance);
+            account.setDisplay_name(resobj.get("name").toString());
+            account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
+            account.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+            account.setFollowers_count(Integer.valueOf(resobj.get("followersCount").toString()));
+            account.setFollowing_count(Integer.valueOf(resobj.get("followingCount").toString()));
+            account.setStatuses_count(Integer.valueOf(resobj.get("notesCount").toString()));
+            account.setNote(resobj.get("description").toString());
             try {
-                account.setBot(Boolean.parseBoolean(resobj.get("bot").toString()));
+                account.setBot(Boolean.parseBoolean(resobj.get("isBot").toString()));
             }catch (Exception e){
                 account.setBot(false);
             }
             try{
-                account.setMoved_to_account(parseAccountResponse(context, resobj.getJSONObject("moved")));
+                account.setMoved_to_account(parseAccountResponse(context, resobj.getJSONObject("moved"),instance));
             }catch (Exception ignored){account.setMoved_to_account(null);}
-            account.setUrl(resobj.get("url").toString());
-            account.setAvatar(resobj.get("avatar").toString());
-            account.setAvatar_static(resobj.get("avatar_static").toString());
-            account.setHeader(resobj.get("header").toString());
-            account.setHeader_static(resobj.get("header_static").toString());
+            account.setUrl(instance + "/@" + account.getAcct());
+            account.setAvatar(resobj.get("avatarUrl").toString());
+            account.setAvatar_static(resobj.get("avatarUrl").toString());
+            account.setHeader(resobj.get("bannerUrl").toString());
+            account.setHeader_static(resobj.get("bannerUrl").toString());
+            Log.d("acct",account.getAcct());
             try {
                 JSONArray fields = resobj.getJSONArray("fields");
                 LinkedHashMap<String, String> fieldsMap = new LinkedHashMap<>();
@@ -3351,7 +3351,9 @@ public class API {
                 }
                 account.setFields(fieldsMap);
                 account.setFieldsVerified(fieldsMapVerified);
-            }catch (Exception ignored){}
+            }catch (Exception e){
+                e.printStackTrace();
+            }
 
             //Retrieves emjis
             List<Emojis> emojiList = new ArrayList<>();
@@ -3386,7 +3388,7 @@ public class API {
             int i = 0;
             while (i < jsonArray.length() ) {
                 JSONObject resobj = jsonArray.getJSONObject(i);
-                Account account = parseAccountResponse(context, resobj);
+                Account account = parseAccountResponse(context, resobj,instance);
                 accounts.add(account);
                 i++;
             }
@@ -3465,8 +3467,8 @@ public class API {
 
         fr.gouv.etalab.mastodon.client.Entities.Context context = new fr.gouv.etalab.mastodon.client.Entities.Context();
         try {
-            context.setAncestors(parseStatuses(this.context, jsonObject.getJSONArray("ancestors")));
-            context.setDescendants(parseStatuses(this.context, jsonObject.getJSONArray("descendants")));
+            context.setAncestors(parseStatuses(this.context, jsonObject.getJSONArray("ancestors"),instance));
+            context.setDescendants(parseStatuses(this.context, jsonObject.getJSONArray("descendants"),instance));
         } catch (JSONException e) {
             setDefaultError(e);
         }
@@ -3512,16 +3514,16 @@ public class API {
      * @param resobj JSONObject
      * @return Account
      */
-    public static Notification parseNotificationResponse(Context context, JSONObject resobj){
+    public static Notification parseNotificationResponse(Context context, JSONObject resobj,String instance){
 
         Notification notification = new Notification();
         try {
             notification.setId(resobj.get("id").toString());
             notification.setType(resobj.get("type").toString());
             notification.setCreated_at(Helper.mstStringToDate(context, resobj.get("created_at").toString()));
-            notification.setAccount(parseAccountResponse(context, resobj.getJSONObject("account")));
+            notification.setAccount(parseAccountResponse(context, resobj.getJSONObject("account"),instance));
             try{
-                notification.setStatus(parseStatuses(context, resobj.getJSONObject("status")));
+                notification.setStatus(parseStatuses(context, resobj.getJSONObject("status"),instance));
             }catch (Exception ignored){}
             notification.setCreated_at(Helper.mstStringToDate(context, resobj.get("created_at").toString()));
         } catch (JSONException ignored) {} catch (ParseException e) {
@@ -3543,7 +3545,7 @@ public class API {
             while (i < jsonArray.length() ) {
 
                 JSONObject resobj = jsonArray.getJSONObject(i);
-                Notification notification = parseNotificationResponse(context, resobj);
+                Notification notification = parseNotificationResponse(context, resobj, instance);
                 notifications.add(notification);
                 i++;
             }
