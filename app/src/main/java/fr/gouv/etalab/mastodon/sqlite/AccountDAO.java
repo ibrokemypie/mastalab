@@ -101,6 +101,7 @@ public class AccountDAO {
         values.put(Sqlite.COL_URL,account.getUrl());
         values.put(Sqlite.COL_AVATAR,account.getAvatar());
         values.put(Sqlite.COL_AVATAR_STATIC,account.getAvatar_static());
+        //Need to set values because Misskey doesn't return default banners
         values.put(Sqlite.COL_HEADER,account.getHeader()!=null?account.getHeader():"null");
         values.put(Sqlite.COL_HEADER_STATIC,account.getHeader_static()!=null?account.getHeader_static():"null");
         values.put(Sqlite.COL_CREATED_AT, Helper.dateToString(account.getCreated_at()));
