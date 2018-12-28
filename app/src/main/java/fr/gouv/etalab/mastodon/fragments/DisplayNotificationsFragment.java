@@ -228,9 +228,9 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
         if( notifications != null && notifications.size() > 0) {
             for(Notification tmpNotification: notifications){
 
-                if( lastReadNotifications != null && Long.parseLong(tmpNotification.getId()) > Long.parseLong(lastReadNotifications)) {
-                    MainActivity.countNewNotifications++;
-                }
+//                if( lastReadNotifications != null && Long.parseLong(tmpNotification.getId()) > Long.parseLong(lastReadNotifications)) {
+//                    MainActivity.countNewNotifications++;
+//                }
                 this.notifications.add(tmpNotification);
             }
             if( firstLoad) {
@@ -342,11 +342,11 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
     private void updateNotificationLastId(String notificationId){
 
         String lastNotif = sharedpreferences.getString(Helper.LAST_NOTIFICATION_MAX_ID + userId + instance, null);
-        if( lastNotif == null || Long.parseLong(notificationId) > Long.parseLong(lastNotif)){
-            MainActivity.countNewNotifications = 0;
-            SharedPreferences.Editor editor = sharedpreferences.edit();
-            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + userId + instance, notificationId);
-            editor.apply();
-        }
+//        if( lastNotif == null || Long.parseLong(notificationId) > Long.parseLong(lastNotif)){
+//            MainActivity.countNewNotifications = 0;
+//            SharedPreferences.Editor editor = sharedpreferences.edit();
+//            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + userId + instance, notificationId);
+//            editor.apply();
+//        }
     }
 }

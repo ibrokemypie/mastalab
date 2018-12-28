@@ -19,6 +19,8 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.google.gson.JsonIOException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -168,7 +170,7 @@ public class API {
      */
     public APIResponse getInstance() {
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl("/meta"), 30, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/meta"), 30, null, prefKeyOauthTokenT);
             Instance instanceEntity = parseInstance(new JSONObject(response));
             apiResponse.setInstance(instanceEntity);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -268,7 +270,7 @@ public class API {
 
         account = new Account();
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl(String.format("/accounts/%s",accountId)), 60, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl(String.format("/users/%s",accountId)), 60, null, prefKeyOauthTokenT);
             account = parseAccountResponse(context, new JSONObject(response),instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -295,10 +297,10 @@ public class API {
         List<Relationship> relationships;
         Relationship relationship = null;
         HashMap<String, String> params = new HashMap<>();
-        params.put("id",accountId);
+        params.put("userId",accountId);
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl("/accounts/relationships"), 60, params, prefKeyOauthTokenT);
-            relationships = parseRelationshipResponse(new JSONArray(response));
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/users/relation"), 60, new JSONObject(params), prefKeyOauthTokenT);
+            relationships = parseRelationshipResponseList(new JSONObject(response));
             if( relationships != null && relationships.size() > 0)
                 relationship = relationships.get(0);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -324,18 +326,21 @@ public class API {
      * @return Relationship entity
      */
     public APIResponse getRelationship(List<Account> accounts) {
-        HashMap<String, String> params = new HashMap<>();
+        JSONObject params = new JSONObject();
         if( accounts != null && accounts.size() > 0 ) {
-            StringBuilder parameters = new StringBuilder();
+            JSONArray parameters = new JSONArray();
             for(Account account: accounts)
-                parameters.append("id[]=").append(account.getId()).append("&");
-            parameters = new StringBuilder(parameters.substring(0, parameters.length() - 1).substring(5));
-            params.put("id[]", parameters.toString());
+                parameters.put(account.getId());
+            try {
+                params.put("userId[]", parameters);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             List<Relationship> relationships = new ArrayList<>();
             try {
                 HttpsConnection httpsConnection = new HttpsConnection(context);
-                String response = httpsConnection.get(getAbsoluteUrl("/accounts/relationships"), 60, params, prefKeyOauthTokenT);
-                relationships = parseRelationshipResponse(new JSONArray(response));
+                String response = httpsConnection.post(getAbsoluteUrl("/users/relation"), 60, params, prefKeyOauthTokenT);
+                relationships = parseRelationshipResponseList(new JSONObject(response));
                 apiResponse.setSince_id(httpsConnection.getSince_id());
                 apiResponse.setMax_id(httpsConnection.getMax_id());
             } catch (HttpsConnection.HttpsConnectionException e) {
@@ -424,23 +429,29 @@ public class API {
     private APIResponse getStatus(String accountId, boolean onlyMedia, boolean pinned,
                                   boolean exclude_replies, String max_id, String since_id, int limit) {
 
-        HashMap<String, String> params = new HashMap<>();
-        if (max_id != null)
-            params.put("max_id", max_id);
-        if (since_id != null)
-            params.put("since_id", since_id);
-        if (0 < limit || limit > 40)
-            limit = 40;
-        if( onlyMedia)
-            params.put("only_media", Boolean.toString(true));
-        if( pinned)
-            params.put("pinned", Boolean.toString(true));
-        params.put("exclude_replies", Boolean.toString(exclude_replies));
-        params.put("limit", String.valueOf(limit));
+        JSONObject params = new JSONObject();
+        try {
+            if (max_id != null)
+                params.put("untilId", max_id);
+            if (since_id != null)
+                params.put("sinceId", since_id);
+            if (0 < limit || limit > 40)
+                limit = 40;
+            if (onlyMedia)
+                params.put("only_media", true);
+            if (pinned)
+                params.put("pinned", true);
+            params.put("includeReplies", !exclude_replies);
+            params.put("limit", limit);
+            params.put("userId", accountId);
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
+
         statuses = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl(String.format("/accounts/%s/statuses", accountId)), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/users/notes"), 60, params, prefKeyOauthTokenT);
             statuses = parseStatuses(context, new JSONArray(response),instance);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -474,12 +485,12 @@ public class API {
 
         HashMap<String, String> params = new HashMap<>();
         if (max_id != null)
-            params.put("max_id", max_id);
+            params.put("untilId", max_id);
         params.put("limit", "80");
         accounts = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl(String.format("/statuses/%s/reblogged_by", statusId)), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl(String.format("/statuses/%s/reblogged_by", statusId)), 60, new JSONObject(params), prefKeyOauthTokenT);
             accounts = parseAccountResponse(new JSONArray(response));
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -510,14 +521,18 @@ public class API {
     @SuppressWarnings("SameParameterValue")
     public APIResponse getFavouritedBy(String statusId, String max_id) {
 
-        HashMap<String, String> params = new HashMap<>();
-        if (max_id != null)
-            params.put("max_id", max_id);
-        params.put("limit", "80");
+        JSONObject params = new JSONObject();
+        try {
+            if (max_id != null)
+                params.put("untilID", max_id);
+            params.put("limit", "80");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         accounts = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl(String.format("/statuses/%s/favourited_by", statusId)), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl(String.format("/statuses/%s/favourited_by", statusId)), 60, params, prefKeyOauthTokenT);
             accounts = parseAccountResponse(new JSONArray(response));
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -549,7 +564,7 @@ public class API {
 
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl(String.format("/statuses/%s", statusId)), 60, null, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl(String.format("/notes/show/%s", statusId)), 60, null, prefKeyOauthTokenT);
             Status status = parseStatuses(context, new JSONObject(response),instance);
             statuses.add(status);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -577,7 +592,7 @@ public class API {
         fr.gouv.etalab.mastodon.client.Entities.Context statusContext = new fr.gouv.etalab.mastodon.client.Entities.Context();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl(String.format("/statuses/%s/context", statusId)), 60, null, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl(String.format("/statuses/%s/context", statusId)), 60, null, prefKeyOauthTokenT);
             statusContext = parseContext(new JSONObject(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -629,18 +644,23 @@ public class API {
      */
     private APIResponse getConversationTimeline(String max_id, String since_id, int limit) {
 
-        HashMap<String, String> params = new HashMap<>();
-        if (max_id != null)
-            params.put("max_id", max_id);
-        if (since_id != null)
-            params.put("since_id", since_id);
-        if (0 > limit || limit > 80)
-            limit = 80;
-        params.put("limit",String.valueOf(limit));
+        JSONObject params = new JSONObject();
+        try {
+            if (max_id != null)
+                params.put("untilId", max_id);
+            if (since_id != null)
+                params.put("sinceId", since_id);
+            if (0 > limit || limit > 80)
+                limit = 80;
+            params.put("limit", limit);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         conversations = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/conversations"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/conversations"), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             conversations = parseConversations(new JSONArray(response));
@@ -676,18 +696,22 @@ public class API {
      */
     private APIResponse getDirectTimeline(String max_id, String since_id, int limit) {
 
-        HashMap<String, String> params = new HashMap<>();
-        if (max_id != null)
-            params.put("max_id", max_id);
-        if (since_id != null)
-            params.put("since_id", since_id);
-        if (0 > limit || limit > 80)
-            limit = 80;
-        params.put("limit",String.valueOf(limit));
+        JSONObject params = new JSONObject();
+        try {
+            if (max_id != null)
+                params.put("untilId", max_id);
+            if (since_id != null)
+                params.put("sinceId", since_id);
+            if (0 > limit || limit > 80)
+                limit = 80;
+            params.put("limit", limit);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         statuses = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/timelines/direct"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/mentions"), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response),instance);
@@ -743,20 +767,24 @@ public class API {
      */
     private APIResponse getHomeTimeline(String max_id, String since_id, String min_id, int limit) {
 
-        HashMap<String, String> params = new HashMap<>();
-        if (max_id != null)
-            params.put("max_id", max_id);
-        if (since_id != null)
-            params.put("since_id", since_id);
-        if (min_id != null)
-            params.put("min_id", min_id);
-        if (0 > limit || limit > 80)
-            limit = 80;
-        params.put("limit",String.valueOf(limit));
+       JSONObject params = new JSONObject();
+       try {
+           if (max_id != null)
+               params.put("untilId", max_id);
+           if (since_id != null)
+               params.put("sinceId", since_id);
+           if (min_id != null)
+               params.put("untilId", min_id);
+           if (0 > limit || limit > 80)
+               limit = 80;
+           params.put("limit", limit);
+       } catch(JSONException e) {
+           e.printStackTrace();
+       }
         statuses = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/timelines/home"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/timeline"), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response),instance);
@@ -1059,25 +1087,29 @@ public class API {
      */
     private APIResponse getPublicTimeline(boolean local, String instanceName, String max_id, String since_id, int limit){
 
-        HashMap<String, String> params = new HashMap<>();
-        if( local)
-            params.put("local", Boolean.toString(true));
-        if( max_id != null )
-            params.put("max_id", max_id);
-        if( since_id != null )
-            params.put("since_id", since_id);
-        if( 0 > limit || limit > 40)
-            limit = 40;
-        params.put("limit",String.valueOf(limit));
+        JSONObject params = new JSONObject();
+        try {
+            if (local)
+                params.put("local", true);
+            if (max_id != null)
+                params.put("untilId", max_id);
+            if (since_id != null)
+                params.put("sinceId", since_id);
+            if (0 > limit || limit > 40)
+                limit = 40;
+            params.put("limit", limit);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         statuses = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             String url;
             if( instanceName == null)
-                url = getAbsoluteUrl("/timelines/public");
+                url = getAbsoluteUrl("/notes/global-timeline");
             else
                 url = getAbsoluteUrlRemoteInstance(instanceName);
-            String response = httpsConnection.get(url, 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(url, 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response),instance);
@@ -1181,22 +1213,26 @@ public class API {
     @SuppressWarnings("SameParameterValue")
     private APIResponse getPublicTimelineTag(String tag, boolean local, boolean onlymedia, String max_id, String since_id, int limit){
 
-        HashMap<String, String> params = new HashMap<>();
-        if( local)
-            params.put("local", Boolean.toString(true));
-        if( max_id != null )
-            params.put("max_id", max_id);
-        if( since_id != null )
-            params.put("since_id", since_id);
-        if( 0 > limit || limit > 40)
-            limit = 40;
-        params.put("limit",String.valueOf(limit));
+        JSONObject params = new JSONObject();
+        try {
+            if (local)
+                params.put("local", true);
+            if (max_id != null)
+                params.put("max_id", max_id);
+            if (since_id != null)
+                params.put("since_id", since_id);
+            if (0 > limit || limit > 40)
+                limit = 40;
+            params.put("limit", limit);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         statuses = new ArrayList<>();
         if( tag == null)
             return null;
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl(String.format("/timelines/tag/%s",tag.trim())), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl(String.format("/timelines/tag/%s",tag.trim())), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response),instance);
@@ -1242,7 +1278,7 @@ public class API {
      * @return APIResponse
      */
     public APIResponse getFollowing(String targetedId, String max_id){
-        return getAccounts(String.format("/accounts/%s/following",targetedId),max_id, null, accountPerPage);
+        return getAccounts(String.format("/users/%s/following",targetedId),max_id, null, accountPerPage);
     }
 
     /**
@@ -1252,7 +1288,7 @@ public class API {
      * @return APIResponse
      */
     public APIResponse getFollowers(String targetedId, String max_id){
-        return getAccounts(String.format("/accounts/%s/followers",targetedId),max_id, null, accountPerPage);
+        return getAccounts(String.format("/users/%s/followers",targetedId),max_id, null, accountPerPage);
     }
 
     /**
@@ -1265,18 +1301,22 @@ public class API {
     @SuppressWarnings("SameParameterValue")
     private APIResponse getAccounts(String action, String max_id, String since_id, int limit){
 
-        HashMap<String, String> params = new HashMap<>();
-        if( max_id != null )
-            params.put("max_id", max_id);
-        if( since_id != null )
-            params.put("since_id", since_id);
-        if( 0 > limit || limit > 40)
-            limit = 40;
-        params.put("limit",String.valueOf(limit));
+        JSONObject params = new JSONObject();
+        try {
+            if (max_id != null)
+                params.put("untilId", max_id);
+            if (since_id != null)
+                params.put("sinceId", since_id);
+            if (0 > limit || limit > 40)
+                limit = 40;
+            params.put("limit", limit);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         accounts = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl(action), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl(action), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             accounts = parseAccountResponse(new JSONArray(response));
@@ -1318,7 +1358,7 @@ public class API {
         domains = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/domain_blocks"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/domain_blocks"), 60, new JSONObject(params), prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             domains = parseDomains(new JSONArray(response));
@@ -1383,18 +1423,10 @@ public class API {
     @SuppressWarnings("SameParameterValue")
     private APIResponse getFollowRequest(String max_id, String since_id, int limit){
 
-        HashMap<String, String> params = new HashMap<>();
-        if( max_id != null )
-            params.put("max_id", max_id);
-        if( since_id != null )
-            params.put("since_id", since_id);
-        if( 0 > limit || limit > 40)
-            limit = 40;
-        params.put("limit",String.valueOf(limit));
         accounts = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/follow_requests"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/following/requests/list"), 60, null, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             accounts = parseAccountResponse(new JSONArray(response));
@@ -1432,18 +1464,22 @@ public class API {
     @SuppressWarnings("SameParameterValue")
     private APIResponse getFavourites(String max_id, String since_id, int limit){
 
-        HashMap<String, String> params = new HashMap<>();
-        if( max_id != null )
-            params.put("max_id", max_id);
-        if( since_id != null )
-            params.put("since_id", since_id);
-        if( 0 > limit || limit > 40)
-            limit = 40;
-        params.put("limit",String.valueOf(limit));
+        JSONObject params = new JSONObject();
+        try {
+            if (max_id != null)
+                params.put("untilId", max_id);
+            if (since_id != null)
+                params.put("sinceId", since_id);
+            if (0 > limit || limit > 40)
+                limit = 40;
+            params.put("limit", limit);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         statuses = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/favourites"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/i/favorites"), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response),instance);
@@ -1485,7 +1521,7 @@ public class API {
         params.put("notifications", Boolean.toString(muteNotifications));
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            httpsConnection.post(getAbsoluteUrl(String.format("/accounts/%s/mute", targetedId)), 60, new JSONObject(params), prefKeyOauthTokenT);
+            httpsConnection.post(getAbsoluteUrl(String.format("/users/%s/mute", targetedId)), 60, new JSONObject(params), prefKeyOauthTokenT);
             actionCode = httpsConnection.getActionCode();
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -1529,19 +1565,19 @@ public class API {
         HashMap<String, String> params = null;
         switch (statusAction){
             case FAVOURITE:
-                action = String.format("/statuses/%s/favourite", targetedId);
+                action = String.format("/notes/%s/favourite", targetedId);
                 break;
             case UNFAVOURITE:
-                action = String.format("/statuses/%s/unfavourite", targetedId);
+                action = String.format("/notes/%s/unfavourite", targetedId);
                 break;
             case REBLOG:
-                action = String.format("/statuses/%s/reblog", targetedId);
+                action = String.format("/notes/%s/reblog", targetedId);
                 break;
             case UNREBLOG:
-                action = String.format("/statuses/%s/unreblog", targetedId);
+                action = String.format("/notes/%s/unreblog", targetedId);
                 break;
             case FOLLOW:
-                action = String.format("/accounts/%s/follow", targetedId);
+                action = String.format("/users/%s/follow", targetedId);
                 break;
             case REMOTE_FOLLOW:
                 action = "/follows";
@@ -1549,10 +1585,10 @@ public class API {
                 params.put("uri", targetedId);
                 break;
             case UNFOLLOW:
-                action = String.format("/accounts/%s/unfollow", targetedId);
+                action = String.format("/users/%s/unfollow", targetedId);
                 break;
             case BLOCK:
-                action = String.format("/accounts/%s/block", targetedId);
+                action = String.format("/users/%s/block", targetedId);
                 break;
             case BLOCK_DOMAIN:
                 action = "/domain_blocks";
@@ -1560,13 +1596,13 @@ public class API {
                 params.put("domain", targetedId);
                 break;
             case UNBLOCK:
-                action = String.format("/accounts/%s/unblock", targetedId);
+                action = String.format("/users/%s/unblock", targetedId);
                 break;
             case MUTE:
-                action = String.format("/accounts/%s/mute", targetedId);
+                action = String.format("/users/%s/mute", targetedId);
                 break;
             case UNMUTE:
-                action = String.format("/accounts/%s/unmute", targetedId);
+                action = String.format("/users/%s/unmute", targetedId);
                 break;
             case PIN:
                 action = String.format("/statuses/%s/pin", targetedId);
@@ -1575,23 +1611,23 @@ public class API {
                 action = String.format("/statuses/%s/unpin", targetedId);
                 break;
             case ENDORSE:
-                action = String.format("/accounts/%s/pin", targetedId);
+                action = String.format("/users/%s/pin", targetedId);
                 break;
             case UNENDORSE:
-                action = String.format("/accounts/%s/unpin", targetedId);
+                action = String.format("/users/%s/unpin", targetedId);
                 break;
             case SHOW_BOOST:
                 params = new HashMap<>();
                 params.put("reblogs","true");
-                action = String.format("/accounts/%s/follow", targetedId);
+                action = String.format("/users/%s/follow", targetedId);
                 break;
             case HIDE_BOOST:
                 params = new HashMap<>();
                 params.put("reblogs","false");
-                action = String.format("/accounts/%s/follow", targetedId);
+                action = String.format("/users/%s/follow", targetedId);
                 break;
             case UNSTATUS:
-                action = String.format("/statuses/%s", targetedId);
+                action = String.format("/notes/%s", targetedId);
                 break;
             case AUTHORIZE:
                 action = String.format("/follow_requests/%s/authorize", targetedId);
@@ -1795,41 +1831,45 @@ public class API {
      */
     private APIResponse getNotifications(String max_id, String since_id, int limit, boolean display){
 
-        HashMap<String, String> params = new HashMap<>();
-        if( max_id != null )
-            params.put("max_id", max_id);
-        if( since_id != null )
-            params.put("since_id", since_id);
-        if( 0 > limit || limit > 30)
-            limit = 30;
-        params.put("limit",String.valueOf(limit));
+        JSONObject params = new JSONObject();
+        try {
+            if (max_id != null)
+                params.put("max_id", max_id);
+            if (since_id != null)
+                params.put("since_id", since_id);
+            if (0 > limit || limit > 30)
+                limit = 30;
+            params.put("limit", limit);
 
-        final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
-        boolean notif_follow, notif_add, notif_mention, notif_share;
-        if( display) {
-            notif_follow = sharedpreferences.getBoolean(Helper.SET_NOTIF_FOLLOW_FILTER, true);
-            notif_add = sharedpreferences.getBoolean(Helper.SET_NOTIF_ADD_FILTER, true);
-            notif_mention = sharedpreferences.getBoolean(Helper.SET_NOTIF_MENTION_FILTER, true);
-            notif_share = sharedpreferences.getBoolean(Helper.SET_NOTIF_SHARE_FILTER, true);
-        }else{
-            notif_follow = sharedpreferences.getBoolean(Helper.SET_NOTIF_FOLLOW, true);
-            notif_add = sharedpreferences.getBoolean(Helper.SET_NOTIF_ADD, true);
-            notif_mention = sharedpreferences.getBoolean(Helper.SET_NOTIF_MENTION, true);
-            notif_share = sharedpreferences.getBoolean(Helper.SET_NOTIF_SHARE, true);
-        }
-        StringBuilder parameters = new StringBuilder();
+            final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
+            boolean notif_follow, notif_add, notif_mention, notif_share;
+            if (display) {
+                notif_follow = sharedpreferences.getBoolean(Helper.SET_NOTIF_FOLLOW_FILTER, true);
+                notif_add = sharedpreferences.getBoolean(Helper.SET_NOTIF_ADD_FILTER, true);
+                notif_mention = sharedpreferences.getBoolean(Helper.SET_NOTIF_MENTION_FILTER, true);
+                notif_share = sharedpreferences.getBoolean(Helper.SET_NOTIF_SHARE_FILTER, true);
+            } else {
+                notif_follow = sharedpreferences.getBoolean(Helper.SET_NOTIF_FOLLOW, true);
+                notif_add = sharedpreferences.getBoolean(Helper.SET_NOTIF_ADD, true);
+                notif_mention = sharedpreferences.getBoolean(Helper.SET_NOTIF_MENTION, true);
+                notif_share = sharedpreferences.getBoolean(Helper.SET_NOTIF_SHARE, true);
+            }
+            StringBuilder parameters = new StringBuilder();
 
-        if( !notif_follow )
-            parameters.append("exclude_types[]=").append("follow").append("&");
-        if( !notif_add )
-            parameters.append("exclude_types[]=").append("favourite").append("&");
-        if( !notif_share )
-            parameters.append("exclude_types[]=").append("reblog").append("&");
-        if( !notif_mention )
-            parameters.append("exclude_types[]=").append("mention").append("&");
-        if( parameters.length() > 0) {
-            parameters = new StringBuilder(parameters.substring(0, parameters.length() - 1).substring(16));
-            params.put("exclude_types[]", parameters.toString());
+            if (!notif_follow)
+                parameters.append("exclude_types[]=").append("follow").append("&");
+            if (!notif_add)
+                parameters.append("exclude_types[]=").append("favourite").append("&");
+            if (!notif_share)
+                parameters.append("exclude_types[]=").append("reblog").append("&");
+            if (!notif_mention)
+                parameters.append("exclude_types[]=").append("mention").append("&");
+            if (parameters.length() > 0) {
+                parameters = new StringBuilder(parameters.substring(0, parameters.length() - 1).substring(16));
+                params.put("exclude_types[]", parameters.toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
 
@@ -1837,7 +1877,7 @@ public class API {
 
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/notifications"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/i/notifications"), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             notifications = parseNotificationResponse(new JSONArray(response));
@@ -1901,13 +1941,13 @@ public class API {
 
         HashMap<String, String> params = new HashMap<>();
         try {
-            params.put("q", URLEncoder.encode(query, "UTF-8"));
+            params.put("query", URLEncoder.encode(query, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            params.put("q", query);
+            params.put("query", query);
         }
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/search"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/search"), 60, new JSONObject(params), prefKeyOauthTokenT);
             results = parseResultsResponse(new JSONObject(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -1945,19 +1985,23 @@ public class API {
      */
     public APIResponse searchAccounts(String query, int count, boolean following) {
 
-        HashMap<String, String> params = new HashMap<>();
+        JSONObject params = new JSONObject();
+        try {
         params.put("q", query);
-        if( count < 5)
+        if (count < 5)
             count = 5;
-        if( count > 40 )
+        if (count > 40)
             count = 40;
-        if( following)
+        if (following)
             params.put("following", Boolean.toString(true));
-        params.put("limit", String.valueOf(count));
+        params.put("limit", count);
+    } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/accounts/search"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/users/search"), 60, params, prefKeyOauthTokenT);
             accounts = parseAccountResponse(new JSONArray(response));
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -1988,7 +2032,7 @@ public class API {
         List<Emojis> emojis = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl("/custom_emojis"), 60, null, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/custom_emojis"), 60, null, prefKeyOauthTokenT);
             emojis = parseEmojis(new JSONArray(response));
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -2017,7 +2061,7 @@ public class API {
 
         List<Filters> filters = null;
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl("/filters"), 60, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/filters"), 60, null, prefKeyOauthTokenT);
             filters = parseFilters(new JSONArray(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -2044,7 +2088,7 @@ public class API {
         List<fr.gouv.etalab.mastodon.client.Entities.Filters> filters = new ArrayList<>();
         fr.gouv.etalab.mastodon.client.Entities.Filters filter;
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl(String.format("/filters/%s", filterId)), 60, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl(String.format("/filters/%s", filterId)), 60, null, prefKeyOauthTokenT);
             filter = parseFilter(new JSONObject(response));
             filters.add(filter);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -2170,7 +2214,7 @@ public class API {
 
         List<fr.gouv.etalab.mastodon.client.Entities.List> lists = new ArrayList<>();
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl("/lists"), 60, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/users/lists/list"), 60, null, prefKeyOauthTokenT);
             lists = parseLists(new JSONArray(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -2197,7 +2241,7 @@ public class API {
         List<fr.gouv.etalab.mastodon.client.Entities.List> lists = new ArrayList<>();
         fr.gouv.etalab.mastodon.client.Entities.List list;
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl(String.format("/accounts/%s/lists", userId)), 60, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl(String.format("/users/%s/lists", userId)), 60, null, prefKeyOauthTokenT);
             list = parseList(new JSONObject(response));
             lists.add(list);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -2236,7 +2280,7 @@ public class API {
         statuses = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl(String.format("/timelines/list/%s",list_id)), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl(String.format("/timelines/user-list-timeline/%s",list_id)), 60, new JSONObject(params), prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response),instance);
@@ -2274,7 +2318,7 @@ public class API {
         params.put("limit",String.valueOf(limit));
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.get(getAbsoluteUrl(String.format("/lists/%s/accounts", listId)), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl(String.format("/lists/%s/accounts", listId)), 60, new JSONObject(params), prefKeyOauthTokenT);
             accounts = parseAccountResponse(new JSONArray(response));
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -2306,7 +2350,7 @@ public class API {
         List<fr.gouv.etalab.mastodon.client.Entities.List> lists = new ArrayList<>();
         fr.gouv.etalab.mastodon.client.Entities.List list;
         try {
-            String response = new HttpsConnection(context).get(getAbsoluteUrl(String.format("/lists/%s",id)), 60, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl(String.format("/users/lists/show/%s",id)), 60, null, prefKeyOauthTokenT);
             list = parseList(new JSONObject(response));
             lists.add(list);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -2949,32 +2993,38 @@ public class API {
         Status status = new Status();
         try {
             status.setId(resobj.get("id").toString());
-            status.setUri(resobj.get("uri").toString());
-            status.setCreated_at(Helper.mstStringToDate(context, resobj.get("created_at").toString()));
-            status.setIn_reply_to_id(resobj.get("in_reply_to_id").toString());
-            status.setIn_reply_to_account_id(resobj.get("in_reply_to_account_id").toString());
-            status.setSensitive(Boolean.parseBoolean(resobj.get("sensitive").toString()));
-            status.setSpoiler_text(resobj.get("spoiler_text").toString());
+            status.setUri(instance + "/notes" + resobj.get("id").toString());
+            status.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+            try {
+                status.setIn_reply_to_id(resobj.getJSONObject("reply").get("replyId").toString());
+                status.setIn_reply_to_account_id(resobj.getJSONObject("reply").getJSONObject("user").get("id").toString());
+            } catch (JSONException e) {
+                status.setIn_reply_to_id(null);
+                status.setIn_reply_to_account_id(null);
+            }
+//            status.setSensitive(Boolean.parseBoolean(resobj.get("sensitive").toString()));
+            status.setSensitive(false);
+            status.setSpoiler_text(resobj.get("cw").toString());
             try {
                 status.setVisibility(resobj.get("visibility").toString());
             }catch (Exception e){status.setVisibility("public");}
-            status.setLanguage(resobj.get("language").toString());
-            status.setUrl(resobj.get("url").toString());
+//            status.setLanguage(resobj.get("language").toString());
+            status.setUri(instance + "/notes" + resobj.get("id").toString());
             //TODO: replace by the value
             status.setApplication(new Application());
 
             //Retrieves attachments
-            JSONArray arrayAttachement = resobj.getJSONArray("media_attachments");
+            JSONArray arrayAttachement = resobj.getJSONArray("files");
             ArrayList<Attachment> attachments = new ArrayList<>();
             if( arrayAttachement != null){
                 for(int j = 0 ; j < arrayAttachement.length() ; j++){
                     JSONObject attObj = arrayAttachement.getJSONObject(j);
                     Attachment attachment = new Attachment();
                     attachment.setId(attObj.get("id").toString());
-                    attachment.setPreview_url(attObj.get("preview_url").toString());
-                    attachment.setRemote_url(attObj.get("remote_url").toString());
+                    attachment.setPreview_url(attObj.get("thumbnailUrl").toString());
+                    attachment.setRemote_url(attObj.get("url").toString());
                     attachment.setType(attObj.get("type").toString());
-                    attachment.setText_url(attObj.get("text_url").toString());
+                    attachment.setText_url(null);
                     attachment.setUrl(attObj.get("url").toString());
                     try {
                         attachment.setDescription(attObj.get("description").toString());
@@ -2983,39 +3033,44 @@ public class API {
                 }
             }
             try {
-
                 status.setCard(parseCardResponse(resobj.getJSONObject("card")));
             }catch (Exception e){status.setCard(null);}
 
 
             status.setMedia_attachments(attachments);
             //Retrieves mentions
+            // TODO: fix mentions
             List<Mention> mentions = new ArrayList<>();
-            JSONArray arrayMention = resobj.getJSONArray("mentions");
-            if( arrayMention != null){
-                for(int j = 0 ; j < arrayMention.length() ; j++){
-                    JSONObject menObj = arrayMention.getJSONObject(j);
-                    Mention mention = new Mention();
-                    mention.setId(menObj.get("id").toString());
-                    mention.setUrl(menObj.get("url").toString());
-                    mention.setAcct(menObj.get("acct").toString());
-                    mention.setUsername(menObj.get("username").toString());
-                    mentions.add(mention);
+            try {
+                JSONArray arrayMention = resobj.getJSONArray("mentionedRemoteUsers");
+                JSONArray arrayID = resobj.getJSONArray("mentions");
+                if (arrayMention != null) {
+                    for (int j = 0; j < arrayMention.length(); j++) {
+                        JSONObject menObj = arrayMention.getJSONObject(j);
+                        Mention mention = new Mention();
+                        mention.setId(arrayID.get(j).toString());
+                        mention.setUrl(menObj.get("uri").toString());
+                        mention.setAcct(menObj.getString("username") + "@" + menObj.getString("host"));
+                        mention.setUsername(menObj.get("username").toString());
+                        mentions.add(mention);
+                    }
                 }
+            } catch (JSONException e) {
+
             }
             status.setMentions(mentions);
             //Retrieves tags
             List<Tag> tags = new ArrayList<>();
-            JSONArray arrayTag = resobj.getJSONArray("tags");
-            if( arrayTag != null){
-                for(int j = 0 ; j < arrayTag.length() ; j++){
-                    JSONObject tagObj = arrayTag.getJSONObject(j);
-                    Tag tag = new Tag();
-                    tag.setName(tagObj.get("name").toString());
-                    tag.setUrl(tagObj.get("url").toString());
-                    tags.add(tag);
-                }
-            }
+//            JSONArray arrayTag = resobj.getJSONArray("tags");
+//            if( arrayTag != null){
+//                for(int j = 0 ; j < arrayTag.length() ; j++){
+//                    JSONObject tagObj = arrayTag.getJSONObject(j);
+//                    Tag tag = new Tag();
+//                    tag.setName(tagObj.get("name").toString());
+//                    tag.setUrl(tagObj.get("url").toString());
+//                    tags.add(tag);
+//                }
+//            }
             status.setTags(tags);
 
             //Retrieves emjis
@@ -3047,10 +3102,16 @@ public class API {
             status.setApplication(application);
 
 
-            status.setAccount(parseAccountResponse(context, resobj.getJSONObject("account"),instance));
-            status.setContent(resobj.get("content").toString());
-            status.setFavourites_count(Integer.valueOf(resobj.get("favourites_count").toString()));
-            status.setReblogs_count(Integer.valueOf(resobj.get("reblogs_count").toString()));
+            status.setAccount(parseAccountResponse(context, resobj.getJSONObject("user"),instance));
+            status.setContent(resobj.get("text").toString());
+            try {
+                status.setFavourites_count(resobj.getJSONArray("reactionCounts").length());
+            } catch (JSONException e) {
+                status.setFavourites_count(0);
+            }
+
+//            status.setReblogs_count(Integer.valueOf(resobj.get("reblogs_count").toString()));
+            status.setReblogs_count(0);
             try{
                 status.setReplies_count(Integer.valueOf(resobj.get("replies_count").toString()));
             }catch (Exception e){
@@ -3079,7 +3140,9 @@ public class API {
             try{
                 status.setReblog(parseStatuses(context, resobj.getJSONObject("reblog"),instance));
             }catch (Exception ignored){}
-        } catch (JSONException ignored) {} catch (ParseException e) {
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return status;
@@ -3308,7 +3371,6 @@ public class API {
     private static Account parseAccountResponse(Context context, JSONObject resobj, String instance){
 
         Account account = new Account();
-        Log.d("accountresp",resobj.toString());
         try {
             account.setId(resobj.get("id").toString());
             account.setUsername(resobj.get("username").toString());
@@ -3441,16 +3503,15 @@ public class API {
      * @param jsonArray JSONArray
      * @return List<Relationship>
      */
-    private List<Relationship> parseRelationshipResponse(JSONArray jsonArray){
+    private List<Relationship> parseRelationshipResponseList(JSONObject jsonArray){
 
         List<Relationship> relationships = new ArrayList<>();
         try {
-            int i = 0;
-            while (i < jsonArray.length() ) {
-                JSONObject resobj = jsonArray.getJSONObject(i);
+            Iterator<String> iter = jsonArray.keys();
+            while (iter.hasNext()) {
+                JSONObject resobj = jsonArray.getJSONObject(iter.next());
                 Relationship relationship = parseRelationshipResponse(resobj);
                 relationships.add(relationship);
-                i++;
             }
         } catch (JSONException e) {
             setDefaultError(e);
@@ -3520,13 +3581,15 @@ public class API {
         try {
             notification.setId(resobj.get("id").toString());
             notification.setType(resobj.get("type").toString());
-            notification.setCreated_at(Helper.mstStringToDate(context, resobj.get("created_at").toString()));
-            notification.setAccount(parseAccountResponse(context, resobj.getJSONObject("account"),instance));
+            notification.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+            notification.setAccount(parseAccountResponse(context, resobj.getJSONObject("user"),instance));
             try{
-                notification.setStatus(parseStatuses(context, resobj.getJSONObject("status"),instance));
+                notification.setStatus(parseStatuses(context, resobj.getJSONObject("note"),instance));
             }catch (Exception ignored){}
-            notification.setCreated_at(Helper.mstStringToDate(context, resobj.get("created_at").toString()));
-        } catch (JSONException ignored) {} catch (ParseException e) {
+            notification.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return notification;

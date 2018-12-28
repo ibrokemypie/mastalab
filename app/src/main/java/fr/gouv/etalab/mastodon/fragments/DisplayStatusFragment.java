@@ -240,10 +240,10 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
                     }
                 }
                 if(type == RetrieveFeedsAsyncTask.Type.HOME && statuses != null && statuses.size() > firstVisibleItem && firstVisibleItem >= 0) {
-                    Long bookmarkL = Long.parseLong(statuses.get(firstVisibleItem).getId()) + 1;
+                    String bookmarkL = (statuses.get(firstVisibleItem).getId()) + 1;
                     updatedBookMark = String.valueOf(bookmarkL);
-                    if( lastReadToot == null || bookmarkL > Long.parseLong(lastReadToot)) //Last read toot, only incremented if the id of the toot is greater than the recorded one
-                        lastReadToot = String.valueOf(bookmarkL);
+//                    if( lastReadToot == null || bookmarkL > (lastReadToot)) //Last read toot, only incremented if the id of the toot is greater than the recorded one
+//                        lastReadToot = String.valueOf(bookmarkL);
                 }
             }
         });
@@ -834,9 +834,9 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
             return;
         //Find the position of toots between those already present
         int position = 0;
-        while (position < this.statuses.size() && Long.parseLong(statuses.get(0).getId()) < Long.parseLong(this.statuses.get(position).getId())) {
-            position++;
-        }
+//        while (position < this.statuses.size() && Long.parseLong(statuses.get(0).getId()) < Long.parseLong(this.statuses.get(position).getId())) {
+//            position++;
+//        }
         ArrayList<Status> tmpStatuses = new ArrayList<>();
         for (Status tmpStatus : statuses) {
             //Put the toot at its place in the list (id desc)

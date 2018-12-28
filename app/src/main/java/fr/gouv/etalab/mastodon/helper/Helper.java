@@ -548,6 +548,7 @@ public class Helper {
             //noinspection deprecation
             userLocale = context.getResources().getConfiguration().locale;
         }
+        // 2018-12-28T12:35:20.399Z"
         final String STRING_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(STRING_DATE_FORMAT, userLocale);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("gmt"));

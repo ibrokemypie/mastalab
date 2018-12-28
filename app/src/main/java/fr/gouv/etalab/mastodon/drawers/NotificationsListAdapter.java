@@ -34,6 +34,7 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -163,25 +164,27 @@ public class NotificationsListAdapter extends RecyclerView.Adapter implements On
         switch (type){
             case "mention":
                 holder.status_action_container.setVisibility(View.VISIBLE);
-                if( notification.getAccount().getDisplay_name() != null && notification.getAccount().getDisplay_name().length() > 0)
-                    typeString = String.format("%s %s", Helper.shortnameToUnicode(notification.getAccount().getDisplay_name(), true),context.getString(R.string.notif_mention));
-                else
-                    typeString = String.format("@%s %s", notification.getAccount().getUsername(),context.getString(R.string.notif_mention));
-                if( theme == Helper.THEME_DARK){
-                    if( notification.getStatus().getVisibility().equals("direct"))
-                        holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_dark_private));
+                if (notification.getStatus().getVisibility() != null) {
+                    if (notification.getAccount().getDisplay_name() != null && notification.getAccount().getDisplay_name().length() > 0)
+                        typeString = String.format("%s %s", Helper.shortnameToUnicode(notification.getAccount().getDisplay_name(), true), context.getString(R.string.notif_mention));
                     else
-                        holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_dark_1));
-                }else if( theme == Helper.THEME_BLACK){
-                    if( notification.getStatus().getVisibility().equals("direct"))
-                        holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_black_private));
-                    else
-                        holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_black_1));
-                }else {
-                    if( notification.getStatus().getVisibility().equals("direct"))
-                        holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_light_private));
-                    else
-                        holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_light_1));
+                        typeString = String.format("@%s %s", notification.getAccount().getUsername(), context.getString(R.string.notif_mention));
+                    if (theme == Helper.THEME_DARK) {
+                        if (notification.getStatus().getVisibility().equals("direct"))
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_dark_private));
+                        else
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_dark_1));
+                    } else if (theme == Helper.THEME_BLACK) {
+                        if (notification.getStatus().getVisibility().equals("direct"))
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_black_private));
+                        else
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_black_1));
+                    } else {
+                        if (notification.getStatus().getVisibility().equals("direct"))
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_light_private));
+                        else
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_light_1));
+                    }
                 }
                 imgH = ContextCompat.getDrawable(context, R.drawable.ic_chat_bubble_outline);
                 holder.main_container_trans.setVisibility(View.GONE);
@@ -352,8 +355,10 @@ public class NotificationsListAdapter extends RecyclerView.Adapter implements On
 
             Helper.absoluteDateTimeReveal(context, holder.status_date, status.getCreated_at());
 
-            holder.status_mention_spoiler.setText(Helper.makeMentionsClick(context,status.getMentions()), TextView.BufferType.SPANNABLE);
-            holder.status_mention_spoiler.setMovementMethod(LinkMovementMethod.getInstance());
+            if (status.getMentions() != null) {
+                holder.status_mention_spoiler.setText(Helper.makeMentionsClick(context, status.getMentions()), TextView.BufferType.SPANNABLE);
+                holder.status_mention_spoiler.setMovementMethod(LinkMovementMethod.getInstance());
+            }
 
             //Adds attachment -> disabled, to enable them uncomment the line below
             //loadAttachments(status, holder);
