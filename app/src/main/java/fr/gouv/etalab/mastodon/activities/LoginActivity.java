@@ -20,9 +20,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
@@ -46,7 +44,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,7 +62,6 @@ import java.util.HashMap;
 
 import es.dmoral.toasty.Toasty;
 import fr.gouv.etalab.mastodon.R;
-import fr.gouv.etalab.mastodon.asynctasks.UpdateAccountInfoAsyncTask;
 import fr.gouv.etalab.mastodon.client.HttpsConnection;
 import fr.gouv.etalab.mastodon.helper.Helper;
 
@@ -83,255 +79,230 @@ public class LoginActivity extends BaseActivity {
 
     private static String app_id;
     private static String app_secret;
-    private TextView login_two_step;
     private static boolean client_id_for_webview = false;
     private static String instance;
     private AutoCompleteTextView login_instance;
-    private EditText login_uid;
-    private EditText login_passwd;
     boolean isLoadingInstance = false;
     private String oldSearch;
-    private ImageView info_uid, info_instance, info_pwd, info_2FA;
+    private ImageView info_instance;
+    boolean instanceSuccess = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-            SharedPreferences sharedpreferences = getSharedPreferences(Helper.APP_PREFS, android.content.Context.MODE_PRIVATE);
-            int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
-            switch (theme) {
-                case Helper.THEME_LIGHT:
-                    setTheme(R.style.AppTheme);
-                    break;
-                case Helper.THEME_DARK:
-                    setTheme(R.style.AppThemeDark);
-                    break;
-                case Helper.THEME_BLACK:
-                    setTheme(R.style.AppThemeBlack);
-                    break;
-                default:
-                    setTheme(R.style.AppThemeDark);
+        SharedPreferences sharedpreferences = getSharedPreferences(Helper.APP_PREFS, android.content.Context.MODE_PRIVATE);
+        int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
+        switch (theme) {
+            case Helper.THEME_LIGHT:
+                setTheme(R.style.AppTheme);
+                break;
+            case Helper.THEME_DARK:
+                setTheme(R.style.AppThemeDark);
+                break;
+            case Helper.THEME_BLACK:
+                setTheme(R.style.AppThemeBlack);
+                break;
+            default:
+                setTheme(R.style.AppThemeDark);
+        }
+
+        setContentView(R.layout.activity_login);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            assert inflater != null;
+            @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.simple_bar, null);
+            actionBar.setCustomView(view, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+            ImageView toolbar_close = actionBar.getCustomView().findViewById(R.id.toolbar_close);
+            TextView toolbar_title = actionBar.getCustomView().findViewById(R.id.toolbar_title);
+            toolbar_close.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+            toolbar_title.setText(R.string.add_account);
+            if (theme == THEME_LIGHT) {
+                Toolbar toolbar = actionBar.getCustomView().findViewById(R.id.toolbar);
+                Helper.colorizeToolbar(toolbar, R.color.black, LoginActivity.this);
+            }
+        }
+        if (theme == Helper.THEME_DARK) {
+            changeDrawableColor(getApplicationContext(), R.drawable.mastodon_icon, R.color.mastodonC2);
+        } else {
+            changeDrawableColor(getApplicationContext(), R.drawable.mastodon_icon, R.color.mastodonC3);
+        }
+        final Button connectionButton = findViewById(R.id.login_button);
+        login_instance = findViewById(R.id.login_instance);
+        info_instance = findViewById(R.id.info_instance);
+
+        info_instance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showcaseInstance(false);
+            }
+        });
+
+
+        showcaseInstance(true);
+
+        login_instance.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                oldSearch = parent.getItemAtPosition(position).toString().trim();
+            }
+        });
+        login_instance.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
-            setContentView(R.layout.activity_login);
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                assert inflater != null;
-                @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.simple_bar, null);
-                actionBar.setCustomView(view, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-                ImageView toolbar_close = actionBar.getCustomView().findViewById(R.id.toolbar_close);
-                TextView toolbar_title = actionBar.getCustomView().findViewById(R.id.toolbar_title);
-                toolbar_close.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        finish();
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 2 && !isLoadingInstance) {
+                    final String action = "/instances/search";
+                    final HashMap<String, String> parameters = new HashMap<>();
+                    parameters.put("q", s.toString().trim());
+                    parameters.put("count", String.valueOf(1000));
+                    parameters.put("name", String.valueOf(true));
+                    isLoadingInstance = true;
+                    if (oldSearch == null || !oldSearch.equals(s.toString().trim()))
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    final String response = new HttpsConnection(LoginActivity.this).get("https://instances.social/api/1.0" + action, 30, parameters, Helper.THEKINRAR_SECRET_TOKEN);
+                                    runOnUiThread(new Runnable() {
+                                        public void run() {
+                                            isLoadingInstance = false;
+                                            String[] instances;
+                                            try {
+                                                JSONObject jsonObject = new JSONObject(response);
+                                                JSONArray jsonArray = jsonObject.getJSONArray("instances");
+                                                if (jsonArray != null) {
+                                                    int length = 0;
+                                                    for (int i = 0; i < jsonArray.length(); i++) {
+                                                        if (!jsonArray.getJSONObject(i).get("name").toString().contains("@"))
+                                                            length++;
+                                                    }
+                                                    instances = new String[length];
+                                                    int j = 0;
+                                                    for (int i = 0; i < jsonArray.length(); i++) {
+                                                        if (!jsonArray.getJSONObject(i).get("name").toString().contains("@")) {
+                                                            instances[j] = jsonArray.getJSONObject(i).get("name").toString();
+                                                            j++;
+                                                        }
+                                                    }
+                                                } else {
+                                                    instances = new String[]{};
+                                                }
+                                                login_instance.setAdapter(null);
+                                                ArrayAdapter<String> adapter =
+                                                        new ArrayAdapter<>(LoginActivity.this, android.R.layout.simple_list_item_1, instances);
+                                                login_instance.setAdapter(adapter);
+                                                if (login_instance.hasFocus() && !LoginActivity.this.isFinishing())
+                                                    login_instance.showDropDown();
+                                                oldSearch = s.toString().trim();
+
+                                            } catch (JSONException ignored) {
+                                                isLoadingInstance = false;
+                                            }
+                                        }
+                                    });
+
+                                } catch (HttpsConnection.HttpsConnectionException e) {
+                                    isLoadingInstance = false;
+                                } catch (Exception e) {
+                                    isLoadingInstance = false;
+                                }
+                            }
+                        }).start();
+                }
+            }
+        });
+
+
+        TextView instances_social = findViewById(R.id.instances_social);
+        instances_social.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://instances.social"));
+                startActivity(browserIntent);
+            }
+        });
+        login_instance.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                TextInputLayout login_instance_layout = findViewById(R.id.login_instance_layout);
+                if (!hasFocus) {
+                    retrievesClientId();
+                    if (login_instance.getText() == null || login_instance.getText().toString().length() == 0) {
+                        login_instance_layout.setError(getString(R.string.toast_error_instance));
+                        login_instance_layout.setErrorEnabled(true);
+                    }
+                } else {
+                    login_instance_layout.setErrorEnabled(false);
+                }
+            }
+        });
+
+
+        final TextView login_issue = findViewById(R.id.login_issue);
+        SpannableString content = new SpannableString(getString(R.string.issue_login_title));
+        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+        login_issue.setText(content);
+        login_issue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                int style;
+                if (theme == Helper.THEME_DARK) {
+                    style = R.style.DialogDark;
+                } else if (theme == Helper.THEME_BLACK) {
+                    style = R.style.DialogBlack;
+                } else {
+                    style = R.style.Dialog;
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this, style);
+                builder.setTitle(R.string.issue_login_title);
+                TextView message = new TextView(LoginActivity.this);
+                final SpannableString s =
+                        new SpannableString(getText(R.string.issue_login_message));
+                Linkify.addLinks(s, Linkify.WEB_URLS);
+                message.setText(s);
+                message.setPadding((int) convertDpToPixel(10, LoginActivity.this), (int) convertDpToPixel(10, LoginActivity.this), (int) convertDpToPixel(10, LoginActivity.this), (int) convertDpToPixel(10, LoginActivity.this));
+                message.setMovementMethod(LinkMovementMethod.getInstance());
+                builder.setView(message);
+                builder.setPositiveButton(R.string.close, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
                     }
                 });
-                toolbar_title.setText(R.string.add_account);
-                if (theme == THEME_LIGHT) {
-                    Toolbar toolbar = actionBar.getCustomView().findViewById(R.id.toolbar);
-                    Helper.colorizeToolbar(toolbar, R.color.black, LoginActivity.this);
+                builder.setIcon(android.R.drawable.ic_dialog_alert).show();
+            }
+        });
+        // open the auth_url in WebviewConnectActivity
+        connectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connectionButton.setEnabled(false);
+
+                if (retrievesClientId()) {
+                    Intent i = new Intent(LoginActivity.this, WebviewConnectActivity.class);
+                    i.putExtra("instance", instance);
+                    startActivity(i);
+                } else {
+                    connectionButton.setEnabled(true);
                 }
             }
-            if (theme == Helper.THEME_DARK) {
-                changeDrawableColor(getApplicationContext(), R.drawable.mastodon_icon, R.color.mastodonC2);
-            } else {
-                changeDrawableColor(getApplicationContext(), R.drawable.mastodon_icon, R.color.mastodonC3);
-            }
-            final Button connectionButton = findViewById(R.id.login_button);
-            login_instance = findViewById(R.id.login_instance);
-            login_uid = findViewById(R.id.login_uid);
-            login_passwd = findViewById(R.id.login_passwd);
-            info_uid = findViewById(R.id.info_uid);
-            info_instance = findViewById(R.id.info_instance);
-            info_pwd = findViewById(R.id.info_pwd);
-            info_2FA = findViewById(R.id.info_2FA);
-
-            info_instance.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showcaseInstance(false);
-                }
-            });
-
-            info_uid.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showCaseLogin(false);
-                }
-            });
-            info_pwd.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showCasePassword(false);
-                }
-            });
-            info_2FA.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showCase2FA(false);
-                }
-            });
-
-            showcaseInstance(true);
-
-            login_instance.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    oldSearch = parent.getItemAtPosition(position).toString().trim();
-                }
-            });
-            login_instance.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    if (s.length() > 2 && !isLoadingInstance) {
-                        final String action = "/instances/search";
-                        final HashMap<String, String> parameters = new HashMap<>();
-                        parameters.put("q", s.toString().trim());
-                        parameters.put("count", String.valueOf(1000));
-                        parameters.put("name", String.valueOf(true));
-                        isLoadingInstance = true;
-                        if (oldSearch == null || !oldSearch.equals(s.toString().trim()))
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        final String response = new HttpsConnection(LoginActivity.this).get("https://instances.social/api/1.0" + action, 30, parameters, Helper.THEKINRAR_SECRET_TOKEN);
-                                        runOnUiThread(new Runnable() {
-                                            public void run() {
-                                                isLoadingInstance = false;
-                                                String[] instances;
-                                                try {
-                                                    JSONObject jsonObject = new JSONObject(response);
-                                                    JSONArray jsonArray = jsonObject.getJSONArray("instances");
-                                                    if (jsonArray != null) {
-                                                        int length = 0;
-                                                        for (int i = 0; i < jsonArray.length(); i++) {
-                                                            if (!jsonArray.getJSONObject(i).get("name").toString().contains("@"))
-                                                                length++;
-                                                        }
-                                                        instances = new String[length];
-                                                        int j = 0;
-                                                        for (int i = 0; i < jsonArray.length(); i++) {
-                                                            if (!jsonArray.getJSONObject(i).get("name").toString().contains("@")) {
-                                                                instances[j] = jsonArray.getJSONObject(i).get("name").toString();
-                                                                j++;
-                                                            }
-                                                        }
-                                                    } else {
-                                                        instances = new String[]{};
-                                                    }
-                                                    login_instance.setAdapter(null);
-                                                    ArrayAdapter<String> adapter =
-                                                            new ArrayAdapter<>(LoginActivity.this, android.R.layout.simple_list_item_1, instances);
-                                                    login_instance.setAdapter(adapter);
-                                                    if (login_instance.hasFocus() && !LoginActivity.this.isFinishing())
-                                                        login_instance.showDropDown();
-                                                    oldSearch = s.toString().trim();
-
-                                                } catch (JSONException ignored) {
-                                                    isLoadingInstance = false;
-                                                }
-                                            }
-                                        });
-
-                                    } catch (HttpsConnection.HttpsConnectionException e) {
-                                        isLoadingInstance = false;
-                                    } catch (Exception e) {
-                                        isLoadingInstance = false;
-                                    }
-                                }
-                            }).start();
-                    }
-                }
-            });
-
-
-            connectionButton.setEnabled(false);
-            login_two_step = findViewById(R.id.login_two_step);
-            login_two_step.setVisibility(View.GONE);
-            info_2FA.setVisibility(View.GONE);
-            login_two_step.setPaintFlags(login_two_step.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-            login_two_step.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    client_id_for_webview = true;
-                    retrievesClientId();
-                }
-            });
-            TextView instances_social = findViewById(R.id.instances_social);
-            instances_social.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://instances.social"));
-                    startActivity(browserIntent);
-                }
-            });
-            login_instance.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    connectionButton.setEnabled(false);
-                    login_two_step.setVisibility(View.INVISIBLE);
-                    info_2FA.setVisibility(View.INVISIBLE);
-                    TextInputLayout login_instance_layout = findViewById(R.id.login_instance_layout);
-                    if (!hasFocus) {
-                        retrievesClientId();
-                        if (login_instance.getText() == null || login_instance.getText().toString().length() == 0) {
-                            login_instance_layout.setError(getString(R.string.toast_error_instance));
-                            login_instance_layout.setErrorEnabled(true);
-                        }
-                    } else {
-                        login_instance_layout.setErrorEnabled(false);
-                    }
-                }
-            });
-
-
-            final TextView login_issue = findViewById(R.id.login_issue);
-            SpannableString content = new SpannableString(getString(R.string.issue_login_title));
-            content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-            login_issue.setText(content);
-            login_issue.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    int style;
-                    if (theme == Helper.THEME_DARK) {
-                        style = R.style.DialogDark;
-                    } else if (theme == Helper.THEME_BLACK) {
-                        style = R.style.DialogBlack;
-                    } else {
-                        style = R.style.Dialog;
-                    }
-                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this, style);
-                    builder.setTitle(R.string.issue_login_title);
-                    TextView message = new TextView(LoginActivity.this);
-                    final SpannableString s =
-                            new SpannableString(getText(R.string.issue_login_message));
-                    Linkify.addLinks(s, Linkify.WEB_URLS);
-                    message.setText(s);
-                    message.setPadding((int) convertDpToPixel(10, LoginActivity.this), (int) convertDpToPixel(10, LoginActivity.this), (int) convertDpToPixel(10, LoginActivity.this), (int) convertDpToPixel(10, LoginActivity.this));
-                    message.setMovementMethod(LinkMovementMethod.getInstance());
-                    builder.setView(message);
-                    builder.setPositiveButton(R.string.close, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.setIcon(android.R.drawable.ic_dialog_alert).show();
-                }
-            });
+        });
     }
 
     @Override
@@ -355,12 +326,14 @@ public class LoginActivity extends BaseActivity {
     //		permission: ps.permission,
     //		callbackUrl: ps.callbackUrl,
     //		secret: secret
-    private void retrievesClientId() {
+    private boolean retrievesClientId() {
         final Button connectionButton = findViewById(R.id.login_button);
+        instanceSuccess = false;
         try {
             instance = URLEncoder.encode(login_instance.getText().toString().trim(), "utf-8");
         } catch (UnsupportedEncodingException e) {
             Toasty.error(LoginActivity.this, getString(R.string.client_error), Toast.LENGTH_LONG).show();
+            instanceSuccess = false;
         }
         final String action = "/api/app/create";
         final JSONArray perms = new JSONArray();
@@ -377,14 +350,16 @@ public class LoginActivity extends BaseActivity {
             parameters.put(Helper.WEBSITE, Helper.WEBSITE_VALUE);
         } catch (JSONException e) {
             e.printStackTrace();
+            instanceSuccess = false;
         }
 
-        new Thread(new Runnable() {
+        Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     final String response = new HttpsConnection(LoginActivity.this).post(Helper.instanceWithProtocol(instance) + action, 30, parameters, null);
-                    runOnUiThread(new Runnable() {
+                    Thread t = new Thread(new Runnable() {
+                        @Override
                         public void run() {
                             JSONObject resobj;
                             try {
@@ -406,12 +381,12 @@ public class LoginActivity extends BaseActivity {
                                     e.printStackTrace();
                                 }
 
-                                new Thread(new Runnable() {
+                                Thread t = new Thread(new Runnable() {
                                     @Override
                                     public void run() {
                                         try {
                                             final String response = new HttpsConnection(LoginActivity.this).post(Helper.instanceWithProtocol(instance) + action, 30, parameters, null);
-                                            runOnUiThread(new Runnable() {
+                                            Thread t = new Thread(new Runnable() {
                                                 public void run() {
                                                     JSONObject resobj;
                                                     try {
@@ -422,27 +397,41 @@ public class LoginActivity extends BaseActivity {
                                                         editor.putString(Helper.APP_TOKEN, app_token);
                                                         editor.putString(Helper.AUTH_URL, auth_url);
                                                         editor.apply();
+                                                        Log.d("r", "tr");
+                                                        instanceSuccess = true;
                                                     } catch (JSONException e) {
                                                         e.printStackTrace();
                                                     }
-                                                    runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            connectionButton.setEnabled(true);
-                                                        }
-                                                    });
                                                 }
                                             });
+                                            t.start();
+                                            try {
+                                                t.join(15000);
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
                                         } catch (final Exception e) {
                                             e.printStackTrace();
                                         }
                                     }
-                                }).start();
+                                });
+                                t.start();
+                                try {
+                                    t.join(15000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             } catch (JSONException ignored) {
                                 ignored.printStackTrace();
                             }
                         }
                     });
+                    t.start();
+                    try {
+                        t.join(15000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 } catch (final Exception e) {
                     e.printStackTrace();
                     runOnUiThread(new Runnable() {
@@ -455,25 +444,20 @@ public class LoginActivity extends BaseActivity {
                             else
                                 message = getString(R.string.client_error);
                             Toasty.error(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                            instanceSuccess = false;
                         }
                     });
                 }
             }
-        }).start();
-
-
-
-        // open the auth_url in WebviewConnectActivity
-        connectionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                connectionButton.setEnabled(false);
-
-                Intent i = new Intent(LoginActivity.this, WebviewConnectActivity.class);
-                i.putExtra("instance", instance);
-                startActivity(i);
-            }
         });
+        t.start();
+        try {
+            t.join(25000);
+            Log.d("S", String.valueOf(instanceSuccess));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return instanceSuccess;
     }
 
 
@@ -517,15 +501,6 @@ public class LoginActivity extends BaseActivity {
     }
 
 
-    public static String redirectUserToAuthorizeAndLogin(String clientId, String instance) {
-        String queryString = Helper.APP_ID + "=" + clientId;
-        queryString += "&" + Helper.REDIRECT_URI + "=" + Uri.encode(Helper.REDIRECT_CONTENT_WEB);
-        queryString += "&" + Helper.RESPONSE_TYPE + "=code";
-        queryString += "&" + Helper.SCOPE + "=" + Helper.OAUTH_SCOPES;
-        return Helper.instanceWithProtocol(instance) + Helper.EP_AUTHORIZE + "?" + queryString;
-    }
-
-
     private void showcaseInstance(final boolean loop) {
 
         BubbleShowCaseBuilder showCaseBuilder = new BubbleShowCaseBuilder(LoginActivity.this)
@@ -543,7 +518,6 @@ public class LoginActivity extends BaseActivity {
             public void onTargetClick(BubbleShowCase bubbleShowCase) {
                 if (loop) {
                     bubbleShowCase.finishSequence();
-                    showCaseLogin(true);
                 }
             }
 
@@ -551,7 +525,6 @@ public class LoginActivity extends BaseActivity {
             public void onCloseActionImageClick(BubbleShowCase bubbleShowCase) {
                 if (loop) {
                     bubbleShowCase.finishSequence();
-                    showCaseLogin(true);
                 }
             }
 
@@ -569,122 +542,4 @@ public class LoginActivity extends BaseActivity {
                 .targetView(login_instance)
                 .show();
     }
-
-    private void showCaseLogin(final boolean loop) {
-        BubbleShowCaseBuilder showCaseBuilder = new BubbleShowCaseBuilder(LoginActivity.this) //Activity instance
-                .title(getString(R.string.login))
-                .description(getString(R.string.showcase_uid))
-                .arrowPosition(BubbleShowCase.ArrowPosition.TOP)
-                .backgroundColor(ContextCompat.getColor(LoginActivity.this, R.color.mastodonC4))
-                .textColor(Color.WHITE)
-                .titleTextSize(17)
-                .descriptionTextSize(15);
-        if (loop)
-            showCaseBuilder.showOnce("BUBBLE_SHOW_CASE_UID_ID");
-        showCaseBuilder.listener(new BubbleShowCaseListener() {
-            @Override
-            public void onTargetClick(BubbleShowCase bubbleShowCase) {
-                if (loop) {
-                    bubbleShowCase.finishSequence();
-                    showCasePassword(true);
-                }
-            }
-
-            @Override
-            public void onCloseActionImageClick(BubbleShowCase bubbleShowCase) {
-                if (loop) {
-                    bubbleShowCase.finishSequence();
-                    showCasePassword(true);
-                }
-            }
-
-            @Override
-            public void onBubbleClick(BubbleShowCase bubbleShowCase) {
-
-            }
-
-            @Override
-            public void onBackgroundDimClick(BubbleShowCase bubbleShowCase) {
-            }
-
-        })
-                .targetView(login_uid)
-                .show();
-    }
-
-    private void showCasePassword(boolean loop) {
-        BubbleShowCaseBuilder showCaseBuilder = new BubbleShowCaseBuilder(LoginActivity.this)
-                .title(getString(R.string.password))
-                .description(getString(R.string.showcase_pwd))
-                .arrowPosition(BubbleShowCase.ArrowPosition.BOTTOM)
-                .backgroundColor(ContextCompat.getColor(LoginActivity.this, R.color.mastodonC4))
-                .textColor(Color.WHITE)
-                .titleTextSize(17)
-                .descriptionTextSize(15);
-        if (loop)
-            showCaseBuilder.showOnce("BUBBLE_SHOW_CASE_PASSWORD_ID");
-        showCaseBuilder.listener(new BubbleShowCaseListener() {
-            @Override
-            public void onTargetClick(BubbleShowCase bubbleShowCase) {
-
-            }
-
-            @Override
-            public void onCloseActionImageClick(BubbleShowCase bubbleShowCase) {
-
-            }
-
-            @Override
-            public void onBubbleClick(BubbleShowCase bubbleShowCase) {
-
-            }
-
-            @Override
-            public void onBackgroundDimClick(BubbleShowCase bubbleShowCase) {
-
-            }
-
-        })
-                .targetView(login_passwd)
-                .show();
-    }
-
-
-    private void showCase2FA(boolean loop) {
-        BubbleShowCaseBuilder showCaseBuilder = new BubbleShowCaseBuilder(LoginActivity.this)
-                .title(getString(R.string.two_factor_authentification))
-                .description(getString(R.string.showcase_2FA))
-                .arrowPosition(BubbleShowCase.ArrowPosition.BOTTOM)
-                .backgroundColor(ContextCompat.getColor(LoginActivity.this, R.color.mastodonC4))
-                .textColor(Color.WHITE)
-                .titleTextSize(17)
-                .descriptionTextSize(15);
-        if (loop)
-            showCaseBuilder.showOnce("BUBBLE_SHOW_CASE_2FA_ID");
-        showCaseBuilder.listener(new BubbleShowCaseListener() {
-            @Override
-            public void onTargetClick(BubbleShowCase bubbleShowCase) {
-
-            }
-
-            @Override
-            public void onCloseActionImageClick(BubbleShowCase bubbleShowCase) {
-
-            }
-
-            @Override
-            public void onBubbleClick(BubbleShowCase bubbleShowCase) {
-
-            }
-
-            @Override
-            public void onBackgroundDimClick(BubbleShowCase bubbleShowCase) {
-
-            }
-
-        })
-                .targetView(login_two_step)
-                .show();
-    }
-
 }
