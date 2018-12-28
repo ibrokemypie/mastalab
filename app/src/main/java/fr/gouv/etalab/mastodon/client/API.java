@@ -3087,8 +3087,8 @@ public class API {
             }
 //            status.setSensitive(Boolean.parseBoolean(resobj.get("sensitive").toString()));
             status.setSensitive(false);
-            if (resobj.get("cw") != null && resobj.get("cw") != "null") {
-                status.setSpoiler_text(resobj.get("cw").toString());
+            if (resobj.getString("cw") != null && resobj.getString("cw") != "null") {
+                status.setSpoiler_text(resobj.getString("cw"));
             }
             try {
                 status.setVisibility(resobj.get("visibility").toString());
@@ -3119,6 +3119,7 @@ public class API {
                     }
                     attachments.add(attachment);
                 }
+                status.setMedia_attachments(attachments);
             }
             try {
                 status.setCard(parseCardResponse(resobj.getJSONObject("card")));
@@ -3126,8 +3127,6 @@ public class API {
                 status.setCard(null);
             }
 
-
-            status.setMedia_attachments(attachments);
             //Retrieves mentions
             // TODO: fix mentions
             List<Mention> mentions = new ArrayList<>();
@@ -3145,8 +3144,7 @@ public class API {
                         mentions.add(mention);
                     }
                 }
-            } catch (JSONException e) {
-
+            } catch (JSONException ignored) {
             }
             status.setMentions(mentions);
             //Retrieves tags
