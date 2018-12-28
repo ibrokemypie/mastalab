@@ -1687,11 +1687,7 @@ public class API {
             case CREATESTATUS:
                 params = new HashMap<>();
                 action = "/notes/create";
-                try {
-                    params.put("text", URLEncoder.encode(status.getContent(), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    params.put("text", status.getContent());
-                }
+                params.put("text", status.getContent());
                 if (status.getIn_reply_to_id() != null)
                     params.put("in_reply_to_id", status.getIn_reply_to_id());
                 if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
@@ -1704,11 +1700,7 @@ public class API {
                 if (status.isSensitive())
                     params.put("sensitive", Boolean.toString(status.isSensitive()));
                 if (status.getSpoiler_text() != null)
-                    try {
-                        params.put("spoiler_text", URLEncoder.encode(status.getSpoiler_text(), "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        params.put("spoiler_text", status.getSpoiler_text());
-                    }
+                    params.put("cw", status.getSpoiler_text());
                 params.put("visibility", status.getVisibility());
                 break;
             default:
@@ -1757,11 +1749,7 @@ public class API {
     public APIResponse postStatusAction(Status status) {
 
         HashMap<String, String> params = new HashMap<>();
-        try {
-            params.put("text", URLEncoder.encode(status.getContent(), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            params.put("text", status.getContent());
-        }
+        params.put("text", status.getContent());
         if (status.getIn_reply_to_id() != null)
             params.put("in_reply_to_id", status.getIn_reply_to_id());
         if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
@@ -1774,11 +1762,7 @@ public class API {
         if (status.isSensitive())
             params.put("sensitive", Boolean.toString(status.isSensitive()));
         if (status.getSpoiler_text() != null)
-            try {
-                params.put("spoiler_text", URLEncoder.encode(status.getSpoiler_text(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                params.put("spoiler_text", status.getSpoiler_text());
-            }
+            params.put("cw", status.getSpoiler_text());
         params.put("visibility", status.getVisibility());
         statuses = new ArrayList<>();
 
