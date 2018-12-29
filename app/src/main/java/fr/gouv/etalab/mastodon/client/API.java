@@ -3137,7 +3137,11 @@ public class API {
                         Mention mention = new Mention();
                         mention.setId(arrayID.get(j).toString());
                         mention.setUrl(menObj.get("uri").toString());
-                        mention.setAcct(menObj.getString("username") + "@" + menObj.getString("host"));
+                        if (menObj.getString("host") != null) {
+                            mention.setAcct(menObj.getString("username") + "@" + menObj.getString("host"));
+                        } else {
+                            mention.setAcct(menObj.getString("username"));
+                        }
                         mention.setUsername(menObj.get("username").toString());
                         mentions.add(mention);
                     }
@@ -3475,7 +3479,15 @@ public class API {
         try {
             account.setId(resobj.get("id").toString());
             account.setUsername(resobj.get("username").toString());
-            account.setAcct(resobj.get("username").toString() + "@" + resobj.get("host").toString());
+            if (resobj.getString("host") != null && resobj.getString("host") != "null") {
+                account.setAcct(resobj.get("username").toString() + "@" + resobj.getString("host"));
+                account.setInstance("https://" + resobj.get("host").toString());
+                account.setHost(resobj.get("host").toString());
+            }
+            else
+                account.setAcct(resobj.get("username").toString());
+                account.setInstance(instance);
+                account.setHost(instance);
             account.setDisplay_name(resobj.get("name").toString());
             account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
             try {
