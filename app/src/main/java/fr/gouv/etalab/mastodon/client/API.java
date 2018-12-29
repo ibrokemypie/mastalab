@@ -18,7 +18,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -245,7 +244,6 @@ public class API {
         account = new Account();
         try {
             String response = new HttpsConnection(context).post(getAbsoluteUrl("/i"), 60, null, prefKeyOauthTokenT);
-            Log.d("verif", response.toString());
             account = parseAccountResponse(context, new JSONObject(response), instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -1620,7 +1618,7 @@ public class API {
     private int postAction(StatusAction statusAction, String targetedId, Status status, String comment) {
 
         String action;
-        HashMap<String, String> params = null;
+        HashMap<String, String> params = new HashMap<>();
         switch (statusAction) {
             case FAVOURITE:
                 action = String.format("/notes/%s/favourite", targetedId);
@@ -1629,7 +1627,8 @@ public class API {
                 action = String.format("/notes/%s/unfavourite", targetedId);
                 break;
             case REBLOG:
-                action = String.format("/notes/%s/reblog", targetedId);
+                action = "/notes/create";
+                params.put("renoteId", targetedId);
                 break;
             case UNREBLOG:
                 action = String.format("/notes/%s/unreblog", targetedId);
@@ -1639,7 +1638,6 @@ public class API {
                 break;
             case REMOTE_FOLLOW:
                 action = "/follows";
-                params = new HashMap<>();
                 params.put("uri", targetedId);
                 break;
             case UNFOLLOW:
@@ -1650,7 +1648,6 @@ public class API {
                 break;
             case BLOCK_DOMAIN:
                 action = "/domain_blocks";
-                params = new HashMap<>();
                 params.put("domain", targetedId);
                 break;
             case UNBLOCK:
@@ -1675,12 +1672,10 @@ public class API {
                 action = String.format("/users/%s/unpin", targetedId);
                 break;
             case SHOW_BOOST:
-                params = new HashMap<>();
                 params.put("reblogs", "true");
                 action = String.format("/users/%s/follow", targetedId);
                 break;
             case HIDE_BOOST:
-                params = new HashMap<>();
                 params.put("reblogs", "false");
                 action = String.format("/users/%s/follow", targetedId);
                 break;
@@ -1695,13 +1690,11 @@ public class API {
                 break;
             case REPORT:
                 action = "/reports";
-                params = new HashMap<>();
                 params.put("account_id", status.getAccount().getId());
                 params.put("comment", comment);
                 params.put("status_ids[]", status.getId());
                 break;
             case CREATESTATUS:
-                params = new HashMap<>();
                 action = "/notes/create";
                 params.put("text", status.getContent());
                 if (status.getIn_reply_to_id() != null)
@@ -3506,7 +3499,7 @@ public class API {
                     userLocale = context.getResources().getConfiguration().locale;
                 }
                 String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", userLocale).format(new Date());
-                account.setCreated_at(Helper.mstStringToDate(context,date));
+                account.setCreated_at(Helper.mstStringToDate(context, date));
             }
             if (!resobj.isNull("followersCount")) {
                 account.setFollowers_count(resobj.getInt("followersCount"));

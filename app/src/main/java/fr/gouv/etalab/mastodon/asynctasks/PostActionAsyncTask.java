@@ -47,15 +47,14 @@ public class PostActionAsyncTask extends AsyncTask<Void, Void, Void> {
     private boolean muteNotifications;
 
 
-
-    public PostActionAsyncTask(Context context, API.StatusAction apiAction, String targetedId, OnPostActionInterface onPostActionInterface){
+    public PostActionAsyncTask(Context context, API.StatusAction apiAction, String targetedId, OnPostActionInterface onPostActionInterface) {
         this.contextReference = new WeakReference<>(context);
         this.listener = onPostActionInterface;
         this.apiAction = apiAction;
         this.targetedId = targetedId;
     }
 
-    public PostActionAsyncTask(Context context, Account account, API.StatusAction apiAction, String targetedId, OnPostActionInterface onPostActionInterface){
+    public PostActionAsyncTask(Context context, Account account, API.StatusAction apiAction, String targetedId, OnPostActionInterface onPostActionInterface) {
         this.contextReference = new WeakReference<>(context);
         this.listener = onPostActionInterface;
         this.apiAction = apiAction;
@@ -63,7 +62,7 @@ public class PostActionAsyncTask extends AsyncTask<Void, Void, Void> {
         this.account = account;
     }
 
-    public PostActionAsyncTask(Context context, Account account, fr.gouv.etalab.mastodon.client.Entities.Status remoteStatus, API.StatusAction apiAction, OnPostActionInterface onPostActionInterface){
+    public PostActionAsyncTask(Context context, Account account, fr.gouv.etalab.mastodon.client.Entities.Status remoteStatus, API.StatusAction apiAction, OnPostActionInterface onPostActionInterface) {
         this.contextReference = new WeakReference<>(context);
         this.listener = onPostActionInterface;
         this.apiAction = apiAction;
@@ -71,7 +70,7 @@ public class PostActionAsyncTask extends AsyncTask<Void, Void, Void> {
         this.account = account;
     }
 
-    public PostActionAsyncTask(Context context, Account account, Account remoteAccount, API.StatusAction apiAction, OnPostActionInterface onPostActionInterface){
+    public PostActionAsyncTask(Context context, Account account, Account remoteAccount, API.StatusAction apiAction, OnPostActionInterface onPostActionInterface) {
         this.contextReference = new WeakReference<>(context);
         this.listener = onPostActionInterface;
         this.apiAction = apiAction;
@@ -79,7 +78,7 @@ public class PostActionAsyncTask extends AsyncTask<Void, Void, Void> {
         this.account = account;
     }
 
-    public PostActionAsyncTask(Context context, API.StatusAction apiAction, String targetedId, fr.gouv.etalab.mastodon.client.Entities.Status status, String comment, OnPostActionInterface onPostActionInterface){
+    public PostActionAsyncTask(Context context, API.StatusAction apiAction, String targetedId, fr.gouv.etalab.mastodon.client.Entities.Status status, String comment, OnPostActionInterface onPostActionInterface) {
         contextReference = new WeakReference<>(context);
         this.listener = onPostActionInterface;
         this.apiAction = apiAction;
@@ -87,7 +86,8 @@ public class PostActionAsyncTask extends AsyncTask<Void, Void, Void> {
         this.comment = comment;
         this.status = status;
     }
-    public PostActionAsyncTask(Context context, API.StatusAction apiAction, String targetedId, boolean muteNotifications, OnPostActionInterface onPostActionInterface){
+
+    public PostActionAsyncTask(Context context, API.StatusAction apiAction, String targetedId, boolean muteNotifications, OnPostActionInterface onPostActionInterface) {
         this.contextReference = new WeakReference<>(context);
         this.listener = onPostActionInterface;
         this.apiAction = apiAction;
@@ -97,7 +97,6 @@ public class PostActionAsyncTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
-
         //Remote action
         if (account != null)
             api = new API(contextReference.get(), account.getInstance(), account.getToken());
@@ -125,8 +124,8 @@ public class PostActionAsyncTask extends AsyncTask<Void, Void, Void> {
                     statusCode = api.postAction(apiAction, targetedId);
                 }
             }
-        }else if(remoteAccount != null){
-            String searchString = remoteAccount.getAcct().contains("@")?"@" + remoteAccount.getAcct():"@" + remoteAccount.getAcct() + "@" + Helper.getLiveInstance(contextReference.get());
+        } else if (remoteAccount != null) {
+            String searchString = remoteAccount.getAcct().contains("@") ? "@" + remoteAccount.getAcct() : "@" + remoteAccount.getAcct() + "@" + Helper.getLiveInstance(contextReference.get());
             Results search = api.search(searchString);
             if (search != null) {
                 List<Account> accounts = search.getAccounts();
@@ -136,12 +135,12 @@ public class PostActionAsyncTask extends AsyncTask<Void, Void, Void> {
                     statusCode = api.postAction(apiAction, targetedId);
                 }
             }
-        }else {
+        } else {
             if (apiAction == API.StatusAction.REPORT)
                 statusCode = api.reportAction(status, comment);
             else if (apiAction == API.StatusAction.CREATESTATUS)
                 statusCode = api.statusAction(status);
-            else if( apiAction == API.StatusAction.MUTE_NOTIFICATIONS)
+            else if (apiAction == API.StatusAction.MUTE_NOTIFICATIONS)
                 statusCode = api.muteNotifications(targetedId, muteNotifications);
             else
                 statusCode = api.postAction(apiAction, targetedId);
