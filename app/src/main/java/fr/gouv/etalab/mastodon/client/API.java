@@ -171,7 +171,7 @@ public class API {
      */
     public APIResponse getInstance() {
         try {
-            String response = new HttpsConnection(context).post(getAbsoluteUrl("/meta"), 30, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/meta"), 30, null, null);
             Instance instanceEntity = parseInstance(new JSONObject(response));
             apiResponse.setInstance(instanceEntity);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -276,7 +276,7 @@ public class API {
             e.printStackTrace();
         }
         try {
-            String response = new HttpsConnection(context).post(getAbsoluteUrl("/users/show"), 60, null, prefKeyOauthTokenT);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/users/show"), 60, null, null);
             account = parseAccountResponse(context, new JSONObject(response), instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -457,7 +457,7 @@ public class API {
         statuses = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/users/notes"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/users/notes"), 60, params, null);
             statuses = parseStatuses(context, new JSONArray(response), instance);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -571,7 +571,7 @@ public class API {
         param.put("noteId", statusId);
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/notes/show"), 60, new JSONObject(param), prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/show"), 60, new JSONObject(param), null);
             Status status = parseStatuses(context, new JSONObject(response), instance);
             statuses.add(status);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -601,7 +601,7 @@ public class API {
         param.put("noteId", statusId);
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/notes/conversation"), 60, new JSONObject(param), prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/conversation"), 60, new JSONObject(param), null);
             statusContext = parseContext(new JSONArray(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -673,7 +673,7 @@ public class API {
         conversations = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/notes/conversations"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/conversations"), 60, params, null);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             conversations = parseConversations(new JSONArray(response));
@@ -1136,12 +1136,12 @@ public class API {
         statuses = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String url;
+            String action;
             if (instanceName == null)
-                url = getAbsoluteUrl("/notes/global-timeline");
+                action = getAbsoluteUrl("/notes/global-timeline");
             else
-                url = getAbsoluteUrlRemoteInstance(instanceName);
-            String response = httpsConnection.post(url, 60, params, prefKeyOauthTokenT);
+                action = getAbsoluteUrlRemoteInstance(instanceName);
+            String response = httpsConnection.post(action, 60, params, null);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response), instance);
@@ -1698,7 +1698,7 @@ public class API {
                 action = "/notes/create";
                 params.put("text", status.getContent());
                 if (status.getIn_reply_to_id() != null)
-                    params.put("in_reply_to_id", status.getIn_reply_to_id());
+                    params.put("replyId", status.getIn_reply_to_id());
                 if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
                     StringBuilder parameters = new StringBuilder();
                     for (Attachment attachment : status.getMedia_attachments())
@@ -1760,7 +1760,7 @@ public class API {
         HashMap<String, String> params = new HashMap<>();
         params.put("text", status.getContent());
         if (status.getIn_reply_to_id() != null)
-            params.put("in_reply_to_id", status.getIn_reply_to_id());
+            params.put("replyId", status.getIn_reply_to_id());
         if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
             StringBuilder parameters = new StringBuilder();
             for (Attachment attachment : status.getMedia_attachments())
@@ -1810,7 +1810,7 @@ public class API {
         String action;
         HashMap<String, String> params = new HashMap<>();
         if (notificationId == null)
-            action = "/notifications/clear";
+            action = "/notifications/mark_all_as_read";
         else {
             params.put("id", notificationId);
             action = "/notifications/dismiss";
@@ -1987,7 +1987,7 @@ public class API {
         }
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/notes/search"), 60, new JSONObject(params), prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/search"), 60, new JSONObject(params), null);
             results = parseResultsResponse(new JSONObject(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -2043,7 +2043,7 @@ public class API {
 
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/users/search"), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/users/search"), 60, params, null);
             accounts = parseAccountResponse(new JSONArray(response));
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -2073,7 +2073,7 @@ public class API {
         List<Emojis> emojis = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/meta"), 60, null, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/meta"), 60, null, null);
             JSONObject meta = new JSONObject(response);
             emojis = parseEmojis(meta.getJSONArray("emojis"));
             apiResponse.setSince_id(httpsConnection.getSince_id());
