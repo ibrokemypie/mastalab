@@ -3483,13 +3483,12 @@ public class API {
                 account.setAcct(resobj.get("username").toString() + "@" + resobj.getString("host"));
                 account.setInstance("https://" + resobj.get("host").toString());
                 account.setHost(resobj.get("host").toString());
-            }
-            else
+            } else
                 account.setAcct(resobj.get("username").toString());
-                account.setInstance(instance);
-                account.setHost(instance);
+            account.setInstance(instance);
+            account.setHost(instance);
             account.setDisplay_name(resobj.get("name").toString());
-            account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
+//            account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
             try {
                 account.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
             } catch (ParseException ignored) {
@@ -3558,7 +3557,8 @@ public class API {
             } catch (Exception e) {
                 account.setEmojis(new ArrayList<>());
             }
-        } catch (JSONException ignored) {
+        } catch (JSONException e) {
+            e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
         }
