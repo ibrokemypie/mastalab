@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -532,13 +533,14 @@ public class API {
             if (max_id != null)
 //                params.put("untilID", max_id);
                 params.put("limit", "80");
+            params.put("noteId", statusId);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         accounts = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl(String.format("/statuses/%s/favourited_by", statusId)), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/reactions"), 60, params, null);
             accounts = parseAccountResponse(new JSONArray(response));
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -1621,10 +1623,12 @@ public class API {
         HashMap<String, String> params = new HashMap<>();
         switch (statusAction) {
             case FAVOURITE:
-                action = String.format("/notes/%s/favourite", targetedId);
+                action = "/notes/favorites/create";
+                params.put("noteId",targetedId);
                 break;
             case UNFAVOURITE:
-                action = String.format("/notes/%s/unfavourite", targetedId);
+                action = "/notes/favorites/delete";
+                params.put("noteId",targetedId);
                 break;
             case REBLOG:
                 action = "/notes/create";
@@ -1715,12 +1719,13 @@ public class API {
             default:
                 return -1;
         }
+        Log.d("action", statusAction.toString());
         if (statusAction != StatusAction.UNSTATUS) {
-
             try {
                 HttpsConnection httpsConnection = new HttpsConnection(context);
                 httpsConnection.post(getAbsoluteUrl(action), 60, new JSONObject(params), prefKeyOauthTokenT);
                 actionCode = httpsConnection.getActionCode();
+                Log.d("response",String.valueOf(actionCode));
             } catch (HttpsConnection.HttpsConnectionException e) {
                 setError(e.getStatusCode(), e);
             } catch (NoSuchAlgorithmException e) {
@@ -3211,10 +3216,11 @@ public class API {
             } catch (Exception e) {
                 status.setReblogged(false);
             }
-            try {
-                status.setFavourited(Boolean.valueOf(resobj.get("favourited").toString()));
-            } catch (Exception e) {
+            // TODO: support reactions
+            if (resobj.isNull("myReaction")) {
                 status.setFavourited(false);
+            } else {
+                status.setFavourited(true);
             }
             try {
                 status.setMuted(Boolean.valueOf(resobj.get("muted").toString()));
