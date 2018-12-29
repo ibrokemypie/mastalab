@@ -3479,7 +3479,7 @@ public class API {
         try {
             account.setId(resobj.get("id").toString());
             account.setUsername(resobj.get("username").toString());
-            if (resobj.getString("host") != null && resobj.getString("host") != "null") {
+            if (!resobj.isNull("host")) {
                 account.setAcct(resobj.get("username").toString() + "@" + resobj.getString("host"));
                 account.setInstance("https://" + resobj.get("host").toString());
                 account.setHost(resobj.get("host").toString());
@@ -3489,19 +3489,32 @@ public class API {
             account.setHost(instance);
             account.setDisplay_name(resobj.get("name").toString());
 //            account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
-            try {
-                account.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
-            } catch (ParseException ignored) {
-                account.setCreated_at(Helper.mstStringToDate(context, resobj.get("lastFetchedAt").toString()));
-            }
-            account.setFollowers_count(Integer.valueOf(resobj.get("followersCount").toString()));
-            account.setFollowing_count(Integer.valueOf(resobj.get("followingCount").toString()));
-            account.setStatuses_count(Integer.valueOf(resobj.get("notesCount").toString()));
-            if (resobj.has("description") && resobj.getString("description").length() > 0) {
-                account.setNote(resobj.get("description").toString());
-                Log.d("note", account.getNote());
+            if (!resobj.isNull("createdAt")) {
+                account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("createdAt")));
+            } else if (!resobj.isNull("createdAt")) {
+                account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
             } else {
-                account.setNote(" ");
+                account.setCreated_at(new Date());
+            }
+            if (!resobj.isNull("followersCount")) {
+                account.setFollowers_count(resobj.getInt("followersCount"));
+            } else {
+                account.setFollowers_count(0);
+            }
+            if (!resobj.isNull("followingCount")) {
+                account.setFollowing_count(resobj.getInt("followingCount"));
+            } else {
+                account.setFollowing_count(0);
+            }
+            if (!resobj.isNull("notesCount")) {
+                account.setStatuses_count(resobj.getInt("notesCount"));
+            } else {
+                account.setStatuses_count(0);
+            }
+            if (!resobj.isNull("description")) {
+                account.setNote(resobj.getString("description"));
+            } else {
+                account.setNote("");
             }
             try {
                 account.setBot(Boolean.parseBoolean(resobj.get("isBot").toString()));
@@ -3514,10 +3527,14 @@ public class API {
                 account.setMoved_to_account(null);
             }
             account.setUrl(instance + "/@" + account.getAcct());
-            account.setAvatar(resobj.get("avatarUrl").toString());
-            account.setAvatar_static(resobj.get("avatarUrl").toString());
-            account.setHeader(resobj.get("bannerUrl").toString());
-            account.setHeader_static(resobj.get("bannerUrl").toString());
+            if (!resobj.isNull("avatarUrl")) {
+                account.setAvatar(resobj.get("avatarUrl").toString());
+                account.setAvatar_static(resobj.get("avatarUrl").toString());
+            }
+            if (!resobj.isNull("bannerUrl")) {
+                account.setHeader(resobj.get("bannerUrl").toString());
+                account.setHeader_static(resobj.get("bannerUrl").toString());
+            }
 
             JSONArray fields = new JSONArray();
             try {
