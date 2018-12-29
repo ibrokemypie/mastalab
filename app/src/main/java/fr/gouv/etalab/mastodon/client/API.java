@@ -485,10 +485,11 @@ public class API {
         if (max_id != null)
 //            params.put("untilId", max_id);
         params.put("limit", "80");
+        params.put("noteId", statusId);
         accounts = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl(String.format("/statuses/%s/reblogged_by", statusId)), 60, new JSONObject(params), prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/renotes"), 60, new JSONObject(params), null);
             accounts = parseAccountResponse(new JSONArray(response));
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
@@ -3179,13 +3180,15 @@ public class API {
             try {
                 status.setFavourites_count(resobj.getJSONArray("reactionCounts").length());
             } catch (JSONException e) {
-                status.setFavourites_count(0);
+                status.setFavourites_count(-1);
             }
-
-//            status.setReblogs_count(Integer.valueOf(resobj.get("reblogs_count").toString()));
-            status.setReblogs_count(0);
             try {
-                status.setReplies_count(Integer.valueOf(resobj.get("replies_count").toString()));
+                status.setReblogs_count(resobj.getJSONArray("renoteCount").length());
+            } catch (JSONException e) {
+                status.setFavourites_count(-1);
+            }
+            try {
+                status.setReplies_count(Integer.valueOf(resobj.get("repliesCount").toString()));
             } catch (Exception e) {
                 status.setReplies_count(-1);
             }
@@ -3210,7 +3213,7 @@ public class API {
                 status.setPinned(false);
             }
             try {
-                status.setReblog(parseStatuses(context, resobj.getJSONObject("reblog"), instance));
+                status.setReblog(parseStatuses(context, resobj.getJSONObject("renote"), instance));
             } catch (Exception ignored) {
             }
         } catch (JSONException e) {
