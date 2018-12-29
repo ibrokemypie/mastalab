@@ -145,17 +145,18 @@ public class SearchResultActivity extends BaseActivity implements OnRetrieveSear
             Toasty.error(getApplicationContext(), error.getError(),Toast.LENGTH_LONG).show();
             return;
         }
-        if( results == null || (results.getAccounts().size() == 0 && results.getStatuses().size() == 0 && results.getHashtags().size() == 0)){
+//        if( results == null || (results.getAccounts().size() == 0 && results.getStatuses().size() == 0 && results.getHashtags().size() == 0)){
+        if( results == null ||  results.getStatuses().size() == 0){
             RelativeLayout no_result = findViewById(R.id.no_result);
             no_result.setVisibility(View.VISIBLE);
             return;
         }
         lv_search.setVisibility(View.VISIBLE);
-        List<String> tags = results.getHashtags();
-        List<Account> accounts = results.getAccounts();
+//        List<String> tags = results.getHashtags();
+//        List<Account> accounts = results.getAccounts();
         List<Status> statuses = results.getStatuses();
 
-        SearchListAdapter searchListAdapter = new SearchListAdapter(SearchResultActivity.this, statuses, accounts, tags);
+        SearchListAdapter searchListAdapter = new SearchListAdapter(SearchResultActivity.this, statuses, null, null);
         lv_search.setAdapter(searchListAdapter);
         searchListAdapter.notifyDataSetChanged();
 

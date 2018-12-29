@@ -1974,7 +1974,7 @@ public class API {
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             String response = httpsConnection.post(getAbsoluteUrl("/notes/search"), 60, new JSONObject(params), null);
-            results = parseResultsResponse(new JSONObject(response));
+            results = parseResultsResponse(new JSONArray(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
             e.printStackTrace();
@@ -2628,14 +2628,15 @@ public class API {
      * @param resobj JSONObject
      * @return Account
      */
-    private Results parseResultsResponse(JSONObject resobj) {
+    private Results parseResultsResponse(JSONArray resobj) {
 
         Results results = new Results();
         try {
-            results.setAccounts(parseAccountResponse(resobj.getJSONArray("accounts")));
-            results.setStatuses(parseStatuses(context, resobj.getJSONArray("statuses"), instance));
-            results.setHashtags(parseTags(resobj.getJSONArray("hashtags")));
-        } catch (JSONException e) {
+//            results.setAccounts(parseAccountResponse(resobj));
+            results.setStatuses(parseStatuses(context, resobj, instance));
+//            results.setHashtags(parseTags(resobj));
+        } catch (Exception e) {
+            e.printStackTrace();
             setDefaultError(e);
         }
         return results;
