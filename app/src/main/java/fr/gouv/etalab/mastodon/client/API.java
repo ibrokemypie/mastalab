@@ -331,7 +331,7 @@ public class API {
             for (Account account : accounts)
                 parameters.put(account.getId());
             try {
-                params.put("userId[]", parameters);
+                params.put("userId", parameters);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -339,7 +339,7 @@ public class API {
             try {
                 HttpsConnection httpsConnection = new HttpsConnection(context);
                 String response = httpsConnection.post(getAbsoluteUrl("/users/relation"), 60, params, prefKeyOauthTokenT);
-                relationships = parseRelationshipResponseList(new JSONObject(response));
+                relationships = parseRelationshipResponseList(new JSONArray(response));
                 apiResponse.setSince_id(httpsConnection.getSince_id());
                 apiResponse.setMax_id(httpsConnection.getMax_id());
             } catch (HttpsConnection.HttpsConnectionException e) {
@@ -1286,7 +1286,7 @@ public class API {
      * @return APIResponse
      */
     public APIResponse getMuted(String max_id) {
-        return getAccounts("/mutes", max_id, null, accountPerPage);
+        return getAccounts("/mutes", max_id, null, accountPerPage, null);
     }
 
     /**
@@ -1296,7 +1296,7 @@ public class API {
      * @return APIResponse
      */
     public APIResponse getBlocks(String max_id) {
-        return getAccounts("/blocks", max_id, null, accountPerPage);
+        return getAccounts("/blocks", max_id, null, accountPerPage, null);
     }
 
 
@@ -1308,7 +1308,7 @@ public class API {
      * @return APIResponse
      */
     public APIResponse getFollowing(String targetedId, String max_id) {
-        return getAccounts(String.format("/users/%s/following", targetedId), max_id, null, accountPerPage);
+        return getAccounts("/users/following", max_id, null, accountPerPage, targetedId);
     }
 
     /**
@@ -1319,7 +1319,7 @@ public class API {
      * @return APIResponse
      */
     public APIResponse getFollowers(String targetedId, String max_id) {
-        return getAccounts(String.format("/users/%s/followers", targetedId), max_id, null, accountPerPage);
+        return getAccounts("/users/followers", max_id, null, accountPerPage, targetedId);
     }
 
     /**
@@ -1331,7 +1331,7 @@ public class API {
      * @return APIResponse
      */
     @SuppressWarnings("SameParameterValue")
-    private APIResponse getAccounts(String action, String max_id, String since_id, int limit) {
+    private APIResponse getAccounts(String action, String max_id, String since_id, int limit, String target) {
 
         JSONObject params = new JSONObject();
         try {
@@ -1341,6 +1341,8 @@ public class API {
 //                params.put("sinceId", since_id);
             if (0 > limit || limit > 40)
                 limit = 40;
+            if (target != null)
+                params.put("userId", target);
             params.put("limit", limit);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1351,7 +1353,8 @@ public class API {
             String response = httpsConnection.post(getAbsoluteUrl(action), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
-            accounts = parseAccountResponse(new JSONArray(response));
+            JSONObject jsonobj = new JSONObject(response);
+            accounts = parseAccountResponse(jsonobj.getJSONArray("users"));
             if (accounts != null && accounts.size() == 1) {
                 if (accounts.get(0).getAcct() == null) {
                     Throwable error = new Throwable(context.getString(R.string.toast_error));
@@ -3462,10 +3465,15 @@ public class API {
         try {
             account.setId(resobj.get("id").toString());
             account.setUsername(resobj.get("username").toString());
-            account.setAcct(resobj.get("username").toString() + "@" + instance);
+            account.setAcct(resobj.get("username").toString() + "@" + resobj.get("host").toString());
             account.setDisplay_name(resobj.get("name").toString());
             account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
-            account.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+            try {
+                account.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+            }
+            catch(ParseException ignored) {
+                account.setCreated_at(Helper.mstStringToDate(context, resobj.get("lastFetchedAt").toString()));
+            }
             account.setFollowers_count(Integer.valueOf(resobj.get("followersCount").toString()));
             account.setFollowing_count(Integer.valueOf(resobj.get("followingCount").toString()));
             account.setStatuses_count(Integer.valueOf(resobj.get("notesCount").toString()));
@@ -3485,7 +3493,6 @@ public class API {
             account.setAvatar_static(resobj.get("avatarUrl").toString());
             account.setHeader(resobj.get("bannerUrl").toString());
             account.setHeader_static(resobj.get("bannerUrl").toString());
-            Log.d("acct", account.getAcct());
             try {
                 JSONArray fields = resobj.getJSONArray("fields");
                 LinkedHashMap<String, String> fieldsMap = new LinkedHashMap<>();
@@ -3503,8 +3510,7 @@ public class API {
                 }
                 account.setFields(fieldsMap);
                 account.setFieldsVerified(fieldsMapVerified);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
             }
 
             //Retrieves emjis
@@ -3564,10 +3570,10 @@ public class API {
         Relationship relationship = new Relationship();
         try {
             relationship.setId(resobj.get("id").toString());
-            relationship.setFollowing(Boolean.valueOf(resobj.get("following").toString()));
-            relationship.setFollowed_by(Boolean.valueOf(resobj.get("followed_by").toString()));
-            relationship.setBlocking(Boolean.valueOf(resobj.get("blocking").toString()));
-            relationship.setMuting(Boolean.valueOf(resobj.get("muting").toString()));
+            relationship.setFollowing(Boolean.valueOf(resobj.get("isFollowed").toString()));
+            relationship.setFollowed_by(Boolean.valueOf(resobj.get("isFollowing").toString()));
+            relationship.setBlocking(Boolean.valueOf(resobj.get("isBlocking").toString()));
+            relationship.setMuting(Boolean.valueOf(resobj.get("isMuted").toString()));
             try {
                 relationship.setMuting_notifications(Boolean.valueOf(resobj.get("muting_notifications").toString()));
             } catch (Exception ignored) {
@@ -3597,19 +3603,26 @@ public class API {
      * @param jsonArray JSONArray
      * @return List<Relationship>
      */
-    private List<Relationship> parseRelationshipResponseList(JSONObject jsonArray) {
+    private List<Relationship> parseRelationshipResponseList(JSONArray jsonArray) {
 
         List<Relationship> relationships = new ArrayList<>();
         try {
-            Iterator<String> iter = jsonArray.keys();
-            while (iter.hasNext()) {
-                JSONObject resobj = jsonArray.getJSONObject(iter.next());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject resobj = jsonArray.getJSONObject(i);
                 Relationship relationship = parseRelationshipResponse(resobj);
                 relationships.add(relationship);
             }
         } catch (JSONException e) {
             setDefaultError(e);
         }
+        return relationships;
+    }
+
+    private List<Relationship> parseRelationshipResponseList(JSONObject jsonArray) {
+
+        List<Relationship> relationships = new ArrayList<>();
+                Relationship relationship = parseRelationshipResponse(jsonArray);
+                relationships.add(relationship);
         return relationships;
     }
 
