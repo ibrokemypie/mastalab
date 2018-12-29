@@ -2074,8 +2074,9 @@ public class API {
         List<Emojis> emojis = new ArrayList<>();
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/custom_emojis"), 60, null, prefKeyOauthTokenT);
-            emojis = parseEmojis(new JSONArray(response));
+            String response = httpsConnection.post(getAbsoluteUrl("/meta"), 60, null, prefKeyOauthTokenT);
+            JSONObject meta = new JSONObject(response);
+            emojis = parseEmojis(meta.getJSONArray("emojis"));
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
 
@@ -3287,8 +3288,8 @@ public class API {
     private static Emojis parseEmojis(JSONObject resobj) {
         Emojis emojis = new Emojis();
         try {
-            emojis.setShortcode(resobj.get("shortcode").toString());
-            emojis.setStatic_url(resobj.get("static_url").toString());
+            emojis.setShortcode(resobj.get("name").toString());
+            emojis.setStatic_url(resobj.get("url").toString());
             emojis.setUrl(resobj.get("url").toString());
         } catch (Exception ignored) {
         }
