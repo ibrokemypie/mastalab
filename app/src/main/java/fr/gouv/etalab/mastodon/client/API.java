@@ -566,10 +566,11 @@ public class API {
      */
     public APIResponse getStatusbyId(String statusId) {
         statuses = new ArrayList<>();
-
+        HashMap<String, String> param = new HashMap<>();
+        param.put("noteId", statusId);
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl(String.format("/notes/show/%s", statusId)), 60, null, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/show"), 60, new JSONObject(param), prefKeyOauthTokenT);
             Status status = parseStatuses(context, new JSONObject(response), instance);
             statuses.add(status);
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -595,10 +596,12 @@ public class API {
      */
     public fr.gouv.etalab.mastodon.client.Entities.Context getStatusContext(String statusId) {
         fr.gouv.etalab.mastodon.client.Entities.Context statusContext = new fr.gouv.etalab.mastodon.client.Entities.Context();
+        HashMap<String, String> param = new HashMap<>();
+        param.put("noteId", statusId);
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl(String.format("/statuses/%s/context", statusId)), 60, null, prefKeyOauthTokenT);
-            statusContext = parseContext(new JSONObject(response));
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/conversation"), 60, new JSONObject(param), prefKeyOauthTokenT);
+            statusContext = parseContext(new JSONArray(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -3483,7 +3486,7 @@ public class API {
             account.setFollowers_count(Integer.valueOf(resobj.get("followersCount").toString()));
             account.setFollowing_count(Integer.valueOf(resobj.get("followingCount").toString()));
             account.setStatuses_count(Integer.valueOf(resobj.get("notesCount").toString()));
-            if (resobj.has("description")  && resobj.getString("description").length() > 0) {
+            if (resobj.has("description") && resobj.getString("description").length() > 0) {
                 account.setNote(resobj.get("description").toString());
                 Log.d("note", account.getNote());
             } else {
@@ -3644,18 +3647,23 @@ public class API {
     /**
      * Parse json response for the context
      *
-     * @param jsonObject JSONObject
+     * @param jsonarray JSONArray
      * @return fr.gouv.etalab.mastodon.client.Entities.Context
      */
-    private fr.gouv.etalab.mastodon.client.Entities.Context parseContext(JSONObject jsonObject) {
+    private fr.gouv.etalab.mastodon.client.Entities.Context parseContext(JSONArray jsonarray) {
+        JSONArray ancestors = new JSONArray();
+        for (int i = jsonarray.length() - 1; i >= 0; i--) {
+            try {
+                ancestors.put(jsonarray.get(i));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         fr.gouv.etalab.mastodon.client.Entities.Context context = new fr.gouv.etalab.mastodon.client.Entities.Context();
-        try {
-            context.setAncestors(parseStatuses(this.context, jsonObject.getJSONArray("ancestors"), instance));
-            context.setDescendants(parseStatuses(this.context, jsonObject.getJSONArray("descendants"), instance));
-        } catch (JSONException e) {
-            setDefaultError(e);
-        }
+        context.setAncestors(parseStatuses(this.context, ancestors, instance));
+        context.setDescendants(parseStatuses(this.context, new JSONArray(), instance));
         return context;
     }
 
