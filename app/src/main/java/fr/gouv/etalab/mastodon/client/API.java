@@ -1686,12 +1686,8 @@ public class API {
                 break;
             case CREATESTATUS:
                 params = new HashMap<>();
-                action = "/statuses";
-                try {
-                    params.put("status", URLEncoder.encode(status.getContent(), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    params.put("status", status.getContent());
-                }
+                action = "/notes/create";
+                params.put("text", status.getContent());
                 if (status.getIn_reply_to_id() != null)
                     params.put("in_reply_to_id", status.getIn_reply_to_id());
                 if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
@@ -1704,11 +1700,7 @@ public class API {
                 if (status.isSensitive())
                     params.put("sensitive", Boolean.toString(status.isSensitive()));
                 if (status.getSpoiler_text() != null)
-                    try {
-                        params.put("spoiler_text", URLEncoder.encode(status.getSpoiler_text(), "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        params.put("spoiler_text", status.getSpoiler_text());
-                    }
+                    params.put("cw", status.getSpoiler_text());
                 params.put("visibility", status.getVisibility());
                 break;
             default:
@@ -1757,11 +1749,7 @@ public class API {
     public APIResponse postStatusAction(Status status) {
 
         HashMap<String, String> params = new HashMap<>();
-        try {
-            params.put("status", URLEncoder.encode(status.getContent(), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            params.put("status", status.getContent());
-        }
+        params.put("text", status.getContent());
         if (status.getIn_reply_to_id() != null)
             params.put("in_reply_to_id", status.getIn_reply_to_id());
         if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
@@ -1774,17 +1762,13 @@ public class API {
         if (status.isSensitive())
             params.put("sensitive", Boolean.toString(status.isSensitive()));
         if (status.getSpoiler_text() != null)
-            try {
-                params.put("spoiler_text", URLEncoder.encode(status.getSpoiler_text(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                params.put("spoiler_text", status.getSpoiler_text());
-            }
+            params.put("cw", status.getSpoiler_text());
         params.put("visibility", status.getVisibility());
         statuses = new ArrayList<>();
 
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/statuses"), 60, new JSONObject(params), prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/create"), 60, new JSONObject(params), prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             Status statusreturned = parseStatuses(context, new JSONObject(response), instance);
