@@ -35,11 +35,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import fr.gouv.etalab.mastodon.R;
 import fr.gouv.etalab.mastodon.client.Entities.Account;
@@ -1617,11 +1615,11 @@ public class API {
         switch (statusAction) {
             case FAVOURITE:
                 action = "/notes/favorites/create";
-                params.put("noteId",targetedId);
+                params.put("noteId", targetedId);
                 break;
             case UNFAVOURITE:
                 action = "/notes/favorites/delete";
-                params.put("noteId",targetedId);
+                params.put("noteId", targetedId);
                 break;
             case REBLOG:
                 action = "/notes/create";
@@ -1629,19 +1627,19 @@ public class API {
                 break;
             case UNREBLOG:
                 action = "/notes/delete";
-                params.put("noteId",targetedId);
+                params.put("noteId", targetedId);
                 break;
             case FOLLOW:
                 action = "/following/create";
-                params.put("userId",targetedId);
+                params.put("userId", targetedId);
                 break;
             case REMOTE_FOLLOW:
                 action = "/following/create";
-                params.put("userId",targetedId);
+                params.put("userId", targetedId);
                 break;
             case UNFOLLOW:
                 action = "/following/delete";
-                params.put("userId",targetedId);
+                params.put("userId", targetedId);
                 break;
             case BLOCK:
                 action = String.format("/users/%s/block", targetedId);
@@ -1681,7 +1679,7 @@ public class API {
                 break;
             case UNSTATUS:
                 action = "/notes/delete";
-                params.put("noteId",targetedId);
+                params.put("noteId", targetedId);
                 break;
             case AUTHORIZE:
                 action = String.format("/follow_requests/%s/authorize", targetedId);
@@ -1717,20 +1715,20 @@ public class API {
                 return -1;
         }
         Log.d("action", statusAction.toString());
-            try {
-                HttpsConnection httpsConnection = new HttpsConnection(context);
-                httpsConnection.post(getAbsoluteUrl(action), 60, new JSONObject(params), prefKeyOauthTokenT);
-                actionCode = httpsConnection.getActionCode();
-                Log.d("response",String.valueOf(actionCode));
-            } catch (HttpsConnection.HttpsConnectionException e) {
-                setError(e.getStatusCode(), e);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (KeyManagementException e) {
-                e.printStackTrace();
-            }
+        try {
+            HttpsConnection httpsConnection = new HttpsConnection(context);
+            httpsConnection.post(getAbsoluteUrl(action), 60, new JSONObject(params), prefKeyOauthTokenT);
+            actionCode = httpsConnection.getActionCode();
+            Log.d("response", String.valueOf(actionCode));
+        } catch (HttpsConnection.HttpsConnectionException e) {
+            setError(e.getStatusCode(), e);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
         return actionCode;
     }
 
@@ -1964,29 +1962,69 @@ public class API {
      * @return List<Account>
      */
     public Results search(String query) {
-
+        JSONObject responseholder = new JSONObject();
         HashMap<String, String> params = new HashMap<>();
         try {
             params.put("query", URLEncoder.encode(query, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             params.put("query", query);
         }
-        try {
-            HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/notes/search"), 60, new JSONObject(params), null);
-            results = parseResultsResponse(new JSONArray(response));
-        } catch (HttpsConnection.HttpsConnectionException e) {
-            setError(e.getStatusCode(), e);
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+
+        {
+            try {
+                HttpsConnection httpsConnection = new HttpsConnection(context);
+                String response = httpsConnection.post(getAbsoluteUrl("/notes/search"), 60, new JSONObject(params), null);
+                responseholder.put("statuses", new JSONArray(response));
+            } catch (HttpsConnection.HttpsConnectionException e) {
+                setError(e.getStatusCode(), e);
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
+        {
+            try {
+                HttpsConnection httpsConnection = new HttpsConnection(context);
+                String response = httpsConnection.post(getAbsoluteUrl("/users/search"), 60, new JSONObject(params), null);
+                responseholder.put("users", new JSONArray(response));
+            } catch (HttpsConnection.HttpsConnectionException e) {
+                setError(e.getStatusCode(), e);
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        {
+            try {
+                HttpsConnection httpsConnection = new HttpsConnection(context);
+                String response = httpsConnection.post(getAbsoluteUrl("/hashtags/search"), 60, new JSONObject(params), null);
+                responseholder.put("hashtags", new JSONArray(response));
+            } catch (HttpsConnection.HttpsConnectionException e) {
+                setError(e.getStatusCode(), e);
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        results = parseResultsResponse(responseholder);
         return results;
     }
 
@@ -2628,13 +2666,13 @@ public class API {
      * @param resobj JSONObject
      * @return Account
      */
-    private Results parseResultsResponse(JSONArray resobj) {
+    private Results parseResultsResponse(JSONObject resobj) {
 
         Results results = new Results();
         try {
-//            results.setAccounts(parseAccountResponse(resobj));
-            results.setStatuses(parseStatuses(context, resobj, instance));
-//            results.setHashtags(parseTags(resobj));
+            results.setAccounts(parseAccountResponse(resobj.getJSONArray("users")));
+            results.setStatuses(parseStatuses(context, resobj.getJSONArray("statuses"), instance));
+            results.setHashtags(parseTags(resobj.getJSONArray("hashtags")));
         } catch (Exception e) {
             e.printStackTrace();
             setDefaultError(e);
