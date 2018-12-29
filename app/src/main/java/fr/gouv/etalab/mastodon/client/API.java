@@ -196,34 +196,27 @@ public class API {
      */
     public APIResponse updateCredential(String display_name, String note, ByteArrayInputStream avatar, String avatarName, ByteArrayInputStream header, String headerName, accountPrivacy privacy, HashMap<String, String> customFields) {
 
-        HashMap<String, String> requestParams = new HashMap<>();
-        if (display_name != null)
-            try {
-                requestParams.put("display_name", URLEncoder.encode(display_name, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                requestParams.put("display_name", display_name);
-            }
-        if (note != null)
-            try {
-                requestParams.put("note", URLEncoder.encode(note, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                requestParams.put("note", note);
-            }
-        if (privacy != null)
-            requestParams.put("locked", privacy == accountPrivacy.LOCKED ? "true" : "false");
-        int i = 0;
-        if (customFields != null && customFields.size() > 0) {
-            Iterator it = customFields.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry) it.next();
-                requestParams.put("fields_attributes[" + i + "][name]", (String) pair.getKey());
-                requestParams.put("fields_attributes[" + i + "][value]", (String) pair.getValue());
-                it.remove();
-                i++;
-            }
+        JSONObject requestParams = new JSONObject();
+        try {
+            if (display_name != null)
+                try {
+                    requestParams.put("name", URLEncoder.encode(display_name, "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    requestParams.put("name", display_name);
+                }
+            if (note != null)
+                try {
+                    requestParams.put("description", URLEncoder.encode(note, "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    requestParams.put("description", note);
+                }
+            if (privacy != null)
+                requestParams.put("isLocked", privacy == accountPrivacy.LOCKED ? "true" : "false");
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         try {
-            new HttpsConnection(context).patch(getAbsoluteUrl("/accounts/update_credentials"), 60, requestParams, avatar, avatarName, header, headerName, prefKeyOauthTokenT);
+            new HttpsConnection(context).patch(getAbsoluteUrl("/i/update"), 60, requestParams, avatar, avatarName, header, headerName, prefKeyOauthTokenT);
         } catch (HttpsConnection.HttpsConnectionException e) {
             e.printStackTrace();
             setError(e.getStatusCode(), e);

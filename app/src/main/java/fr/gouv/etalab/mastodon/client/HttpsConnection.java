@@ -879,29 +879,26 @@ public class HttpsConnection {
 
 
         @SuppressWarnings("SameParameterValue")
-    void patch(String urlConnection, int timeout, HashMap<String, String> paramaters, InputStream avatar, String avatarName, InputStream header, String headerName, String token) throws IOException, NoSuchAlgorithmException, KeyManagementException, HttpsConnectionException {
-        if( urlConnection.startsWith("https://")) {
+    void patch(String urlConnection, int timeout, JSONObject paramaters, InputStream avatar, String avatarName, InputStream header, String headerName, String token) throws IOException, NoSuchAlgorithmException, KeyManagementException, HttpsConnectionException {
             URL url = new URL(urlConnection);
-            Map<String, Object> params = new LinkedHashMap<>();
-            if (paramaters != null) {
-                Iterator it = paramaters.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry pair = (Map.Entry) it.next();
-                    params.put(pair.getKey().toString(), pair.getValue());
-                    it.remove();
+            JSONObject param = new JSONObject();
+            if (paramaters!=null)
+                param = paramaters;
+
+            if (token != null)
+                try {
+                    param.put("i", token);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            }
-            StringBuilder postData = new StringBuilder();
-            for (Map.Entry<String, Object> param : params.entrySet()) {
-                if (postData.length() != 0) postData.append('&');
-                postData.append(param.getKey());
-                postData.append('=');
-                postData.append(String.valueOf(param.getValue()));
-            }
-            byte[] postDataBytes = (postData.toString()).getBytes("UTF-8");
 
+            String postData = param.toString();
+            Log.d("posturl",urlConnection);
+            Log.d("postdata",postData);
 
+            byte[] postDataBytes = postData.getBytes("UTF-8");
 
+        if( urlConnection.startsWith("https://")) {
             if (proxy != null)
                 httpsURLConnection = (HttpsURLConnection) url.openConnection(proxy);
             else
@@ -950,25 +947,6 @@ public class HttpsConnection {
             }
             httpsURLConnection.getInputStream().close();
         }else {
-            URL url = new URL(urlConnection);
-            Map<String, Object> params = new LinkedHashMap<>();
-            if (paramaters != null) {
-                Iterator it = paramaters.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry pair = (Map.Entry) it.next();
-                    params.put(pair.getKey().toString(), pair.getValue());
-                    it.remove();
-                }
-            }
-            StringBuilder postData = new StringBuilder();
-            for (Map.Entry<String, Object> param : params.entrySet()) {
-                if (postData.length() != 0) postData.append('&');
-                postData.append(param.getKey());
-                postData.append('=');
-                postData.append(String.valueOf(param.getValue()));
-            }
-            byte[] postDataBytes = (postData.toString()).getBytes("UTF-8");
-
             if (proxy != null)
                 httpURLConnection = (HttpsURLConnection) url.openConnection(proxy);
             else
