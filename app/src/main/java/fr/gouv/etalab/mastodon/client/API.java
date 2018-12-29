@@ -1635,7 +1635,8 @@ public class API {
                 params.put("renoteId", targetedId);
                 break;
             case UNREBLOG:
-                action = String.format("/notes/%s/unreblog", targetedId);
+                action = "/notes/delete";
+                params.put("noteId",targetedId);
                 break;
             case FOLLOW:
                 action = String.format("/users/%s/follow", targetedId);
