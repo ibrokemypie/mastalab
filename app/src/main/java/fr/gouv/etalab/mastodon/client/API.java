@@ -268,8 +268,14 @@ public class API {
     public Account getAccount(String accountId) {
 
         account = new Account();
+        JSONObject params = new JSONObject();
         try {
-            String response = new HttpsConnection(context).post(getAbsoluteUrl(String.format("/users/%s", accountId)), 60, null, prefKeyOauthTokenT);
+            params.put("userId", accountId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/users/show"), 60, null, prefKeyOauthTokenT);
             account = parseAccountResponse(context, new JSONObject(response), instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -432,10 +438,10 @@ public class API {
         try {
             if (max_id != null)
 //                params.put("untilId", max_id);
-            if (since_id != null)
+                if (since_id != null)
 //                params.put("sinceId", since_id);
-            if (0 < limit || limit > 40)
-                limit = 40;
+                    if (0 < limit || limit > 40)
+                        limit = 40;
             if (onlyMedia)
                 params.put("only_media", true);
             if (pinned)
@@ -484,7 +490,7 @@ public class API {
         HashMap<String, String> params = new HashMap<>();
         if (max_id != null)
 //            params.put("untilId", max_id);
-        params.put("limit", "80");
+            params.put("limit", "80");
         params.put("noteId", statusId);
         accounts = new ArrayList<>();
         try {
@@ -524,7 +530,7 @@ public class API {
         try {
             if (max_id != null)
 //                params.put("untilID", max_id);
-            params.put("limit", "80");
+                params.put("limit", "80");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -651,10 +657,10 @@ public class API {
         try {
             if (max_id != null)
 //                params.put("untilId", max_id);
-            if (since_id != null)
+                if (since_id != null)
 //                params.put("sinceId", since_id);
-            if (0 > limit || limit > 80)
-                limit = 80;
+                    if (0 > limit || limit > 80)
+                        limit = 80;
             params.put("limit", limit);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -705,10 +711,10 @@ public class API {
         try {
             if (max_id != null)
 //                params.put("untilId", max_id);
-            if (since_id != null)
+                if (since_id != null)
 //                params.put("sinceId", since_id);
-            if (0 > limit || limit > 80)
-                limit = 80;
+                    if (0 > limit || limit > 80)
+                        limit = 80;
             params.put("limit", limit);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -780,12 +786,12 @@ public class API {
         try {
             if (max_id != null)
 //                params.put("untilId", max_id);
-            if (since_id != null)
+                if (since_id != null)
 //                params.put("sinceId", since_id);
-            if (min_id != null)
+                    if (min_id != null)
 //                params.put("untilId", min_id);
-            if (0 > limit || limit > 80)
-                limit = 80;
+                        if (0 > limit || limit > 80)
+                            limit = 80;
             params.put("limit", limit);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1115,10 +1121,10 @@ public class API {
                 params.put("local", true);
             if (max_id != null)
 //                params.put("untilId", max_id);
-            if (since_id != null)
+                if (since_id != null)
 //                params.put("sinceId", since_id);
-            if (0 > limit || limit > 40)
-                limit = 40;
+                    if (0 > limit || limit > 40)
+                        limit = 40;
             params.put("limit", limit);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1337,10 +1343,10 @@ public class API {
         try {
             if (max_id != null)
 //                params.put("untilId", max_id);
-            if (since_id != null)
+                if (since_id != null)
 //                params.put("sinceId", since_id);
-            if (0 > limit || limit > 40)
-                limit = 40;
+                    if (0 > limit || limit > 40)
+                        limit = 40;
             if (target != null)
                 params.put("userId", target);
             params.put("limit", limit);
@@ -1510,10 +1516,10 @@ public class API {
         try {
             if (max_id != null)
 //                params.put("untilId", max_id);
-            if (since_id != null)
+                if (since_id != null)
 //                params.put("sinceId", since_id);
-            if (0 > limit || limit > 40)
-                limit = 40;
+                    if (0 > limit || limit > 40)
+                        limit = 40;
             params.put("limit", limit);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -3470,8 +3476,7 @@ public class API {
             account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
             try {
                 account.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
-            }
-            catch(ParseException ignored) {
+            } catch (ParseException ignored) {
                 account.setCreated_at(Helper.mstStringToDate(context, resobj.get("lastFetchedAt").toString()));
             }
             account.setFollowers_count(Integer.valueOf(resobj.get("followersCount").toString()));
@@ -3493,25 +3498,28 @@ public class API {
             account.setAvatar_static(resobj.get("avatarUrl").toString());
             account.setHeader(resobj.get("bannerUrl").toString());
             account.setHeader_static(resobj.get("bannerUrl").toString());
-            try {
-                JSONArray fields = resobj.getJSONArray("fields");
-                LinkedHashMap<String, String> fieldsMap = new LinkedHashMap<>();
-                LinkedHashMap<String, Boolean> fieldsMapVerified = new LinkedHashMap<>();
-                if (fields != null) {
-                    for (int j = 0; j < fields.length(); j++) {
-                        fieldsMap.put(fields.getJSONObject(j).getString("name"), fields.getJSONObject(j).getString("value"));
-                        try {
-                            fieldsMapVerified.put(fields.getJSONObject(j).getString("name"), (fields.getJSONObject(j).getString("verified_at") != null && !fields.getJSONObject(j).getString("verified_at").equals("null")));
-                        } catch (Exception e) {
-                            fieldsMapVerified.put(fields.getJSONObject(j).getString("name"), false);
-                        }
 
-                    }
-                }
-                account.setFields(fieldsMap);
-                account.setFieldsVerified(fieldsMapVerified);
-            } catch (Exception ignored) {
+            JSONArray fields = new JSONArray();
+            try {
+                fields = resobj.getJSONArray("fields");
+            } catch (JSONException ignored) {
             }
+            LinkedHashMap<String, String> fieldsMap = new LinkedHashMap<>();
+            LinkedHashMap<String, Boolean> fieldsMapVerified = new LinkedHashMap<>();
+            if (fields != null) {
+                for (int j = 0; j < fields.length(); j++) {
+                    fieldsMap.put(fields.getJSONObject(j).getString("name"), fields.getJSONObject(j).getString("value"));
+                    try {
+                        fieldsMapVerified.put(fields.getJSONObject(j).getString("name"), (fields.getJSONObject(j).getString("verified_at") != null && !fields.getJSONObject(j).getString("verified_at").equals("null")));
+                    } catch (Exception e) {
+                        fieldsMapVerified.put(fields.getJSONObject(j).getString("name"), false);
+                    }
+
+                }
+            }
+            account.setFields(fieldsMap);
+            account.setFieldsVerified(fieldsMapVerified);
+
 
             //Retrieves emjis
             List<Emojis> emojiList = new ArrayList<>();
@@ -3621,8 +3629,8 @@ public class API {
     private List<Relationship> parseRelationshipResponseList(JSONObject jsonArray) {
 
         List<Relationship> relationships = new ArrayList<>();
-                Relationship relationship = parseRelationshipResponse(jsonArray);
-                relationships.add(relationship);
+        Relationship relationship = parseRelationshipResponse(jsonArray);
+        relationships.add(relationship);
         return relationships;
     }
 
