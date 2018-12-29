@@ -17,6 +17,7 @@ package fr.gouv.etalab.mastodon.client;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -30,12 +31,14 @@ import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import fr.gouv.etalab.mastodon.R;
@@ -3494,7 +3497,15 @@ public class API {
             } else if (!resobj.isNull("createdAt")) {
                 account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
             } else {
-                account.setCreated_at(new Date());
+                Locale userLocale;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    userLocale = context.getResources().getConfiguration().getLocales().get(0);
+                } else {
+                    //noinspection deprecation
+                    userLocale = context.getResources().getConfiguration().locale;
+                }
+                String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", userLocale).format(new Date());
+                account.setCreated_at(Helper.mstStringToDate(context,date));
             }
             if (!resobj.isNull("followersCount")) {
                 account.setFollowers_count(resobj.getInt("followersCount"));
