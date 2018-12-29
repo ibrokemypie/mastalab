@@ -1678,7 +1678,8 @@ public class API {
                 action = String.format("/users/%s/follow", targetedId);
                 break;
             case UNSTATUS:
-                action = String.format("/notes/%s", targetedId);
+                action = "/notes/delete";
+                params.put("noteId",targetedId);
                 break;
             case AUTHORIZE:
                 action = String.format("/follow_requests/%s/authorize", targetedId);
@@ -1714,7 +1715,6 @@ public class API {
                 return -1;
         }
         Log.d("action", statusAction.toString());
-        if (statusAction != StatusAction.UNSTATUS) {
             try {
                 HttpsConnection httpsConnection = new HttpsConnection(context);
                 httpsConnection.post(getAbsoluteUrl(action), 60, new JSONObject(params), prefKeyOauthTokenT);
@@ -1729,21 +1729,6 @@ public class API {
             } catch (KeyManagementException e) {
                 e.printStackTrace();
             }
-        } else {
-            try {
-                HttpsConnection httpsConnection = new HttpsConnection(context);
-                httpsConnection.delete(getAbsoluteUrl(action), 60, null, prefKeyOauthTokenT);
-                actionCode = httpsConnection.getActionCode();
-            } catch (HttpsConnection.HttpsConnectionException e) {
-                setError(e.getStatusCode(), e);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (KeyManagementException e) {
-                e.printStackTrace();
-            }
-        }
         return actionCode;
     }
 
