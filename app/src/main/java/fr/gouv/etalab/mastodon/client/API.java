@@ -3181,7 +3181,7 @@ public class API {
                 status.setFavourites_count(0);
             }
             try {
-                status.setReblogs_count(resobj.getJSONArray("renoteCount").length());
+                status.setReblogs_count(resobj.getInt("renoteCount"));
             } catch (JSONException e) {
                 status.setReblogs_count(0);
             }
