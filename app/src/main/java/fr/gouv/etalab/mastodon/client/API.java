@@ -3482,7 +3482,12 @@ public class API {
             account.setFollowers_count(Integer.valueOf(resobj.get("followersCount").toString()));
             account.setFollowing_count(Integer.valueOf(resobj.get("followingCount").toString()));
             account.setStatuses_count(Integer.valueOf(resobj.get("notesCount").toString()));
-            account.setNote(resobj.get("description").toString());
+            if (resobj.has("description")  && resobj.getString("description").length() > 0) {
+                account.setNote(resobj.get("description").toString());
+                Log.d("note", account.getNote());
+            } else {
+                account.setNote(" ");
+            }
             try {
                 account.setBot(Boolean.parseBoolean(resobj.get("isBot").toString()));
             } catch (Exception e) {
@@ -3504,6 +3509,7 @@ public class API {
                 fields = resobj.getJSONArray("fields");
             } catch (JSONException ignored) {
             }
+
             LinkedHashMap<String, String> fieldsMap = new LinkedHashMap<>();
             LinkedHashMap<String, Boolean> fieldsMapVerified = new LinkedHashMap<>();
             if (fields != null) {

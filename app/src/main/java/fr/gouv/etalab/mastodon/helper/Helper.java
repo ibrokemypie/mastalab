@@ -190,14 +190,14 @@ public class Helper {
 
 
     @SuppressWarnings({"unused", "WeakerAccess"})
-    public static  final String TAG = "mastodon_etalab";
+    public static final String TAG = "mastodon_etalab";
     public static final String CLIENT_NAME_VALUE = "Mastalab";
     public static final String CLIENT_DESCRIPTION_VALUE = "Mastalab";
-    public static final String[] OAUTH_SCOPES = {"account-read","account-write","note-read",
-            "note-write","reaction-read","reaction-write","following-read","following-write",
-            "drive-read","drive-write","notification-read","notification-write","favorite-read",
-            "favorites-read","favorite-write","account/read","account/write","messaging-read",
-            "messaging-write","vote-read","vote-write"};
+    public static final String[] OAUTH_SCOPES = {"account-read", "account-write", "note-read",
+            "note-write", "reaction-read", "reaction-write", "following-read", "following-write",
+            "drive-read", "drive-write", "notification-read", "notification-write", "favorite-read",
+            "favorites-read", "favorite-write", "account/read", "account/write", "messaging-read",
+            "messaging-write", "vote-read", "vote-write"};
     public static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";
     public static final String PREF_KEY_APP_TOKEN = "app_token";
     public static final String PREF_KEY_ID = "userID";
@@ -292,7 +292,7 @@ public class Helper {
     public static final String SET_KEEP_BACKGROUND_PROCESS = "set_keep_background_process";
     public static final String SET_DISPLAY_EMOJI = "set_display_emoji";
     public static final String SET_DISPLAY_CARD = "set_display_card";
-    public static final String SET_DISPLAY_VIDEO_PREVIEWS= "set_display_video_previews";
+    public static final String SET_DISPLAY_VIDEO_PREVIEWS = "set_display_video_previews";
     public static final String SET_OLD_DIRECT_TIMELINE = "sset_old_direct_timeline";
     public static final String SET_BATTERY_PROFILE = "set_battery_profile";
     public static final String SET_DEFAULT_LOCALE_NEW = "set_default_locale_new";
@@ -303,7 +303,6 @@ public class Helper {
     public static final int ATTACHMENT_ALWAYS = 1;
     public static final int ATTACHMENT_WIFI = 2;
     public static final int ATTACHMENT_ASK = 3;
-
 
 
     public static final int BATTERY_PROFILE_NORMAL = 1;
@@ -392,7 +391,7 @@ public class Helper {
     public static final String RECEIVE_PICTURE = "receive_picture";
 
     //User agent
-    public static final String USER_AGENT = "Mastalab/"+ BuildConfig.VERSION_NAME + " Android/"+ Build.VERSION.RELEASE;
+    public static final String USER_AGENT = "Mastalab/" + BuildConfig.VERSION_NAME + " Android/" + Build.VERSION.RELEASE;
 
     public static final String SET_YANDEX_API_KEY = "set_yandex_api_key";
     public static final String SET_DEEPL_API_KEY = "set_deepl_api_key";
@@ -414,14 +413,14 @@ public class Helper {
     private static final Pattern mentionLongPattern = Pattern.compile("(@[\\w_-]+@[a-z0-9.\\-]+[.][a-z]{2,10})");
 
     //Event Type
-    public enum EventStreaming{
+    public enum EventStreaming {
         UPDATE,
         NOTIFICATION,
         DELETE,
         NONE
     }
 
-    public enum NotifType{
+    public enum NotifType {
         FOLLLOW,
         MENTION,
         BOOST,
@@ -433,11 +432,13 @@ public class Helper {
 
     /**
      * Converts emojis in input to unicode
-     * @param input String
+     *
+     * @param input               String
      * @param removeIfUnsupported boolean
      * @return String
      */
     public static String shortnameToUnicode(String input, boolean removeIfUnsupported) {
+        Log.d("input", input);
         Matcher matcher = SHORTNAME_PATTERN.matcher(input);
 
         boolean supported = Build.VERSION.SDK_INT >= 16;
@@ -460,6 +461,7 @@ public class Helper {
         }
         return input;
     }
+
     //Emoji manager
     private static Map<String, String> emoji = new HashMap<>();
 
@@ -467,22 +469,23 @@ public class Helper {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(context.getAssets().open("emoji.csv")));
             String line;
-            while( (line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
                 String str[] = line.split(",");
                 String unicode = null;
-                if(str.length == 2)
-                    unicode =  new String(new int[] {Integer.parseInt(str[1].replace("0x","").trim(), 16)}, 0, 1);
-                else if(str.length == 3)
-                    unicode =  new String(new int[] {Integer.parseInt(str[1].replace("0x","").trim(), 16), Integer.parseInt(str[2].replace("0x","").trim(), 16)}, 0, 2);
-                else if(str.length == 4)
-                    unicode =  new String(new int[] {Integer.parseInt(str[1].replace("0x","").trim(), 16), Integer.parseInt(str[2].replace("0x","").trim(), 16), Integer.parseInt(str[3].replace("0x","").trim(), 16)}, 0, 3);
-                else if(str.length == 5)
-                    unicode =  new String(new int[] {Integer.parseInt(str[1].replace("0x","").trim(), 16), Integer.parseInt(str[2].replace("0x","").trim(), 16), Integer.parseInt(str[3].replace("0x","").trim(), 16), Integer.parseInt(str[4].replace("0x","").trim(), 16)}, 0, 4);
-                if( unicode != null)
-                    emoji.put(str[0],unicode);
+                if (str.length == 2)
+                    unicode = new String(new int[]{Integer.parseInt(str[1].replace("0x", "").trim(), 16)}, 0, 1);
+                else if (str.length == 3)
+                    unicode = new String(new int[]{Integer.parseInt(str[1].replace("0x", "").trim(), 16), Integer.parseInt(str[2].replace("0x", "").trim(), 16)}, 0, 2);
+                else if (str.length == 4)
+                    unicode = new String(new int[]{Integer.parseInt(str[1].replace("0x", "").trim(), 16), Integer.parseInt(str[2].replace("0x", "").trim(), 16), Integer.parseInt(str[3].replace("0x", "").trim(), 16)}, 0, 3);
+                else if (str.length == 5)
+                    unicode = new String(new int[]{Integer.parseInt(str[1].replace("0x", "").trim(), 16), Integer.parseInt(str[2].replace("0x", "").trim(), 16), Integer.parseInt(str[3].replace("0x", "").trim(), 16), Integer.parseInt(str[4].replace("0x", "").trim(), 16)}, 0, 4);
+                if (unicode != null)
+                    emoji.put(str[0], unicode);
             }
             br.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
     }
 
     /***
@@ -491,10 +494,10 @@ public class Helper {
      */
     public static boolean isConnectedToInternet(Context context, String instance) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if( cm == null)
+        if (cm == null)
             return true;
         NetworkInfo ni = cm.getActiveNetworkInfo();
-        if ( ni != null && ni.isConnected()) {
+        if (ni != null && ni.isConnected()) {
             try {
                 InetAddress ipAddr = InetAddress.getByName(instance);
                 return !ipAddr.toString().equals("");
@@ -508,17 +511,19 @@ public class Helper {
 
     /**
      * Returns boolean depending if the user is authenticated
+     *
      * @param context Context
      * @return boolean
      */
     public static boolean isLoggedIn(Context context) {
         SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         String prefKeyOauthTokenT = sharedpreferences.getString(PREF_KEY_OAUTH_TOKEN, null);
-        return ( prefKeyOauthTokenT != null);
+        return (prefKeyOauthTokenT != null);
     }
 
     /**
      * Log out the authenticated user by removing its token
+     *
      * @param context Context
      */
     public static void logout(Context context) {
@@ -536,8 +541,9 @@ public class Helper {
 
     /**
      * Convert String date from Mastodon
+     *
      * @param context Context
-     * @param date String
+     * @param date    String
      * @return Date
      */
     public static Date mstStringToDate(Context context, String date) throws ParseException {
@@ -559,18 +565,20 @@ public class Helper {
 
     /**
      * Convert a date in String -> format yyyy-MM-dd HH:mm:ss
+     *
      * @param date Date
      * @return String
      */
     public static String dateToString(Date date) {
-        if( date == null)
+        if (date == null)
             return null;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         return dateFormat.format(date);
     }
 
     /**
      * Convert a date in String -> format yyyy-MM-dd HH:mm:ss
+     *
      * @param date Date
      * @return String
      */
@@ -581,8 +589,9 @@ public class Helper {
 
     /**
      * Convert a date in String -> format yyyy-MM-dd HH:mm:ss
+     *
      * @param context Context
-     * @param date Date
+     * @param date    Date
      * @return String
      */
     public static String dateFileToString(Context context, Date date) {
@@ -593,17 +602,18 @@ public class Helper {
             //noinspection deprecation
             userLocale = context.getResources().getConfiguration().locale;
         }
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss",userLocale);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", userLocale);
         return dateFormat.format(date);
     }
 
     /**
      * Convert String date from db to Date Object
+     *
      * @param stringDate date to convert
      * @return Date
      */
     public static Date stringToDate(Context context, String stringDate) {
-        if( stringDate == null)
+        if (stringDate == null)
             return null;
         Locale userLocale;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -612,7 +622,7 @@ public class Helper {
             //noinspection deprecation
             userLocale = context.getResources().getConfiguration().locale;
         }
-        SimpleDateFormat  dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",userLocale);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", userLocale);
         Date date = null;
         try {
             date = dateFormat.parse(stringDate);
@@ -624,8 +634,9 @@ public class Helper {
 
     /**
      * Converts a Date date into a date-time string (SHORT format for both)
+     *
      * @param context Context
-     * @param date to be converted
+     * @param date    to be converted
      * @return String
      */
 
@@ -646,10 +657,11 @@ public class Helper {
 
     /**
      * Makes the tvDate TextView field clickable, and displays the absolute date & time of a toot
-     *  for 5 seconds.
+     * for 5 seconds.
+     *
      * @param context Context
-     * @param tvDate TextView
-     * @param date Date
+     * @param tvDate  TextView
+     * @param date    Date
      */
 
     public static void absoluteDateTimeReveal(final Context context, final TextView tvDate, final Date date) {
@@ -674,6 +686,7 @@ public class Helper {
 
     /**
      * Check if WIFI is opened
+     *
      * @param context Context
      * @return boolean
      */
@@ -685,11 +698,11 @@ public class Helper {
     }
 
 
-    public static String dateDiffFull(Date dateToot){
+    public static String dateDiffFull(Date dateToot) {
         SimpleDateFormat df = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM, Locale.getDefault());
         try {
             return df.format(dateToot);
-        }catch (Exception e){
+        } catch (Exception e) {
             return "";
         }
     }
@@ -700,7 +713,7 @@ public class Helper {
      * @param dateToot Date
      * @return String
      */
-    public static String dateDiff(Context context, Date dateToot){
+    public static String dateDiff(Context context, Date dateToot) {
         Date now = new Date();
         long diff = now.getTime() - dateToot.getTime();
         long seconds = diff / 1000;
@@ -711,19 +724,19 @@ public class Helper {
         long years = days / 365;
 
         String format = DateFormat.getDateInstance(DateFormat.SHORT).format(dateToot);
-        if( years > 0 ) {
+        if (years > 0) {
             return format;
-        } else if( months > 0 || days > 7) {
+        } else if (months > 0 || days > 7) {
             //Removes the year depending of the locale from DateFormat.SHORT format
             SimpleDateFormat df = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault());
             df.applyPattern(df.toPattern().replaceAll("[^\\p{Alpha}]*y+[^\\p{Alpha}]*", ""));
             return df.format(dateToot);
-        }else if( days > 0 )
+        } else if (days > 0)
             return context.getString(R.string.date_day, days);
-        else if(hours > 0)
-            return context.getResources().getString(R.string.date_hours, (int)hours);
-        else if(minutes > 0)
-            return context.getResources().getString(R.string.date_minutes, (int)minutes);
+        else if (hours > 0)
+            return context.getResources().getString(R.string.date_hours, (int) hours);
+        else if (minutes > 0)
+            return context.getResources().getString(R.string.date_minutes, (int) minutes);
         else {
             if (seconds < 0)
                 seconds = 0;
@@ -737,83 +750,80 @@ public class Helper {
      * @param statusCode int the status code
      * @param statusAction API.StatusAction the initial action
      */
-    public static void manageMessageStatusCode(Context context, int statusCode,API.StatusAction statusAction){
+    public static void manageMessageStatusCode(Context context, int statusCode, API.StatusAction statusAction) {
         String message = "";
-        if( statusCode == 200){
-            if( statusAction == API.StatusAction.BLOCK){
+        if (statusCode == 200) {
+            if (statusAction == API.StatusAction.BLOCK) {
                 message = context.getString(R.string.toast_block);
-            }else if(statusAction == API.StatusAction.UNBLOCK){
+            } else if (statusAction == API.StatusAction.UNBLOCK) {
                 message = context.getString(R.string.toast_unblock);
-            }else if(statusAction == API.StatusAction.REBLOG){
+            } else if (statusAction == API.StatusAction.REBLOG) {
                 message = context.getString(R.string.toast_reblog);
-            }else if(statusAction == API.StatusAction.UNREBLOG){
+            } else if (statusAction == API.StatusAction.UNREBLOG) {
                 message = context.getString(R.string.toast_unreblog);
-            }else if(statusAction == API.StatusAction.MUTE){
+            } else if (statusAction == API.StatusAction.MUTE) {
                 message = context.getString(R.string.toast_mute);
-            }else if(statusAction == API.StatusAction.UNMUTE){
+            } else if (statusAction == API.StatusAction.UNMUTE) {
                 message = context.getString(R.string.toast_unmute);
-            }else if(statusAction == API.StatusAction.FOLLOW){
+            } else if (statusAction == API.StatusAction.FOLLOW) {
                 message = context.getString(R.string.toast_follow);
-            }else if(statusAction == API.StatusAction.UNFOLLOW){
+            } else if (statusAction == API.StatusAction.UNFOLLOW) {
                 message = context.getString(R.string.toast_unfollow);
-            }else if(statusAction == API.StatusAction.FAVOURITE){
+            } else if (statusAction == API.StatusAction.FAVOURITE) {
                 message = context.getString(R.string.toast_favourite);
-            }else if(statusAction == API.StatusAction.UNFAVOURITE){
+            } else if (statusAction == API.StatusAction.UNFAVOURITE) {
                 message = context.getString(R.string.toast_unfavourite);
-            }else if(statusAction == API.StatusAction.PIN){
+            } else if (statusAction == API.StatusAction.PIN) {
                 message = context.getString(R.string.toast_pin);
-            }else if (statusAction == API.StatusAction.UNPIN){
+            } else if (statusAction == API.StatusAction.UNPIN) {
                 message = context.getString(R.string.toast_unpin);
-            }else if(statusAction == API.StatusAction.REPORT){
+            } else if (statusAction == API.StatusAction.REPORT) {
                 message = context.getString(R.string.toast_report);
-            }else if(statusAction == API.StatusAction.UNSTATUS){
+            } else if (statusAction == API.StatusAction.UNSTATUS) {
                 message = context.getString(R.string.toast_unstatus);
-            }else if(statusAction == API.StatusAction.UNENDORSE){
+            } else if (statusAction == API.StatusAction.UNENDORSE) {
                 message = context.getString(R.string.toast_unendorse);
-            }else if(statusAction == API.StatusAction.ENDORSE){
+            } else if (statusAction == API.StatusAction.ENDORSE) {
                 message = context.getString(R.string.toast_endorse);
-            }else if(statusAction == API.StatusAction.SHOW_BOOST){
+            } else if (statusAction == API.StatusAction.SHOW_BOOST) {
                 message = context.getString(R.string.toast_show_boost);
-            }else if(statusAction == API.StatusAction.HIDE_BOOST){
+            } else if (statusAction == API.StatusAction.HIDE_BOOST) {
                 message = context.getString(R.string.toast_hide_boost);
-            }else if(statusAction == API.StatusAction.BLOCK_DOMAIN){
+            } else if (statusAction == API.StatusAction.BLOCK_DOMAIN) {
                 message = context.getString(R.string.toast_block_domain);
             }
 
-        }else {
+        } else {
             message = context.getString(R.string.toast_error);
         }
-        if( !message.trim().equals(""))
+        if (!message.trim().equals(""))
             Toasty.success(context, message, Toast.LENGTH_LONG).show();
     }
 
 
-
-
-
-
     /**
      * Manage downloads with URLs
+     *
      * @param context Context
-     * @param url String download url
+     * @param url     String download url
      */
-    public static void manageDownloads(final Context context, final String url){
+    public static void manageDownloads(final Context context, final String url) {
         final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
         int style;
         if (theme == Helper.THEME_DARK) {
             style = R.style.DialogDark;
-        } else if (theme == Helper.THEME_BLACK){
+        } else if (theme == Helper.THEME_BLACK) {
             style = R.style.DialogBlack;
-        }else {
+        } else {
             style = R.style.Dialog;
         }
         final AlertDialog.Builder builder = new AlertDialog.Builder(context, style);
         final DownloadManager.Request request;
         try {
             request = new DownloadManager.Request(Uri.parse(url.trim()));
-        }catch (Exception e){
-            Toasty.error(context,context.getString(R.string.toast_error),Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toasty.error(context, context.getString(R.string.toast_error), Toast.LENGTH_LONG).show();
             return;
         }
         final String fileName = URLUtil.guessFileName(url, null, null);
@@ -837,7 +847,7 @@ public class Helper {
                     }
                 });
         AlertDialog alert = builder.create();
-        if( alert.getWindow() != null )
+        if (alert.getWindow() != null)
             alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         alert.show();
     }
@@ -853,14 +863,15 @@ public class Helper {
 
     /**
      * Sends notification with intent
-     * @param context Context
-     * @param intent Intent associated to the notifcation
+     *
+     * @param context        Context
+     * @param intent         Intent associated to the notifcation
      * @param notificationId int id of the notification
-     * @param icon Bitmap profile picture
-     * @param title String title of the notification
-     * @param message String message for the notification
+     * @param icon           Bitmap profile picture
+     * @param title          String title of the notification
+     * @param message        String message for the notification
      */
-    public static void notify_user(Context context, Intent intent, int notificationId, Bitmap icon, NotifType notifType, String title, String message ) {
+    public static void notify_user(Context context, Intent intent, int notificationId, Bitmap icon, NotifType notifType, String title, String message) {
         final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         // prepare intent which is triggered if the user click on the notification
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
@@ -870,7 +881,7 @@ public class Helper {
         // build notification
         String channelId;
         String channelTitle;
-        switch(notifType){
+        switch (notifType) {
             case BOOST:
                 channelId = "channel_boost";
                 channelTitle = context.getString(R.string.channel_notif_boost);
@@ -939,15 +950,15 @@ public class Helper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel;
             NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if( sharedpreferences.getBoolean(Helper.SET_NOTIF_SILENT,false) ) {
+            if (sharedpreferences.getBoolean(Helper.SET_NOTIF_SILENT, false)) {
                 channel = new NotificationChannel(channelId, channelTitle, NotificationManager.IMPORTANCE_LOW);
                 channel.setSound(null, null);
-                channel.setVibrationPattern(new long[] { 500, 500, 500});
+                channel.setVibrationPattern(new long[]{500, 500, 500});
                 channel.enableVibration(true);
                 channel.setLightColor(ledColour);
-            }else {
+            } else {
                 channel = new NotificationChannel(channelId, channelTitle, NotificationManager.IMPORTANCE_HIGH);
-                String soundUri = sharedpreferences.getString(Helper.SET_NOTIF_SOUND, ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() +"/"+ R.raw.boop);
+                String soundUri = sharedpreferences.getString(Helper.SET_NOTIF_SOUND, ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/" + R.raw.boop);
                 AudioAttributes audioAttributes = new AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .setUsage(AudioAttributes.USAGE_NOTIFICATION)
@@ -956,11 +967,11 @@ public class Helper {
             }
             assert mNotificationManager != null;
             mNotificationManager.createNotificationChannel(channel);
-        }else{
-            if( sharedpreferences.getBoolean(Helper.SET_NOTIF_SILENT,false) ) {
-                notificationBuilder.setVibrate(new long[] { 500, 500, 500});
-            }else {
-                String soundUri =sharedpreferences.getString(Helper.SET_NOTIF_SOUND, ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() +"/"+ R.raw.boop);
+        } else {
+            if (sharedpreferences.getBoolean(Helper.SET_NOTIF_SILENT, false)) {
+                notificationBuilder.setVibrate(new long[]{500, 500, 500});
+            } else {
+                String soundUri = sharedpreferences.getString(Helper.SET_NOTIF_SOUND, ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/" + R.raw.boop);
                 notificationBuilder.setSound(Uri.parse(soundUri));
             }
             notificationBuilder.setLights(ledColour, 500, 1000);
@@ -973,23 +984,25 @@ public class Helper {
 
     /**
      * Manage downloads with URLs
+     *
      * @param context Context
-     * @param url String download url
+     * @param url     String download url
      */
-    public static void manageMoveFileDownload(final Context context, final String preview_url, final String url, Bitmap bitmap, File fileVideo){
+    public static void manageMoveFileDownload(final Context context, final String preview_url, final String url, Bitmap bitmap, File fileVideo) {
 
-        final String fileName = URLUtil.guessFileName(url, null, null);final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
+        final String fileName = URLUtil.guessFileName(url, null, null);
+        final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         String myDir = sharedpreferences.getString(Helper.SET_FOLDER_RECORD, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
         String mime = getMimeType(url);
         try {
             File file;
-            if( bitmap != null) {
+            if (bitmap != null) {
                 file = new File(myDir, fileName);
                 //noinspection ResultOfMethodCallIgnored
                 file.createNewFile();
 
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                if( mime !=null && (mime.contains("png") || mime.contains(".PNG")))
+                if (mime != null && (mime.contains("png") || mime.contains(".PNG")))
                     bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
                 else
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
@@ -999,7 +1012,7 @@ public class Helper {
                 fos.write(bitmapdata);
                 fos.flush();
                 fos.close();
-            }else{
+            } else {
                 File fileVideoTargeded = new File(myDir, fileName);
                 copy(fileVideo, fileVideoTargeded);
                 file = fileVideoTargeded;
@@ -1016,7 +1029,7 @@ public class Helper {
             Glide.with(context)
                     .asBitmap()
                     .load(preview_url)
-                    .listener(new RequestListener<Bitmap>(){
+                    .listener(new RequestListener<Bitmap>() {
 
                         @Override
                         public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
@@ -1026,24 +1039,26 @@ public class Helper {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
                             notify_user(context, intent, notificationIdTmp, BitmapFactory.decodeResource(context.getResources(),
-                                    R.mipmap.ic_launcher),  NotifType.STORE, context.getString(R.string.save_over), context.getString(R.string.download_from, fileName));
-                            Toasty.success(context, context.getString(R.string.toast_saved),Toast.LENGTH_LONG).show();
+                                    R.mipmap.ic_launcher), NotifType.STORE, context.getString(R.string.save_over), context.getString(R.string.download_from, fileName));
+                            Toasty.success(context, context.getString(R.string.toast_saved), Toast.LENGTH_LONG).show();
                             return false;
                         }
                     })
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
-                            notify_user(context, intent, notificationIdTmp, resource,  NotifType.STORE, context.getString(R.string.save_over), context.getString(R.string.download_from, fileName));
-                            Toasty.success(context, context.getString(R.string.toast_saved),Toast.LENGTH_LONG).show();
+                            notify_user(context, intent, notificationIdTmp, resource, NotifType.STORE, context.getString(R.string.save_over), context.getString(R.string.download_from, fileName));
+                            Toasty.success(context, context.getString(R.string.toast_saved), Toast.LENGTH_LONG).show();
                         }
                     });
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
 
     /**
      * Copy a file by transferring bytes from in to out
+     *
      * @param src File source file
      * @param dst File targeted file
      * @throws IOException Exception
@@ -1060,20 +1075,23 @@ public class Helper {
                 while ((len = in.read(buf)) > 0) {
                     out.write(buf, 0, len);
                 }
-            }catch (Exception ignored){}finally {
+            } catch (Exception ignored) {
+            } finally {
                 out.close();
             }
-        } catch (Exception ignored){}finally {
+        } catch (Exception ignored) {
+        } finally {
             in.close();
         }
     }
 
     /**
      * Returns the instance of the authenticated user
+     *
      * @param context Context
      * @return String domain instance
      */
-    public static String getLiveInstance(Context context){
+    public static String getLiveInstance(Context context) {
         final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         return sharedpreferences.getString(Helper.PREF_INSTANCE, null);
     }
@@ -1082,56 +1100,57 @@ public class Helper {
         return instanceWithProtocol(getLiveInstance(context));
     }
 
-    public static String instanceWithProtocol(String instance){
-        if( instance == null)
+    public static String instanceWithProtocol(String instance) {
+        if (instance == null)
             return null;
-        if( instance.endsWith(".onion"))
+        if (instance.endsWith(".onion"))
             return "http://" + instance;
         else
             return "https://" + instance;
     }
 
 
-
     /**
      * Converts dp to pixel
-     * @param dp float - the value in dp to convert
+     *
+     * @param dp      float - the value in dp to convert
      * @param context Context
      * @return float - the converted value in pixel
      */
-    public static float convertDpToPixel(float dp, Context context){
+    public static float convertDpToPixel(float dp, Context context) {
         Resources resources = context.getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
-        return dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+        return dp * ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
 
     /**
      * Toggle for the menu (ie: main menu or accounts menu)
+     *
      * @param activity Activity
      */
-    public static void menuAccounts(final Activity activity){
+    public static void menuAccounts(final Activity activity) {
 
         final NavigationView navigationView = activity.findViewById(R.id.nav_view);
         SharedPreferences mSharedPreferences = activity.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         String currrentUserId = mSharedPreferences.getString(Helper.PREF_KEY_ID, null);
-        final ImageView arrow  = navigationView.getHeaderView(0).findViewById(R.id.owner_accounts);
-        if( currrentUserId == null)
+        final ImageView arrow = navigationView.getHeaderView(0).findViewById(R.id.owner_accounts);
+        if (currrentUserId == null)
             return;
 
         final SharedPreferences sharedpreferences = activity.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
-        if( theme == Helper.THEME_DARK || theme == Helper.THEME_BLACK){
-            changeDrawableColor(activity, R.drawable.ic_person_add,R.color.dark_text);
-            changeDrawableColor(activity, R.drawable.ic_person,R.color.dark_text);
-            changeDrawableColor(activity, R.drawable.ic_cancel,R.color.dark_text);
-        }else {
-            changeDrawableColor(activity, R.drawable.ic_person_add,R.color.black);
-            changeDrawableColor(activity, R.drawable.ic_person,R.color.black);
-            changeDrawableColor(activity, R.drawable.ic_cancel,R.color.black);
+        if (theme == Helper.THEME_DARK || theme == Helper.THEME_BLACK) {
+            changeDrawableColor(activity, R.drawable.ic_person_add, R.color.dark_text);
+            changeDrawableColor(activity, R.drawable.ic_person, R.color.dark_text);
+            changeDrawableColor(activity, R.drawable.ic_cancel, R.color.dark_text);
+        } else {
+            changeDrawableColor(activity, R.drawable.ic_person_add, R.color.black);
+            changeDrawableColor(activity, R.drawable.ic_person, R.color.black);
+            changeDrawableColor(activity, R.drawable.ic_cancel, R.color.black);
         }
 
-        if( !menuAccountsOpened ){
+        if (!menuAccountsOpened) {
             arrow.setImageResource(R.drawable.ic_arrow_drop_up);
             SQLiteDatabase db = Sqlite.getInstance(activity, Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
             final List<Account> accounts = new AccountDAO(activity, db).getAllAccount();
@@ -1140,82 +1159,82 @@ public class Helper {
             navigationView.inflateMenu(R.menu.menu_accounts);
             Menu mainMenu = navigationView.getMenu();
             SubMenu currentSubmenu = null;
-            if( accounts != null)
-            for(final Account account: accounts) {
-                if( !currrentUserId.equals(account.getId()) ) {
-                    if( !lastInstance.trim().toUpperCase().equals(account.getInstance().trim().toUpperCase())){
-                        lastInstance = account.getInstance().toUpperCase();
-                        currentSubmenu = mainMenu.addSubMenu(account.getInstance().toUpperCase());
-                    }
-                    if( currentSubmenu  == null)
-                        continue;
-                    final MenuItem item = currentSubmenu.add("@" + account.getAcct());
-                    item.setIcon(R.drawable.ic_person);
-                    String url = account.getAvatar();
-                    if( url.startsWith("/") ){
-                        url = Helper.getLiveInstanceWithProtocol(activity) + account.getAvatar();
-                    }
-                    Glide.with(activity.getApplicationContext())
-                            .asBitmap()
-                            .load(url)
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
-                                    item.setIcon(new BitmapDrawable(activity.getResources(), resource));
-                                    item.getIcon().setColorFilter(0xFFFFFFFF, PorterDuff.Mode.MULTIPLY);
+            if (accounts != null)
+                for (final Account account : accounts) {
+                    if (!currrentUserId.equals(account.getId())) {
+                        if (!lastInstance.trim().toUpperCase().equals(account.getInstance().trim().toUpperCase())) {
+                            lastInstance = account.getInstance().toUpperCase();
+                            currentSubmenu = mainMenu.addSubMenu(account.getInstance().toUpperCase());
+                        }
+                        if (currentSubmenu == null)
+                            continue;
+                        final MenuItem item = currentSubmenu.add("@" + account.getAcct());
+                        item.setIcon(R.drawable.ic_person);
+                        String url = account.getAvatar();
+                        if (url.startsWith("/")) {
+                            url = Helper.getLiveInstanceWithProtocol(activity) + account.getAvatar();
+                        }
+                        Glide.with(activity.getApplicationContext())
+                                .asBitmap()
+                                .load(url)
+                                .into(new SimpleTarget<Bitmap>() {
+                                    @Override
+                                    public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
+                                        item.setIcon(new BitmapDrawable(activity.getResources(), resource));
+                                        item.getIcon().setColorFilter(0xFFFFFFFF, PorterDuff.Mode.MULTIPLY);
+                                    }
+                                });
+
+                        item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                if (!activity.isFinishing()) {
+                                    menuAccountsOpened = false;
+                                    String userId = account.getId();
+                                    Toasty.info(activity, activity.getString(R.string.toast_account_changed, "@" + account.getAcct() + "@" + account.getInstance()), Toast.LENGTH_LONG).show();
+                                    changeUser(activity, userId, true);
+                                    arrow.setImageResource(R.drawable.ic_arrow_drop_down);
+                                    return true;
                                 }
-                            });
-
-                    item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            if( ! activity.isFinishing() ) {
-                                menuAccountsOpened = false;
-                                String userId = account.getId();
-                                Toasty.info(activity, activity.getString(R.string.toast_account_changed, "@" + account.getAcct() + "@" + account.getInstance()), Toast.LENGTH_LONG).show();
-                                changeUser(activity, userId, true);
-                                arrow.setImageResource(R.drawable.ic_arrow_drop_down);
-                                return true;
+                                return false;
                             }
-                            return false;
-                        }
-                    });
-                    item.setActionView(R.layout.update_account);
-                    ImageView deleteButton = item.getActionView().findViewById(R.id.account_remove_button);
-                    deleteButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            final SharedPreferences sharedpreferences = activity.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
-                            int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
-                            int style;
-                            if (theme == Helper.THEME_DARK) {
-                                style = R.style.DialogDark;
-                            } else if (theme == Helper.THEME_BLACK){
-                                style = R.style.DialogBlack;
-                            }else {
-                                style = R.style.Dialog;
+                        });
+                        item.setActionView(R.layout.update_account);
+                        ImageView deleteButton = item.getActionView().findViewById(R.id.account_remove_button);
+                        deleteButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                final SharedPreferences sharedpreferences = activity.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
+                                int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
+                                int style;
+                                if (theme == Helper.THEME_DARK) {
+                                    style = R.style.DialogDark;
+                                } else if (theme == Helper.THEME_BLACK) {
+                                    style = R.style.DialogBlack;
+                                } else {
+                                    style = R.style.Dialog;
+                                }
+                                new AlertDialog.Builder(activity, style)
+                                        .setTitle(activity.getString(R.string.delete_account_title))
+                                        .setMessage(activity.getString(R.string.delete_account_message, "@" + account.getAcct() + "@" + account.getInstance()))
+                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                new RemoveAccountAsyncTask(activity, account).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                                item.setVisible(false);
+                                            }
+                                        })
+                                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                // do nothing
+                                            }
+                                        })
+                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .show();
                             }
-                            new AlertDialog.Builder(activity, style)
-                                    .setTitle(activity.getString(R.string.delete_account_title))
-                                    .setMessage(activity.getString(R.string.delete_account_message, "@" + account.getAcct() + "@" + account.getInstance()))
-                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            new RemoveAccountAsyncTask(activity, account).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                                            item.setVisible(false);
-                                        }
-                                    })
-                                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            // do nothing
-                                        }
-                                    })
-                                    .setIcon(android.R.drawable.ic_dialog_alert)
-                                    .show();
-                        }
-                    });
+                        });
 
+                    }
                 }
-            }
             currentSubmenu = mainMenu.addSubMenu("");
             MenuItem addItem = currentSubmenu.add(R.string.add_account);
             addItem.setIcon(R.drawable.ic_person_add);
@@ -1228,7 +1247,7 @@ public class Helper {
                     return true;
                 }
             });
-        }else{
+        } else {
             navigationView.getMenu().clear();
             navigationView.inflateMenu(R.menu.activity_main_drawer);
             arrow.setImageResource(R.drawable.ic_arrow_drop_down);
@@ -1240,8 +1259,9 @@ public class Helper {
 
     /**
      * Changes the user in shared preferences
+     *
      * @param activity Activity
-     * @param userID String - the new user id
+     * @param userID   String - the new user id
      */
     public static void changeUser(Activity activity, String userID, boolean checkItem) {
 
@@ -1252,9 +1272,9 @@ public class Helper {
         MainActivity.lastHomeId = null;
         navigationView.inflateMenu(R.menu.activity_main_drawer);
         SQLiteDatabase db = Sqlite.getInstance(activity, Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
-        Account account = new AccountDAO(activity,db).getAccountByID(userID);
+        Account account = new AccountDAO(activity, db).getAccountByID(userID);
         //Can happen when an account has been deleted and there is a click on an old notification
-        if( account == null)
+        if (account == null)
             return;
         //Locked account can see follow request
         if (account.isLocked()) {
@@ -1264,9 +1284,9 @@ public class Helper {
         }
         SharedPreferences sharedpreferences = activity.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         String token = sharedpreferences.getString(Helper.PREF_KEY_OAUTH_TOKEN, null);
-        if( !account.getToken().equals(token)){
+        if (!account.getToken().equals(token)) {
             FragmentManager fm = activity.getFragmentManager();
-            for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+            for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
                 fm.popBackStack();
             }
         }
@@ -1300,22 +1320,23 @@ public class Helper {
 
     /**
      * Load the profile picture at the place of hamburger icon
+     *
      * @param activity Activity The current activity
-     * @param url String the url of the profile picture
+     * @param url      String the url of the profile picture
      */
-    public static void loadPictureIcon(final Activity activity, String url, final ImageView imageView){
-        if( url.startsWith("/") ){
+    public static void loadPictureIcon(final Activity activity, String url, final ImageView imageView) {
+        if (url.startsWith("/")) {
             url = Helper.getLiveInstanceWithProtocol(activity) + url;
         }
-        loadGiF(activity,url, imageView);
+        loadGiF(activity, url, imageView);
     }
 
 
-    public static SpannableString makeMentionsClick(final Context context, List<Mention> mentions){
+    public static SpannableString makeMentionsClick(final Context context, List<Mention> mentions) {
 
         String cw_mention = "";
-        for(Mention mention:mentions){
-            cw_mention = String.format("@%s %s",mention.getUsername(),cw_mention);
+        for (Mention mention : mentions) {
+            cw_mention = String.format("@%s %s", mention.getUsername(), cw_mention);
         }
         SpannableString spannableString = new SpannableString(cw_mention);
         final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
@@ -1325,29 +1346,30 @@ public class Helper {
             if (spannableString.toString().contains(targetedAccount)) {
 
                 //Accounts can be mentioned several times so we have to loop
-                for(int startPosition = -1 ; (startPosition = spannableString.toString().indexOf(targetedAccount, startPosition + 1)) != -1 ; startPosition++){
+                for (int startPosition = -1; (startPosition = spannableString.toString().indexOf(targetedAccount, startPosition + 1)) != -1; startPosition++) {
                     int endPosition = startPosition + targetedAccount.length();
                     spannableString.setSpan(new ClickableSpan() {
-                                @Override
-                                public void onClick(View textView) {
-                                    Intent intent = new Intent(context, ShowAccountActivity.class);
-                                    Bundle b = new Bundle();
-                                    b.putString("accountId", mention.getId());
-                                    intent.putExtras(b);
-                                    context.startActivity(intent);
-                                }
-                                @Override
-                                public void updateDrawState(TextPaint ds) {
-                                    super.updateDrawState(ds);
-                                    ds.setUnderlineText(false);
-                                    if (theme == THEME_DARK)
-                                        ds.setColor(ContextCompat.getColor(context, R.color.dark_link_toot));
-                                    else if (theme == THEME_BLACK)
-                                        ds.setColor(ContextCompat.getColor(context, R.color.black_link_toot));
-                                    else if (theme == THEME_LIGHT)
-                                        ds.setColor(ContextCompat.getColor(context, R.color.mastodonC4));
-                                }
-                            },
+                                                @Override
+                                                public void onClick(View textView) {
+                                                    Intent intent = new Intent(context, ShowAccountActivity.class);
+                                                    Bundle b = new Bundle();
+                                                    b.putString("accountId", mention.getId());
+                                                    intent.putExtras(b);
+                                                    context.startActivity(intent);
+                                                }
+
+                                                @Override
+                                                public void updateDrawState(TextPaint ds) {
+                                                    super.updateDrawState(ds);
+                                                    ds.setUnderlineText(false);
+                                                    if (theme == THEME_DARK)
+                                                        ds.setColor(ContextCompat.getColor(context, R.color.dark_link_toot));
+                                                    else if (theme == THEME_BLACK)
+                                                        ds.setColor(ContextCompat.getColor(context, R.color.black_link_toot));
+                                                    else if (theme == THEME_LIGHT)
+                                                        ds.setColor(ContextCompat.getColor(context, R.color.mastodonC4));
+                                                }
+                                            },
                             startPosition, endPosition,
                             Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                 }
@@ -1359,11 +1381,12 @@ public class Helper {
 
     /**
      * Update the header with the new selected account
-     * @param activity Activity
-     * @param account Account - new account in use
+     *
+     * @param activity     Activity
+     * @param account      Account - new account in use
      * @param headerLayout View - the menu header
      */
-    public static void updateHeaderAccountInfo(Activity activity, final Account account, final View headerLayout){
+    public static void updateHeaderAccountInfo(Activity activity, final Account account, final View headerLayout) {
         ImageView profilePicture = headerLayout.findViewById(R.id.profilePicture);
         TextView username = headerLayout.findViewById(R.id.username);
         TextView displayedName = headerLayout.findViewById(R.id.displayedName);
@@ -1375,32 +1398,32 @@ public class Helper {
         ImageView icon = new ImageView(activity);
 
 
-        FloatingActionButton.LayoutParams layoutparmans = new FloatingActionButton.LayoutParams((int)Helper.convertDpToPixel(35,activity),(int)Helper.convertDpToPixel(35,activity));
-        FloatingActionButton.LayoutParams layoutparmanImg = new FloatingActionButton.LayoutParams((int)Helper.convertDpToPixel(25,activity),(int)Helper.convertDpToPixel(25,activity));
+        FloatingActionButton.LayoutParams layoutparmans = new FloatingActionButton.LayoutParams((int) Helper.convertDpToPixel(35, activity), (int) Helper.convertDpToPixel(35, activity));
+        FloatingActionButton.LayoutParams layoutparmanImg = new FloatingActionButton.LayoutParams((int) Helper.convertDpToPixel(25, activity), (int) Helper.convertDpToPixel(25, activity));
         MenuFloating actionButton = null;
-        if( theme == THEME_LIGHT) {
+        if (theme == THEME_LIGHT) {
             icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_brush));
             actionButton = new MenuFloating.Builder(activity)
                     .setContentView(icon, layoutparmanImg)
-                    .setBackgroundDrawable(activity.getResources().getDrawable( R.drawable.circular))
+                    .setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular))
                     .setLayoutParams(layoutparmans)
                     .setTag("THEME")
                     .intoView(more_option_container)
                     .build();
-        }else if( theme == THEME_DARK) {
+        } else if (theme == THEME_DARK) {
             icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_brush_white));
             actionButton = new MenuFloating.Builder(activity)
                     .setContentView(icon, layoutparmanImg)
-                    .setBackgroundDrawable(activity.getResources().getDrawable( R.drawable.circular_dark))
+                    .setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular_dark))
                     .setLayoutParams(layoutparmans)
                     .setTag("THEME")
                     .intoView(more_option_container)
                     .build();
-        }else if( theme == THEME_BLACK) {
+        } else if (theme == THEME_BLACK) {
             icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_brush_white));
             actionButton = new MenuFloating.Builder(activity)
                     .setContentView(icon, layoutparmanImg)
-                    .setBackgroundDrawable(activity.getResources().getDrawable( R.drawable.circular_black))
+                    .setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular_black))
                     .setLayoutParams(layoutparmans)
                     .setTag("THEME")
                     .intoView(more_option_container)
@@ -1413,19 +1436,19 @@ public class Helper {
         ImageView itemIconLight = new ImageView(activity);
         itemIconLight.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_brush));
         SubActionButton buttonLight = itemBuilder
-                .setBackgroundDrawable(activity.getResources().getDrawable( R.drawable.circular))
+                .setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular))
                 .setContentView(itemIconLight).build();
 
         ImageView itemDark = new ImageView(activity);
         itemDark.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_brush_white));
         SubActionButton buttonDark = itemBuilder
-                .setBackgroundDrawable(activity.getResources().getDrawable( R.drawable.circular_dark))
+                .setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular_dark))
                 .setContentView(itemDark).build();
 
         ImageView itemBlack = new ImageView(activity);
         itemBlack.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_brush_white));
         SubActionButton buttonBlack = itemBuilder
-                .setBackgroundDrawable(activity.getResources().getDrawable( R.drawable.circular_black))
+                .setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular_black))
                 .setContentView(itemBlack).build();
 
         FloatingActionMenu actionMenu = new FloatingActionMenu.Builder(activity)
@@ -1437,13 +1460,13 @@ public class Helper {
                 .setEndAngle(90)
                 .build();
 
-        if( actionButton != null) {
+        if (actionButton != null) {
             actionButton.setFocusableInTouchMode(true);
             actionButton.setFocusable(true);
             actionButton.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if(actionMenu.isOpen())
+                    if (actionMenu.isOpen())
                         actionMenu.close(true);
                     else
                         actionMenu.open(true);
@@ -1455,7 +1478,8 @@ public class Helper {
                 public void onFocusChange(View v, boolean hasFocus) {
                     try {
                         actionMenu.close(true);
-                    }catch (Exception ignored){}
+                    } catch (Exception ignored) {
+                    }
 
                 }
             });
@@ -1495,26 +1519,27 @@ public class Helper {
         SQLiteDatabase db = Sqlite.getInstance(activity, Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
         final List<Account> accounts = new AccountDAO(activity, db).getAllAccount();
 
-        if( accounts != null && accounts.size() > 1) {
+        if (accounts != null && accounts.size() > 1) {
 
             FloatingActionButton.LayoutParams layoutparmansAcc = new FloatingActionButton.LayoutParams((int) Helper.convertDpToPixel(35, activity), (int) Helper.convertDpToPixel(35, activity));
             FloatingActionButton.LayoutParams layoutparmanImgAcc = new FloatingActionButton.LayoutParams((int) Helper.convertDpToPixel(35, activity), (int) Helper.convertDpToPixel(35, activity));
             MenuFloating actionButtonAcc = null;
             SharedPreferences mSharedPreferences = activity.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
             String currrentUserId = mSharedPreferences.getString(Helper.PREF_KEY_ID, null);
-            for(final Account accountChoice: accounts) {
+            for (final Account accountChoice : accounts) {
                 if (currrentUserId != null && !currrentUserId.equals(accountChoice.getId())) {
                     icon = new ImageView(activity);
                     ImageView finalIcon = icon;
                     Glide.with(activity.getApplicationContext())
                             .asBitmap()
                             .apply(new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(270)))
-                            .listener(new RequestListener<Bitmap>(){
+                            .listener(new RequestListener<Bitmap>() {
 
                                 @Override
                                 public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                                     return false;
                                 }
+
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
                                     finalIcon.setImageResource(R.drawable.missing);
@@ -1529,12 +1554,12 @@ public class Helper {
                                 }
                             });
                     MenuFloating.Builder actionButtonAccBuild = new MenuFloating.Builder(activity);
-                    if( theme == THEME_LIGHT) {
-                        actionButtonAccBuild.setBackgroundDrawable(activity.getResources().getDrawable( R.drawable.circular));
-                    }else if( theme == THEME_DARK) {
-                        actionButtonAccBuild.setBackgroundDrawable(activity.getResources().getDrawable( R.drawable.circular_dark));
-                    }else if( theme == THEME_BLACK) {
-                        actionButtonAccBuild.setBackgroundDrawable(activity.getResources().getDrawable( R.drawable.circular_black));
+                    if (theme == THEME_LIGHT) {
+                        actionButtonAccBuild.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular));
+                    } else if (theme == THEME_DARK) {
+                        actionButtonAccBuild.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular_dark));
+                    } else if (theme == THEME_BLACK) {
+                        actionButtonAccBuild.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular_black));
                     }
 
                     actionButtonAcc = actionButtonAccBuild
@@ -1550,7 +1575,7 @@ public class Helper {
 
             FloatingActionMenu.Builder actionMenuAccBuilder = new FloatingActionMenu.Builder(activity);
 
-            for(final Account accountChoice: accounts) {
+            for (final Account accountChoice : accounts) {
                 if (currrentUserId != null && !currrentUserId.equals(accountChoice.getId())) {
                     SubActionButton.Builder itemBuilderAcc = new SubActionButton.Builder(activity);
 
@@ -1559,12 +1584,13 @@ public class Helper {
                             .asBitmap()
                             .apply(new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(270)))
                             .load(accountChoice.getAvatar())
-                            .listener(new RequestListener<Bitmap>(){
+                            .listener(new RequestListener<Bitmap>() {
 
                                 @Override
                                 public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                                     return false;
                                 }
+
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target, boolean isFirstResource) {
                                     itemIconAcc.setImageResource(R.drawable.missing);
@@ -1578,7 +1604,7 @@ public class Helper {
                                 }
                             });
 
-                    if( accounts.size() > 2 ) {
+                    if (accounts.size() > 2) {
                         SubActionButton.Builder subActionButtonAccBuilder = itemBuilderAcc;
                         if (theme == THEME_LIGHT) {
                             subActionButtonAccBuilder.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.circular));
@@ -1615,14 +1641,14 @@ public class Helper {
                     .setStartAngle(0)
                     .setEndAngle(135)
                     .build();
-            if( actionButtonAcc != null) {
-                if( accounts.size() > 2){
+            if (actionButtonAcc != null) {
+                if (accounts.size() > 2) {
                     actionButtonAcc.setFocusableInTouchMode(true);
                     actionButtonAcc.setFocusable(true);
                     actionButtonAcc.setOnTouchListener(new View.OnTouchListener() {
                         @Override
                         public boolean onTouch(View v, MotionEvent event) {
-                            if(actionMenuAcc.isOpen())
+                            if (actionMenuAcc.isOpen())
                                 actionMenuAcc.close(true);
                             else
                                 actionMenuAcc.open(true);
@@ -1634,15 +1660,16 @@ public class Helper {
                         public void onFocusChange(View v, boolean hasFocus) {
                             try {
                                 actionMenuAcc.close(true);
-                            }catch (Exception ignored){}
+                            } catch (Exception ignored) {
+                            }
 
                         }
                     });
-                }else{
+                } else {
                     actionButtonAcc.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            for(final Account accountChoice: accounts) {
+                            for (final Account accountChoice : accounts) {
                                 if (!currrentUserId.equals(accountChoice.getId())) {
                                     SharedPreferences.Editor editor = sharedpreferences.edit();
                                     editor.putString(Helper.PREF_KEY_OAUTH_TOKEN, accountChoice.getToken());
@@ -1662,36 +1689,36 @@ public class Helper {
             }
 
         }
-        if( account == null ) {
+        if (account == null) {
             Helper.logout(activity);
             Intent myIntent = new Intent(activity, LoginActivity.class);
-            Toasty.error(activity,activity.getString(R.string.toast_error), Toast.LENGTH_LONG).show();
+            Toasty.error(activity, activity.getString(R.string.toast_error), Toast.LENGTH_LONG).show();
             activity.startActivity(myIntent);
             activity.finish(); //User is logged out to get a new token
-        }else {
-            account.makeEmojisAccount(activity, ((BaseMainActivity)activity), account);
-            username.setText(String.format("@%s",account.getUsername() + "@" + account.getInstance()));
+        } else {
+            account.makeEmojisAccount(activity, ((BaseMainActivity) activity), account);
+            username.setText(String.format("@%s", account.getUsername() + "@" + account.getInstance()));
             displayedName.setText(account.getdisplayNameSpan(), TextView.BufferType.SPANNABLE);
             String url = account.getAvatar();
-            if( url.startsWith("/") ){
+            if (url.startsWith("/")) {
                 url = Helper.getLiveInstanceWithProtocol(activity) + account.getAvatar();
             }
             loadGiF(activity, url, profilePicture);
             String urlHeader = account.getHeader();
-            if( urlHeader.startsWith("/") ){
+            if (urlHeader.startsWith("/")) {
                 urlHeader = Helper.getLiveInstanceWithProtocol(activity) + account.getHeader();
             }
             ImageView owner_accounts = headerLayout.findViewById(R.id.owner_accounts);
             ImageView header_option_info = headerLayout.findViewById(R.id.header_option_info);
             ImageView header_option_menu = headerLayout.findViewById(R.id.header_option_menu);
-            if( theme == Helper.THEME_DARK || theme == Helper.THEME_BLACK){
-                changeDrawableColor(activity, owner_accounts,R.color.dark_text);
-                changeDrawableColor(activity, header_option_info,R.color.dark_text);
-                changeDrawableColor(activity, header_option_menu,R.color.dark_text);
-            }else {
-                changeDrawableColor(activity, owner_accounts,R.color.light_black);
-                changeDrawableColor(activity, header_option_info,R.color.light_black);
-                changeDrawableColor(activity, header_option_menu,R.color.light_black);
+            if (theme == Helper.THEME_DARK || theme == Helper.THEME_BLACK) {
+                changeDrawableColor(activity, owner_accounts, R.color.dark_text);
+                changeDrawableColor(activity, header_option_info, R.color.dark_text);
+                changeDrawableColor(activity, header_option_menu, R.color.dark_text);
+            } else {
+                changeDrawableColor(activity, owner_accounts, R.color.light_black);
+                changeDrawableColor(activity, header_option_info, R.color.light_black);
+                changeDrawableColor(activity, header_option_menu, R.color.light_black);
             }
             if (!urlHeader.contains("missing.png")) {
                 Glide.with(activity.getApplicationContext())
@@ -1702,16 +1729,16 @@ public class Helper {
                             public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
                                 ImageView backgroundImage = headerLayout.findViewById(R.id.back_ground_image);
                                 backgroundImage.setImageBitmap(resource);
-                                if( theme == THEME_LIGHT){
+                                if (theme == THEME_LIGHT) {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                                         backgroundImage.setImageAlpha(80);
-                                    }else {
+                                    } else {
                                         backgroundImage.setAlpha(80);
                                     }
-                                }else{
+                                } else {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                                         backgroundImage.setImageAlpha(60);
-                                    }else {
+                                    } else {
                                         backgroundImage.setAlpha(60);
                                     }
                                 }
@@ -1738,18 +1765,19 @@ public class Helper {
 
     /**
      * Retrieves the cache size
+     *
      * @param directory File
      * @return long value in Mo
      */
     public static long cacheSize(File directory) {
         long length = 0;
-        if( directory == null || directory.length() == 0 )
+        if (directory == null || directory.length() == 0)
             return -1;
         for (File file : directory.listFiles()) {
             if (file.isFile())
                 try {
                     length += file.length();
-                }catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     return -1;
                 }
             else
@@ -1770,12 +1798,10 @@ public class Helper {
                 }
             }
             return dir.delete();
-        } else{
+        } else {
             return dir != null && dir.isFile() && dir.delete();
         }
     }
-
-
 
 
     /***
@@ -1787,126 +1813,128 @@ public class Helper {
      * @return TextView
      */
     public static SpannableString clickableElementsDescription(final Context context, String fullContent) {
+        SpannableString spannableString = new SpannableString("");
+        if (fullContent != null) {
+            fullContent = Helper.shortnameToUnicode(fullContent, true);
+            SpannableString spannableStringT = new SpannableString(fullContent);
+            Pattern aLink = Pattern.compile("(<\\s?a\\s?href=\"https?:\\/\\/([\\da-z\\.-]+\\.[a-z\\.]{2,10})\\/(@[\\/\\w._-]*)\"\\s?[^.]*<\\s?\\/\\s?a\\s?>)");
+            Matcher matcherALink = aLink.matcher(spannableStringT.toString());
+            ArrayList<Account> accountsMentionUnknown = new ArrayList<>();
+            while (matcherALink.find()) {
+                String acct = matcherALink.group(3).replace("@", "");
+                String instance = matcherALink.group(2);
+                Account account = new Account();
+                account.setAcct(acct);
+                account.setInstance(instance);
+                accountsMentionUnknown.add(account);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                spannableString = new SpannableString(Html.fromHtml(spannableStringT.toString().replaceAll("^<p>", "").replaceAll("<p>", "<br/><br/>").replaceAll("</p>", ""), Html.FROM_HTML_MODE_LEGACY));
+            else
+                //noinspection deprecation
+                spannableString = new SpannableString(Html.fromHtml(spannableStringT.toString().replaceAll("^<p>", "").replaceAll("<p>", "<br/><br/>").replaceAll("</p>", "")));
 
+            URLSpan[] urls = spannableString.getSpans(0, spannableString.length(), URLSpan.class);
+            for (URLSpan span : urls)
+                spannableString.removeSpan(span);
+            SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
+            int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
+            Matcher matcher;
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT)
+                matcher = Patterns.WEB_URL.matcher(spannableString);
+            else
+                matcher = urlPattern.matcher(spannableString);
+            while (matcher.find()) {
+                int matchStart = matcher.start(1);
+                int matchEnd = matcher.end();
+                final String url = spannableString.toString().substring(matchStart, matchEnd);
+                if (matchEnd <= spannableString.toString().length() && matchEnd >= matchStart)
+                    spannableString.setSpan(new ClickableSpan() {
+                        @Override
+                        public void onClick(View textView) {
+                            Helper.openBrowser(context, url);
+                        }
 
-        SpannableString spannableString;
-        fullContent = Helper.shortnameToUnicode(fullContent, true);
-        SpannableString spannableStringT = new SpannableString(fullContent);
-        Pattern aLink = Pattern.compile("(<\\s?a\\s?href=\"https?:\\/\\/([\\da-z\\.-]+\\.[a-z\\.]{2,10})\\/(@[\\/\\w._-]*)\"\\s?[^.]*<\\s?\\/\\s?a\\s?>)");
-        Matcher matcherALink = aLink.matcher(spannableStringT.toString());
-        ArrayList<Account> accountsMentionUnknown = new ArrayList<>();
-        while (matcherALink.find()){
-            String acct = matcherALink.group(3).replace("@","");
-            String instance = matcherALink.group(2);
-            Account account = new Account();
-            account.setAcct(acct);
-            account.setInstance(instance);
-            accountsMentionUnknown.add(account);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            spannableString = new SpannableString(Html.fromHtml(spannableStringT.toString().replaceAll("^<p>","").replaceAll("<p>","<br/><br/>").replaceAll("</p>",""), Html.FROM_HTML_MODE_LEGACY));
-        else
-            //noinspection deprecation
-            spannableString = new SpannableString(Html.fromHtml(spannableStringT.toString().replaceAll("^<p>","").replaceAll("<p>","<br/><br/>").replaceAll("</p>","")));
+                        @Override
+                        public void updateDrawState(TextPaint ds) {
+                            super.updateDrawState(ds);
+                            ds.setUnderlineText(false);
+                            if (theme == THEME_DARK)
+                                ds.setColor(ContextCompat.getColor(context, R.color.dark_link_toot));
+                            else if (theme == THEME_BLACK)
+                                ds.setColor(ContextCompat.getColor(context, R.color.black_link_toot));
+                            else if (theme == THEME_LIGHT)
+                                ds.setColor(ContextCompat.getColor(context, R.color.mastodonC4));
+                        }
+                    }, matchStart, matchEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            }
+            matcher = hashtagPattern.matcher(spannableString);
+            while (matcher.find()) {
+                int matchStart = matcher.start(1);
+                int matchEnd = matcher.end();
+                final String tag = spannableString.toString().substring(matchStart, matchEnd);
+                if (matchEnd <= spannableString.toString().length() && matchEnd >= matchStart)
+                    spannableString.setSpan(new ClickableSpan() {
+                        @Override
+                        public void onClick(View textView) {
+                            Intent intent = new Intent(context, HashTagActivity.class);
+                            Bundle b = new Bundle();
+                            b.putString("tag", tag.substring(1));
+                            intent.putExtras(b);
+                            context.startActivity(intent);
+                        }
 
-        URLSpan[] urls = spannableString.getSpans(0, spannableString.length(), URLSpan.class);
-        for(URLSpan span : urls)
-            spannableString.removeSpan(span);
-        SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
-        int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
-        Matcher matcher;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT)
-            matcher = Patterns.WEB_URL.matcher(spannableString);
-        else
-            matcher = urlPattern.matcher(spannableString);
-        while (matcher.find()){
-            int matchStart = matcher.start(1);
-            int matchEnd = matcher.end();
-            final String url = spannableString.toString().substring(matchStart, matchEnd);
-            if( matchEnd <= spannableString.toString().length() && matchEnd >= matchStart)
-                spannableString.setSpan(new ClickableSpan() {
-                    @Override
-                    public void onClick(View textView) {
-                        Helper.openBrowser(context, url);
-                    }
-                    @Override
-                    public void updateDrawState(TextPaint ds) {
-                        super.updateDrawState(ds);
-                        ds.setUnderlineText(false);
-                        if (theme == THEME_DARK)
-                            ds.setColor(ContextCompat.getColor(context, R.color.dark_link_toot));
-                        else if (theme == THEME_BLACK)
-                            ds.setColor(ContextCompat.getColor(context, R.color.black_link_toot));
-                        else if (theme == THEME_LIGHT)
-                            ds.setColor(ContextCompat.getColor(context, R.color.mastodonC4));
-                    }
-                }, matchStart, matchEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-        }
-        matcher = hashtagPattern.matcher(spannableString);
-        while (matcher.find()){
-            int matchStart = matcher.start(1);
-            int matchEnd = matcher.end();
-            final String tag = spannableString.toString().substring(matchStart, matchEnd);
-            if( matchEnd <= spannableString.toString().length() && matchEnd >= matchStart)
-                spannableString.setSpan(new ClickableSpan() {
-                    @Override
-                    public void onClick(View textView) {
-                        Intent intent = new Intent(context, HashTagActivity.class);
-                        Bundle b = new Bundle();
-                        b.putString("tag", tag.substring(1));
-                        intent.putExtras(b);
-                        context.startActivity(intent);
-                    }
-                    @Override
-                    public void updateDrawState(TextPaint ds) {
-                        super.updateDrawState(ds);
-                        ds.setUnderlineText(false);
-                        if (theme == THEME_DARK)
-                            ds.setColor(ContextCompat.getColor(context, R.color.dark_link_toot));
-                        else if (theme == THEME_BLACK)
-                            ds.setColor(ContextCompat.getColor(context, R.color.black_link_toot));
-                        else if (theme == THEME_LIGHT)
-                            ds.setColor(ContextCompat.getColor(context, R.color.mastodonC4));
-                    }
-                }, matchStart, matchEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-        }
-        if( accountsMentionUnknown.size() > 0 ) {
-            for(Account account: accountsMentionUnknown){
-                String targetedAccount = "@" + account.getAcct();
-                if (spannableString.toString().toLowerCase().contains(targetedAccount.toLowerCase())) {
-                    //Accounts can be mentioned several times so we have to loop
-                    for(int startPosition = -1 ; (startPosition = spannableString.toString().toLowerCase().indexOf(targetedAccount.toLowerCase(), startPosition + 1)) != -1 ; startPosition++){
-                        int endPosition = startPosition + targetedAccount.length();
-                        if( endPosition <= spannableString.toString().length() && endPosition >= startPosition)
-                            spannableString.setSpan(new ClickableSpan() {
-                                 @Override
-                                 public void onClick(View textView) {
-                                     CrossActions.doCrossProfile(context,account);
-                                 }
-                                 @Override
-                                 public void updateDrawState(TextPaint ds) {
-                                     super.updateDrawState(ds);
-                                     ds.setUnderlineText(false);
-                                     if (theme == THEME_DARK)
-                                         ds.setColor(ContextCompat.getColor(context, R.color.dark_link_toot));
-                                     else if (theme == THEME_BLACK)
-                                         ds.setColor(ContextCompat.getColor(context, R.color.black_link_toot));
-                                     else if (theme == THEME_LIGHT)
-                                         ds.setColor(ContextCompat.getColor(context, R.color.mastodonC4));
-                                 }
-                             },
-                            startPosition, endPosition,
-                            Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        @Override
+                        public void updateDrawState(TextPaint ds) {
+                            super.updateDrawState(ds);
+                            ds.setUnderlineText(false);
+                            if (theme == THEME_DARK)
+                                ds.setColor(ContextCompat.getColor(context, R.color.dark_link_toot));
+                            else if (theme == THEME_BLACK)
+                                ds.setColor(ContextCompat.getColor(context, R.color.black_link_toot));
+                            else if (theme == THEME_LIGHT)
+                                ds.setColor(ContextCompat.getColor(context, R.color.mastodonC4));
+                        }
+                    }, matchStart, matchEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            }
+            if (accountsMentionUnknown.size() > 0) {
+                for (Account account : accountsMentionUnknown) {
+                    String targetedAccount = "@" + account.getAcct();
+                    if (spannableString.toString().toLowerCase().contains(targetedAccount.toLowerCase())) {
+                        //Accounts can be mentioned several times so we have to loop
+                        for (int startPosition = -1; (startPosition = spannableString.toString().toLowerCase().indexOf(targetedAccount.toLowerCase(), startPosition + 1)) != -1; startPosition++) {
+                            int endPosition = startPosition + targetedAccount.length();
+                            if (endPosition <= spannableString.toString().length() && endPosition >= startPosition)
+                                spannableString.setSpan(new ClickableSpan() {
+                                                            @Override
+                                                            public void onClick(View textView) {
+                                                                CrossActions.doCrossProfile(context, account);
+                                                            }
+
+                                                            @Override
+                                                            public void updateDrawState(TextPaint ds) {
+                                                                super.updateDrawState(ds);
+                                                                ds.setUnderlineText(false);
+                                                                if (theme == THEME_DARK)
+                                                                    ds.setColor(ContextCompat.getColor(context, R.color.dark_link_toot));
+                                                                else if (theme == THEME_BLACK)
+                                                                    ds.setColor(ContextCompat.getColor(context, R.color.black_link_toot));
+                                                                else if (theme == THEME_LIGHT)
+                                                                    ds.setColor(ContextCompat.getColor(context, R.color.mastodonC4));
+                                                            }
+                                                        },
+                                        startPosition, endPosition,
+                                        Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        }
                     }
                 }
             }
         }
-
         return spannableString;
     }
 
 
-    public static WebView initializeWebview(Activity activity, int webviewId){
+    public static WebView initializeWebview(Activity activity, int webviewId) {
 
         WebView webView = activity.findViewById(webviewId);
         final SharedPreferences sharedpreferences = activity.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
@@ -1964,16 +1992,18 @@ public class Helper {
             }
             return hexString.toString();
 
-        } catch (NoSuchAlgorithmException ignored) {}
+        } catch (NoSuchAlgorithmException ignored) {
+        }
         return "";
     }
 
     /**
      * change color of a drawable
-     * @param drawable int the drawable
+     *
+     * @param drawable  int the drawable
      * @param hexaColor example 0xffff00
      */
-    public static Drawable changeDrawableColor(Context context, int drawable, int hexaColor){
+    public static Drawable changeDrawableColor(Context context, int drawable, int hexaColor) {
         Drawable mDrawable = ContextCompat.getDrawable(context, drawable);
         int color = Color.parseColor(context.getString(hexaColor));
         assert mDrawable != null;
@@ -1981,26 +2011,30 @@ public class Helper {
         DrawableCompat.setTint(mDrawable, ContextCompat.getColor(context, hexaColor));
         return mDrawable;
     }
+
     /**
      * change color of a drawable
+     *
      * @param imageView int the ImageView
      * @param hexaColor example 0xffff00
      */
-    public static void changeDrawableColor(Context context, ImageView imageView, int hexaColor){
+    public static void changeDrawableColor(Context context, ImageView imageView, int hexaColor) {
         imageView.setColorFilter(context.getResources().getColor(hexaColor));
     }
 
     /**
      * change color of a drawable
+     *
      * @param imageButton int the ImageButton
-     * @param hexaColor example 0xffff00
+     * @param hexaColor   example 0xffff00
      */
-    public static void changeDrawableColor(Context context, ImageButton imageButton, int hexaColor){
+    public static void changeDrawableColor(Context context, ImageButton imageButton, int hexaColor) {
         imageButton.setColorFilter(context.getResources().getColor(hexaColor));
     }
 
     /**
      * Returns the current locale of the device
+     *
      * @param context Context
      * @return String locale
      */
@@ -2021,20 +2055,21 @@ public class Helper {
 
     /**
      * Compare date with these in shared pref.
-     * @param context Context
-     * @param newDate String
+     *
+     * @param context         Context
+     * @param newDate         String
      * @param shouldBeGreater boolean if date passed as a parameter should be greater
      * @return boolean
      */
-    public static boolean compareDate(Context context, String newDate, boolean shouldBeGreater){
+    public static boolean compareDate(Context context, String newDate, boolean shouldBeGreater) {
         String dateRef;
         final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         if (shouldBeGreater) {
             dateRef = sharedpreferences.getString(Helper.SET_TIME_FROM, "07:00");
-        }else {
+        } else {
             dateRef = sharedpreferences.getString(Helper.SET_TIME_TO, "22:00");
         }
-        try{
+        try {
             Locale userLocale;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 userLocale = context.getResources().getConfiguration().getLocales().get(0);
@@ -2047,7 +2082,7 @@ public class Helper {
             Date dateRefD = formatter.parse(dateRef);
             if (shouldBeGreater) {
                 return (newDateD.after(dateRefD));
-            }else {
+            } else {
                 return (newDateD.before(dateRefD));
             }
         } catch (java.text.ParseException e) {
@@ -2058,16 +2093,17 @@ public class Helper {
 
     /**
      * Tells if the the service can notify depending of the current hour and minutes
+     *
      * @param context Context
      * @return boolean
      */
-    public static boolean canNotify(Context context){
+    public static boolean canNotify(Context context) {
         final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         boolean notify = sharedpreferences.getBoolean(Helper.SET_NOTIFY, true);
-        if( !notify)
+        if (!notify)
             return false;
         boolean enable_time_slot = sharedpreferences.getBoolean(Helper.SET_ENABLE_TIME_SLOT, true);
-        if( ! enable_time_slot)
+        if (!enable_time_slot)
             return true;
         String dateIni = sharedpreferences.getString(Helper.SET_TIME_FROM, "07:00");
         String dateEnd = sharedpreferences.getString(Helper.SET_TIME_TO, "22:00");
@@ -2075,10 +2111,10 @@ public class Helper {
         Calendar now = Calendar.getInstance();
         int hour = now.get(Calendar.HOUR_OF_DAY);
         int minute = now.get(Calendar.MINUTE);
-        String hourS = String.valueOf(hour).length() == 1?"0"+String.valueOf(hour):String.valueOf(hour);
-        String minuteS = String.valueOf(minute).length() == 1?"0"+String.valueOf(minute):String.valueOf(minute);
+        String hourS = String.valueOf(hour).length() == 1 ? "0" + String.valueOf(hour) : String.valueOf(hour);
+        String minuteS = String.valueOf(minute).length() == 1 ? "0" + String.valueOf(minute) : String.valueOf(minute);
         String currentDate = hourS + ":" + minuteS;
-        try{
+        try {
             Locale userLocale;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 userLocale = context.getResources().getConfiguration().getLocales().get(0);
@@ -2091,9 +2127,9 @@ public class Helper {
             Date dateEndD = formatter.parse(dateEnd);
             Date currentDateD = formatter.parse(currentDate);
             boolean canNotify = false;
-            if( currentDateD.before(dateEndD) && currentDateD.after(dateIniD) && notification == Helper.ACTION_ACTIVE)
+            if (currentDateD.before(dateEndD) && currentDateD.after(dateIniD) && notification == Helper.ACTION_ACTIVE)
                 canNotify = true;
-            else if ( currentDateD.after(dateEndD) && currentDateD.before(dateIniD) && notification == Helper.ACTION_SILENT )
+            else if (currentDateD.after(dateEndD) && currentDateD.before(dateIniD) && notification == Helper.ACTION_SILENT)
                 canNotify = true;
             return canNotify;
         } catch (java.text.ParseException e) {
@@ -2104,140 +2140,150 @@ public class Helper {
 
     /**
      * Unserialized a Locale
+     *
      * @param serializedLocale String serialized locale
      * @return Locale
      */
-    public static Locale restoreLocaleFromString(String serializedLocale){
+    public static Locale restoreLocaleFromString(String serializedLocale) {
         Gson gson = new Gson();
         try {
             return gson.fromJson(serializedLocale, Locale.class);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Serialized a Locale class
+     *
      * @param locale Locale to serialize
      * @return String serialized Locale
      */
-    public static String localeToStringStorage(Locale locale){
+    public static String localeToStringStorage(Locale locale) {
         Gson gson = new Gson();
         try {
             return gson.toJson(locale);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Serialized a Status class
+     *
      * @param status Status to serialize
      * @return String serialized Status
      */
-    public static String statusToStringStorage(Status status){
+    public static String statusToStringStorage(Status status) {
         Gson gson = new Gson();
         try {
             return gson.toJson(status);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Unserialized a Card
+     *
      * @param serializedCard String serialized card
      * @return Card
      */
-    public static Card restoreCardFromString(String serializedCard){
+    public static Card restoreCardFromString(String serializedCard) {
         Gson gson = new Gson();
         try {
             return gson.fromJson(serializedCard, Card.class);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Serialized a Card class
+     *
      * @param card Card to serialize
      * @return String serialized Status
      */
-    public static String cardToStringStorage(Card card){
+    public static String cardToStringStorage(Card card) {
         Gson gson = new Gson();
         try {
             return gson.toJson(card);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Unserialized a Status
+     *
      * @param serializedStatus String serialized status
      * @return Status
      */
-    public static Status restoreStatusFromString(String serializedStatus){
+    public static Status restoreStatusFromString(String serializedStatus) {
         Gson gson = new Gson();
         try {
             return gson.fromJson(serializedStatus, Status.class);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Serialized a List<String>
+     *
      * @param list List<String> to serialize
      * @return String serialized List
      */
-    public static String arrayToStringStorage(List<String> list){
+    public static String arrayToStringStorage(List<String> list) {
         Gson gson = new Gson();
         try {
             return gson.toJson(list);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Unserialized a List<String>
+     *
      * @param serializedArray String serialized array
      * @return List<String> list
      */
-    public static List<String> restoreArrayFromString(String serializedArray){
+    public static List<String> restoreArrayFromString(String serializedArray) {
         Gson gson = new Gson();
         try {
             return gson.fromJson(serializedArray, List.class);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Serialized an Application class
+     *
      * @param application Application to serialize
      * @return String serialized Application
      */
-    public static String applicationToStringStorage(Application application){
+    public static String applicationToStringStorage(Application application) {
         Gson gson = new Gson();
         try {
             return gson.toJson(application);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Unserialized an Application
+     *
      * @param serializedApplication String serialized application
      * @return Application
      */
-    public static Application restoreApplicationFromString(String serializedApplication){
+    public static Application restoreApplicationFromString(String serializedApplication) {
         Gson gson = new Gson();
         try {
             return gson.fromJson(serializedApplication, Application.class);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
@@ -2245,14 +2291,15 @@ public class Helper {
 
     /**
      * Serialized a Account class
+     *
      * @param account Account to serialize
      * @return String serialized Account
      */
-    public static String accountToStringStorage(Account account){
+    public static String accountToStringStorage(Account account) {
         Gson gson = new Gson();
         try {
             return gson.toJson(account);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -2261,14 +2308,15 @@ public class Helper {
 
     /**
      * Unserialized an Account
+     *
      * @param serializedAccount String serialized account
      * @return Account
      */
-    public static Account restoreAccountFromString(String serializedAccount){
+    public static Account restoreAccountFromString(String serializedAccount) {
         Gson gson = new Gson();
         try {
             return gson.fromJson(serializedAccount, Account.class);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
@@ -2276,28 +2324,31 @@ public class Helper {
 
     /**
      * Serialized a List of Emojis class
+     *
      * @param emojis Emojis List to serialize
      * @return String serialized List of Emojis
      */
-    public static String emojisToStringStorage(List<Emojis> emojis){
+    public static String emojisToStringStorage(List<Emojis> emojis) {
         Gson gson = new Gson();
         try {
             return gson.toJson(emojis);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Unserialized a list of Emojis
+     *
      * @param serializedEmojis String serialized emojis
      * @return List<Emojis>
      */
-    public static List<Emojis> restoreEmojisFromString(String serializedEmojis){
-        Type listType = new TypeToken<ArrayList<Emojis>>(){}.getType();
+    public static List<Emojis> restoreEmojisFromString(String serializedEmojis) {
+        Type listType = new TypeToken<ArrayList<Emojis>>() {
+        }.getType();
         try {
             return new Gson().fromJson(serializedEmojis, listType);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
@@ -2305,59 +2356,64 @@ public class Helper {
 
     /**
      * Serialized a List of a Attachment class
+     *
      * @param attachments Attachment List to serialize
      * @return String serialized List of Attachment
      */
-    public static String attachmentToStringStorage(List<Attachment> attachments){
+    public static String attachmentToStringStorage(List<Attachment> attachments) {
         Gson gson = new Gson();
         try {
             return gson.toJson(attachments);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Unserialized a list of Attachment
+     *
      * @param serializedAttachment String serialized attachment
      * @return List<Attachment>
      */
-    public static ArrayList<Attachment> restoreAttachmentFromString(String serializedAttachment){
-        Type listType = new TypeToken<ArrayList<Attachment>>(){}.getType();
+    public static ArrayList<Attachment> restoreAttachmentFromString(String serializedAttachment) {
+        Type listType = new TypeToken<ArrayList<Attachment>>() {
+        }.getType();
         try {
             return new Gson().fromJson(serializedAttachment, listType);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
 
-
     /**
      * Serialized a List of a Mention class
+     *
      * @param mentions Mention List to serialize
      * @return String serialized List of Mention
      */
-    public static String mentionToStringStorage(List<Mention> mentions){
+    public static String mentionToStringStorage(List<Mention> mentions) {
         Gson gson = new Gson();
         try {
             return gson.toJson(mentions);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Unserialized a list of Mention
+     *
      * @param serializedMention String serialized mention
      * @return String serialized List of Mention
      */
-    public static List<Mention> restoreMentionFromString(String serializedMention){
-        Type listType = new TypeToken<ArrayList<Mention>>(){}.getType();
+    public static List<Mention> restoreMentionFromString(String serializedMention) {
+        Type listType = new TypeToken<ArrayList<Mention>>() {
+        }.getType();
         try {
             return new Gson().fromJson(serializedMention, listType);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
@@ -2365,50 +2421,54 @@ public class Helper {
 
     /**
      * Serialized a List of a Tag class
+     *
      * @param tags Tag List to serialize
      * @return String serialized List of Tag
      */
-    public static String tagToStringStorage(List<Tag> tags){
+    public static String tagToStringStorage(List<Tag> tags) {
         Gson gson = new Gson();
         try {
             return gson.toJson(tags);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
      * Unserialized a list of Tag
+     *
      * @param serializedTag String serialized tag
      * @return String serialized List of Tag
      */
-    public static List<Tag> restoreTagFromString(String serializedTag){
-        Type listType = new TypeToken<ArrayList<Tag>>(){}.getType();
+    public static List<Tag> restoreTagFromString(String serializedTag) {
+        Type listType = new TypeToken<ArrayList<Tag>>() {
+        }.getType();
         try {
             return new Gson().fromJson(serializedTag, listType);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
 
-
     /**
      * Check if a job id is in array of ids
+     *
      * @param jobIds int[]
-     * @param id int id to check
+     * @param id     int id to check
      * @return boolean
      */
-    public static boolean isJobPresent(int[] jobIds, int id){
-        for(int x:jobIds) {
-            if (x == id) {return true;}
+    public static boolean isJobPresent(int[] jobIds, int id) {
+        for (int x : jobIds) {
+            if (x == id) {
+                return true;
+            }
         }
         return false;
     }
 
 
-
-    public static void unCheckAllMenuItems(NavigationView navigationView){
+    public static void unCheckAllMenuItems(NavigationView navigationView) {
         navigationView.setCheckedItem(R.id.menu_none);
         unCheckAllMenuItemsRec(navigationView.getMenu());
     }
@@ -2417,7 +2477,7 @@ public class Helper {
         int size = menu.size();
         for (int i = 0; i < size; i++) {
             final MenuItem item = menu.getItem(i);
-            if(item.hasSubMenu()) {
+            if (item.hasSubMenu()) {
                 unCheckAllMenuItemsRec(item.getSubMenu());
             } else {
                 item.setChecked(false);
@@ -2428,22 +2488,23 @@ public class Helper {
 
     /**
      * Changes the menu layout
+     *
      * @param activity Activity must be an instance of MainActivity
      */
-    public static void switchLayout(Activity activity){
+    public static void switchLayout(Activity activity) {
         //Check if the class calling the method is an instance of MainActivity
         final SharedPreferences sharedpreferences = activity.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         final NavigationView navigationView = activity.findViewById(R.id.nav_view);
         android.support.design.widget.TabLayout tableLayout = activity.findViewById(R.id.tabLayout);
         String userID = sharedpreferences.getString(Helper.PREF_KEY_ID, null);
         SQLiteDatabase db = Sqlite.getInstance(activity, Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
-        Account account = new AccountDAO(activity,db).getAccountByID(userID);
-        if( account != null) {
+        Account account = new AccountDAO(activity, db).getAccountByID(userID);
+        if (account != null) {
             if (account.isLocked()) {
-                if( navigationView.getMenu().findItem(R.id.nav_follow_request) != null)
+                if (navigationView.getMenu().findItem(R.id.nav_follow_request) != null)
                     navigationView.getMenu().findItem(R.id.nav_follow_request).setVisible(true);
             } else {
-                if( navigationView.getMenu().findItem(R.id.nav_follow_request) != null)
+                if (navigationView.getMenu().findItem(R.id.nav_follow_request) != null)
                     navigationView.getMenu().findItem(R.id.nav_follow_request).setVisible(false);
             }
 
@@ -2464,23 +2525,23 @@ public class Helper {
     }
 
 
-
     /**
      * Get a bitmap from a view
+     *
      * @param view The view to convert
      * @return Bitmap
      */
     public static Bitmap convertTootIntoBitmap(Context context, String name, View view) {
 
-        if( view.getWidth() == 0 || view.getHeight() == 0){
-            Toasty.error(context, context.getString(R.string.toast_error),Toast.LENGTH_LONG).show();
+        if (view.getWidth() == 0 || view.getHeight() == 0) {
+            Toasty.error(context, context.getString(R.string.toast_error), Toast.LENGTH_LONG).show();
             return null;
         }
-        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth()+(int)Helper.convertDpToPixel(10, context), view.getHeight()+(int)Helper.convertDpToPixel(30, context), Bitmap.Config.ARGB_8888);
+        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth() + (int) Helper.convertDpToPixel(10, context), view.getHeight() + (int) Helper.convertDpToPixel(30, context), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(returnedBitmap);
-        canvas.drawBitmap(returnedBitmap, view.getWidth()+(int)Helper.convertDpToPixel(10, context), 0, null);
-        Drawable bgDrawable =view.getBackground();
-        if (bgDrawable!=null)
+        canvas.drawBitmap(returnedBitmap, view.getWidth() + (int) Helper.convertDpToPixel(10, context), 0, null);
+        Drawable bgDrawable = view.getBackground();
+        if (bgDrawable != null)
             bgDrawable.draw(canvas);
         else {
             final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
@@ -2488,10 +2549,9 @@ public class Helper {
             if (theme == Helper.THEME_DARK) {
                 canvas.drawColor(ContextCompat.getColor(context, R.color.mastodonC1));
 
-            }else if( theme == Helper.THEME_BLACK){
+            } else if (theme == Helper.THEME_BLACK) {
                 canvas.drawColor(ContextCompat.getColor(context, R.color.black));
-            }
-            else {
+            } else {
                 canvas.drawColor(Color.WHITE);
             }
         }
@@ -2501,9 +2561,9 @@ public class Helper {
         int mastodonC4 = ContextCompat.getColor(context, R.color.mastodonC4);
         paint.setColor(mastodonC4);
         paint.setStrokeWidth(12);
-        paint.setTextSize((int)Helper.convertDpToPixel(14, context));
+        paint.setTextSize((int) Helper.convertDpToPixel(14, context));
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
-        canvas.drawText(name +" - #Mastalab", 0, view.getHeight() +(int)Helper.convertDpToPixel(15, context), paint);
+        canvas.drawText(name + " - #Mastalab", 0, view.getHeight() + (int) Helper.convertDpToPixel(15, context), paint);
 
         return returnedBitmap;
     }
@@ -2516,15 +2576,16 @@ public class Helper {
         Locale locale = null;
         try {
             locale = Locale.getDefault();
-        }catch (Exception ignored){}
-        if(locale != null)
-        return String.format(locale, "%.1f %c",
-                count / Math.pow(1000, exp),
-                "kMGTPE".charAt(exp-1));
-        else
-            return String.format( "%.1f %c",
+        } catch (Exception ignored) {
+        }
+        if (locale != null)
+            return String.format(locale, "%.1f %c",
                     count / Math.pow(1000, exp),
-                    "kMGTPE".charAt(exp-1));
+                    "kMGTPE".charAt(exp - 1));
+        else
+            return String.format("%.1f %c",
+                    count / Math.pow(1000, exp),
+                    "kMGTPE".charAt(exp - 1));
     }
 
 
@@ -2551,23 +2612,23 @@ public class Helper {
 
     public static String secondsToString(int pTime) {
 
-        int hour = pTime/3600;
-        int min = (pTime -(hour*3600))/60;
-        int sec = pTime -(hour*3600)-(min*60);
-        String strHour="0", strMin="0", strSec="0";
+        int hour = pTime / 3600;
+        int min = (pTime - (hour * 3600)) / 60;
+        int sec = pTime - (hour * 3600) - (min * 60);
+        String strHour = "0", strMin = "0", strSec = "0";
 
-        if( hour > 0 )
+        if (hour > 0)
             strHour = String.format(Locale.getDefault(), "%02d", hour);
-        if( min > 0 )
+        if (min > 0)
             strMin = String.format(Locale.getDefault(), "%02d", min);
         strSec = String.format(Locale.getDefault(), "%02d", sec);
-        if( hour > 0 )
-            return String.format(Locale.getDefault(),"%s:%s:%s",strHour, strMin,strSec);
+        if (hour > 0)
+            return String.format(Locale.getDefault(), "%s:%s:%s", strHour, strMin, strSec);
         else
-            return String.format(Locale.getDefault(), "%s:%s",strMin,strSec);
+            return String.format(Locale.getDefault(), "%s:%s", strMin, strSec);
     }
 
-    public static void loadGiF(final Context context, String url, final ImageView imageView){
+    public static void loadGiF(final Context context, String url, final ImageView imageView) {
         SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         boolean disableGif = sharedpreferences.getBoolean(SET_DISABLE_GIF, false);
 
@@ -2576,41 +2637,45 @@ public class Helper {
                 return;
             }
         }
-        if( url == null || url.contains("missing.png")) {
+        if (url == null || url.contains("missing.png")) {
             try {
                 Glide.with(imageView.getContext())
                         .load(R.drawable.missing)
                         .apply(new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(10)))
                         .into(imageView);
-            }catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
             return;
         }
-        if( !disableGif)
+        if (!disableGif)
             try {
                 Glide.with(imageView.getContext())
                         .load(url)
                         .apply(new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(10)))
                         .into(imageView);
-            }catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
         else
             try {
-            Glide.with(context)
-                    .asBitmap()
-                    .apply(new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(10)))
-                    .load(url)
-                    .into(imageView);
-            }catch (Exception ignored){}
+                Glide.with(context)
+                        .asBitmap()
+                        .apply(new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(10)))
+                        .load(url)
+                        .into(imageView);
+            } catch (Exception ignored) {
+            }
     }
 
     /**
      * Manage URLs to open (built-in or external app)
+     *
      * @param context Context
-     * @param url String url to open
+     * @param url     String url to open
      */
-    public static void openBrowser(Context context, String url){
+    public static void openBrowser(Context context, String url) {
         SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, android.content.Context.MODE_PRIVATE);
         boolean embedded_browser = sharedpreferences.getBoolean(Helper.SET_EMBEDDED_BROWSER, true);
-        if( embedded_browser) {
+        if (embedded_browser) {
             Intent intent = new Intent(context, WebviewActivity.class);
             Bundle b = new Bundle();
             String finalUrl = url;
@@ -2619,20 +2684,20 @@ public class Helper {
             b.putString("url", finalUrl);
             intent.putExtras(b);
             context.startActivity(intent);
-        }else {
+        } else {
             boolean custom_tabs = sharedpreferences.getBoolean(Helper.SET_CUSTOM_TABS, true);
-            if( custom_tabs){
+            if (custom_tabs) {
                 CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
                 CustomTabsIntent customTabsIntent = builder.build();
                 builder.setToolbarColor(ContextCompat.getColor(context, R.color.mastodonC1));
                 customTabsIntent.launchUrl(context, Uri.parse(url));
-            }else{
+            } else {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
                 try {
                     context.startActivity(intent);
-                }catch (Exception e){
-                    Toasty.error(context, context.getString(R.string.toast_error),Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Toasty.error(context, context.getString(R.string.toast_error), Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -2640,25 +2705,26 @@ public class Helper {
     }
 
 
-    public static void installProvider(){
+    public static void installProvider() {
         try {
-            Security.insertProviderAt(Conscrypt.newProvider(),1);
-        }catch (Exception ignored){}
+            Security.insertProviderAt(Conscrypt.newProvider(), 1);
+        } catch (Exception ignored) {
+        }
     }
 
 
-    public enum MediaType{
+    public enum MediaType {
         MEDIA,
         PROFILE
     }
 
-    public static ByteArrayInputStream compressImage(Context context, android.net.Uri uriFile, MediaType mediaType){
+    public static ByteArrayInputStream compressImage(Context context, android.net.Uri uriFile, MediaType mediaType) {
         Bitmap takenImage;
         ByteArrayInputStream bs = null;
         try {
             takenImage = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uriFile);
         } catch (IOException e) {
-            Toasty.error(context, context.getString(R.string.toast_error),Toast.LENGTH_LONG).show();
+            Toasty.error(context, context.getString(R.string.toast_error), Toast.LENGTH_LONG).show();
             return null;
         }
         ExifInterface exif = null;
@@ -2669,82 +2735,88 @@ public class Helper {
             e.printStackTrace();
         }
         Matrix matrix = null;
-        if( takenImage != null ){
+        if (takenImage != null) {
             int size = takenImage.getByteCount();
-            if( exif != null) {
+            if (exif != null) {
                 int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
                 int rotationDegree = 0;
-                if (rotation == ExifInterface.ORIENTATION_ROTATE_90) { rotationDegree = 90; }
-                else if (rotation == ExifInterface.ORIENTATION_ROTATE_180) {  rotationDegree = 180; }
-                else if (rotation == ExifInterface.ORIENTATION_ROTATE_270) {  rotationDegree =  270; }
+                if (rotation == ExifInterface.ORIENTATION_ROTATE_90) {
+                    rotationDegree = 90;
+                } else if (rotation == ExifInterface.ORIENTATION_ROTATE_180) {
+                    rotationDegree = 180;
+                } else if (rotation == ExifInterface.ORIENTATION_ROTATE_270) {
+                    rotationDegree = 270;
+                }
                 matrix = new Matrix();
-                if (rotation != 0f) {matrix.preRotate(rotationDegree);}
+                if (rotation != 0f) {
+                    matrix.preRotate(rotationDegree);
+                }
             }
 
             SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, android.content.Context.MODE_PRIVATE);
             int resizeSet = sharedpreferences.getInt(Helper.SET_PICTURE_RESIZE, Helper.S_2MO);
-            if( mediaType == MediaType.PROFILE)
+            if (mediaType == MediaType.PROFILE)
                 resizeSet = Helper.S_1MO;
             double resizeby = size;
-            if( resizeSet == Helper.S_512KO){
+            if (resizeSet == Helper.S_512KO) {
                 resizeby = 4194304;
-            }else if(resizeSet == Helper.S_1MO){
+            } else if (resizeSet == Helper.S_1MO) {
                 resizeby = 8388608;
-            }else if(resizeSet == Helper.S_2MO){
+            } else if (resizeSet == Helper.S_2MO) {
                 resizeby = 16777216;
             }
-            double resize = ((double)size)/resizeby;
-            if( resize > 1 ){
+            double resize = ((double) size) / resizeby;
+            if (resize > 1) {
                 ContentResolver cr = context.getContentResolver();
                 String mime = cr.getType(uriFile);
                 Bitmap newBitmap = Bitmap.createScaledBitmap(takenImage, (int) (takenImage.getWidth() / resize),
                         (int) (takenImage.getHeight() / resize), true);
                 Bitmap adjustedBitmap;
-                if( matrix != null)
+                if (matrix != null)
                     try {
                         adjustedBitmap = Bitmap.createBitmap(newBitmap, 0, 0, newBitmap.getWidth(), newBitmap.getHeight(), matrix, true);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         adjustedBitmap = newBitmap;
                     }
                 else
                     adjustedBitmap = newBitmap;
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                if( mime !=null && (mime.contains("png") || mime.contains(".PNG")))
+                if (mime != null && (mime.contains("png") || mime.contains(".PNG")))
                     adjustedBitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
                 else
                     adjustedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
                 byte[] bitmapdata = bos.toByteArray();
                 bs = new ByteArrayInputStream(bitmapdata);
-            }else {
+            } else {
                 try {
                     InputStream inputStream = context.getContentResolver().openInputStream(uriFile);
                     byte[] buff = new byte[8 * 1024];
                     int bytesRead;
                     ByteArrayOutputStream bao = new ByteArrayOutputStream();
                     assert inputStream != null;
-                    while((bytesRead = inputStream.read(buff)) != -1) {
+                    while ((bytesRead = inputStream.read(buff)) != -1) {
                         bao.write(buff, 0, bytesRead);
                     }
                     byte[] data = bao.toByteArray();
-                    bs  = new ByteArrayInputStream(data);
+                    bs = new ByteArrayInputStream(data);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        }else {
+        } else {
             try {
                 InputStream inputStream = context.getContentResolver().openInputStream(uriFile);
                 byte[] buff = new byte[8 * 1024];
                 int bytesRead;
                 ByteArrayOutputStream bao = new ByteArrayOutputStream();
                 assert inputStream != null;
-                while((bytesRead = inputStream.read(buff)) != -1) {
+                while ((bytesRead = inputStream.read(buff)) != -1) {
                     bao.write(buff, 0, bytesRead);
                 }
                 byte[] data = bao.toByteArray();
-                bs  = new ByteArrayInputStream(data);
+                bs = new ByteArrayInputStream(data);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -2766,25 +2838,25 @@ public class Helper {
             returnCursor.close();
             Random r = new Random();
             int suf = r.nextInt(9999 - 1000) + 1000;
-            return String.valueOf(suf)+name;
-        }catch (Exception e){
+            return String.valueOf(suf) + name;
+        } catch (Exception e) {
             Random r = new Random();
             int suf = r.nextInt(9999 - 1000) + 1000;
             ContentResolver cr = context.getContentResolver();
             String mime = cr.getType(uri);
-            if( mime != null && mime.split("/").length > 1)
-                return "__" + String.valueOf(suf)+"."+mime.split("/")[1];
+            if (mime != null && mime.split("/").length > 1)
+                return "__" + String.valueOf(suf) + "." + mime.split("/")[1];
             else
-                return "__" + String.valueOf(suf)+".jpg";
+                return "__" + String.valueOf(suf) + ".jpg";
         }
     }
 
-    public static Bitmap compressImageIfNeeded(Context context, Bitmap bmToCompress){
+    public static Bitmap compressImageIfNeeded(Context context, Bitmap bmToCompress) {
 
         int size = bmToCompress.getByteCount();
-        double resizeby =  33554432; //4Mo
-        double resize = ((double)size)/resizeby;
-        if( resize > 1 ) {
+        double resizeby = 33554432; //4Mo
+        double resize = ((double) size) / resizeby;
+        if (resize > 1) {
             Bitmap newBitmap = Bitmap.createScaledBitmap(bmToCompress, (int) (bmToCompress.getWidth() / resize),
                     (int) (bmToCompress.getHeight() / resize), true);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -2806,47 +2878,46 @@ public class Helper {
     }
 
 
-
-    public static void refreshSearchTag(Context context, TabLayout tableLayout, BaseMainActivity.PagerAdapter pagerAdapter){
+    public static void refreshSearchTag(Context context, TabLayout tableLayout, BaseMainActivity.PagerAdapter pagerAdapter) {
         SQLiteDatabase db = Sqlite.getInstance(context, Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
         List<String> searches = new SearchDAO(context, db).getAllSearch();
         int countInitialTab = ((BaseMainActivity) context).countPage;
         int allTabCount = tableLayout.getTabCount();
-        if( allTabCount > countInitialTab){
-            while(allTabCount > countInitialTab){
-                removeTab(tableLayout, pagerAdapter, allTabCount-1);
-                allTabCount -=1;
+        if (allTabCount > countInitialTab) {
+            while (allTabCount > countInitialTab) {
+                removeTab(tableLayout, pagerAdapter, allTabCount - 1);
+                allTabCount -= 1;
             }
         }
         int i = countInitialTab;
-        if( searches != null) {
+        if (searches != null) {
             for (String search : searches) {
                 addTab(tableLayout, pagerAdapter, search);
                 BaseMainActivity.typePosition.put(i, RetrieveFeedsAsyncTask.Type.TAG);
                 i++;
             }
-            if( searches.size() > 0 ){
+            if (searches.size() > 0) {
                 tableLayout.setTabGravity(TabLayout.GRAVITY_FILL);
                 tableLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
             }
         }
         final SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, android.content.Context.MODE_PRIVATE);
         final int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
-        if( theme == THEME_LIGHT)
+        if (theme == THEME_LIGHT)
             tableLayout.setTabTextColors(ContextCompat.getColor(context, R.color.mastodonC1), ContextCompat.getColor(context, R.color.mastodonC4));
-        else if( theme == THEME_BLACK)
+        else if (theme == THEME_BLACK)
             tableLayout.setTabTextColors(ContextCompat.getColor(context, R.color.dark_text), ContextCompat.getColor(context, R.color.dark_icon));
-        else if( theme == THEME_DARK)
+        else if (theme == THEME_DARK)
             tableLayout.setTabTextColors(ContextCompat.getColor(context, R.color.dark_text), ContextCompat.getColor(context, R.color.mastodonC4));
     }
 
     public static void removeTab(TabLayout tableLayout, BaseMainActivity.PagerAdapter pagerAdapter, int position) {
-        if (tableLayout.getTabCount() >= position  ) {
+        if (tableLayout.getTabCount() >= position) {
             try {
-                if(tableLayout.getTabCount() > 0)
+                if (tableLayout.getTabCount() > 0)
                     tableLayout.removeTabAt(position);
                 pagerAdapter.removeTabPage();
-            }catch (Exception ignored){
+            } catch (Exception ignored) {
                 refreshSearchTag(tableLayout.getContext(), tableLayout, pagerAdapter);
             }
 
@@ -2854,21 +2925,18 @@ public class Helper {
     }
 
 
-
-
-    public static void removeSearchTag(String keyword, TabLayout tableLayout, BaseMainActivity.PagerAdapter pagerAdapter){
+    public static void removeSearchTag(String keyword, TabLayout tableLayout, BaseMainActivity.PagerAdapter pagerAdapter) {
 
         int selection = -1;
-        for(int i = 0; i < tableLayout.getTabCount() ; i++ ){
-            if( tableLayout.getTabAt(i).getText() != null && tableLayout.getTabAt(i).getText().equals(keyword)) {
+        for (int i = 0; i < tableLayout.getTabCount(); i++) {
+            if (tableLayout.getTabAt(i).getText() != null && tableLayout.getTabAt(i).getText().equals(keyword)) {
                 selection = i;
                 break;
             }
         }
-        if( selection != -1)
+        if (selection != -1)
             removeTab(tableLayout, pagerAdapter, selection);
     }
-
 
 
     private static void addTab(TabLayout tableLayout, BaseMainActivity.PagerAdapter pagerAdapter, String title) {
@@ -2879,11 +2947,12 @@ public class Helper {
 
     /**
      * Allows to split the toot by dot "." for sentences - adds number at the end automatically
-     * @param content String initial content
+     *
+     * @param content  String initial content
      * @param maxChars int the max chars per toot (minus 10 to write the page: 1/x, 2/x etc.)
      * @return ArrayList<String> split toot
      */
-    public static ArrayList<String> splitToots(String content, int maxChars){
+    public static ArrayList<String> splitToots(String content, int maxChars) {
         String[] splitContent = content.split("(\\.\\s){1}");
         ArrayList<String> splitToot = new ArrayList<>();
         StringBuilder tempContent = new StringBuilder(splitContent[0]);
@@ -2899,63 +2968,62 @@ public class Helper {
             mentions.add(mentionLong);
         }
         StringBuilder mentionString = new StringBuilder();
-        for(String mention: mentions){
+        for (String mention : mentions) {
             mentionString.append(mention).append(" ");
         }
         int mentionLength = mentionString.length();
         int maxCharsMention = maxChars - mentionLength;
-        for(int i= 0 ; i < splitContent.length ; i++){
+        for (int i = 0; i < splitContent.length; i++) {
             if (i < (splitContent.length - 1) && (tempContent.length() + splitContent[i + 1].length()) < (maxChars - 10)) {
                 tempContent.append(". ").append(splitContent[i + 1]);
             } else {
                 splitToot.add(tempContent.toString());
                 if (i < (splitContent.length - 1)) {
-                    if( maxCharsMention > 0){
+                    if (maxCharsMention > 0) {
                         maxChars = maxCharsMention;
-                        tempContent = new StringBuilder(mentionString+splitContent[i + 1]);
-                    }else{
+                        tempContent = new StringBuilder(mentionString + splitContent[i + 1]);
+                    } else {
                         tempContent = new StringBuilder(splitContent[i + 1]);
                     }
                 }
             }
         }
-        int i=1;
+        int i = 1;
         ArrayList<String> reply = new ArrayList<>();
-        for(String newContent : splitToot){
-            reply.add((i-1), newContent + " - " + i + "/" + splitToot.size());
+        for (String newContent : splitToot) {
+            reply.add((i - 1), newContent + " - " + i + "/" + splitToot.size());
             i++;
         }
         return reply;
     }
 
 
-
-    public static boolean filterToots(Context context, Status status, List<String> timedMute, RetrieveFeedsAsyncTask.Type type){
+    public static boolean filterToots(Context context, Status status, List<String> timedMute, RetrieveFeedsAsyncTask.Type type) {
         String filter;
-        if( status == null)
+        if (status == null)
             return true;
         SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
-        if( type == RetrieveFeedsAsyncTask.Type.HOME)
+        if (type == RetrieveFeedsAsyncTask.Type.HOME)
             filter = sharedpreferences.getString(Helper.SET_FILTER_REGEX_HOME, null);
-        else if( type == RetrieveFeedsAsyncTask.Type.LOCAL)
+        else if (type == RetrieveFeedsAsyncTask.Type.LOCAL)
             filter = sharedpreferences.getString(Helper.SET_FILTER_REGEX_LOCAL, null);
         else
             filter = sharedpreferences.getString(Helper.SET_FILTER_REGEX_PUBLIC, null);
 
         String content = status.getContent();
-        if( status.getSpoiler_text() != null)
-            content += " "+ status.getSpoiler_text();
+        if (status.getSpoiler_text() != null)
+            content += " " + status.getSpoiler_text();
         boolean addToot = true; //Flag to tell if the current toot will be added.
-        if( status.getAccount()  == null)
+        if (status.getAccount() == null)
             addToot = false;
         boolean show_nsfw = sharedpreferences.getBoolean(Helper.SET_ART_WITH_NSFW, false);
-        if( type == RetrieveFeedsAsyncTask.Type.ART && !show_nsfw && status.isSensitive()) {
+        if (type == RetrieveFeedsAsyncTask.Type.ART && !show_nsfw && status.isSensitive()) {
             addToot = false;
         }
-        if(addToot && MainActivity.filters != null){
-            for(Filters mfilter: filters){
+        if (addToot && MainActivity.filters != null) {
+            for (Filters mfilter : filters) {
                 ArrayList<String> filterContext = mfilter.getContext();
-                if(
+                if (
                         (type == RetrieveFeedsAsyncTask.Type.HOME && filterContext.contains("home")) ||
                                 (type == RetrieveFeedsAsyncTask.Type.LOCAL && filterContext.contains("public")) ||
                                 (type == RetrieveFeedsAsyncTask.Type.PUBLIC && filterContext.contains("public"))
@@ -2969,20 +3037,22 @@ public class Helper {
                             Matcher matcher = filterPattern.matcher(content);
                             if (matcher.find())
                                 addToot = false;
-                        } catch (Exception ignored) { }
+                        } catch (Exception ignored) {
+                        }
                     }
                 }
             }
         }
-        if( addToot && filter != null && filter.length() > 0){
+        if (addToot && filter != null && filter.length() > 0) {
             try {
                 Pattern filterPattern = Pattern.compile("(" + filter + ")", Pattern.CASE_INSENSITIVE);
                 Matcher matcher = filterPattern.matcher(content);
                 if (matcher.find())
                     addToot = false;
-            }catch (Exception ignored){ }
+            } catch (Exception ignored) {
+            }
         }
-        if(addToot) {
+        if (addToot) {
             if (type == RetrieveFeedsAsyncTask.Type.HOME) {
                 if (status.getReblog() != null && !sharedpreferences.getBoolean(Helper.SET_SHOW_BOOSTS, true))
                     addToot = false;
@@ -2998,7 +3068,7 @@ public class Helper {
                 }
             }
         }
-        if( addToot){
+        if (addToot) {
             if (timedMute != null && timedMute.size() > 0) {
                 if (timedMute.contains(status.getAccount().getId()))
                     addToot = false;
@@ -3010,7 +3080,7 @@ public class Helper {
     public static void colorizeIconMenu(Menu menu, int toolbarIconsColor) {
         final PorterDuffColorFilter colorFilter
                 = new PorterDuffColorFilter(toolbarIconsColor, PorterDuff.Mode.MULTIPLY);
-        for(int i = 0; i < menu.size(); i++) {
+        for (int i = 0; i < menu.size(); i++) {
             MenuItem v = menu.getItem(i);
             v.getIcon().setColorFilter(colorFilter);
         }
@@ -3019,42 +3089,43 @@ public class Helper {
     /**
      * Code from "Michal Pawlowski"
      * https://snow.dog/blog/how-to-dynamicaly-change-android-toolbar-icons-color
-     * @param toolbarView toolbar view being colored
+     *
+     * @param toolbarView       toolbar view being colored
      * @param toolbarIconsColor the target color of toolbar icons
-     * @param activity reference to activity needed to register observers
+     * @param activity          reference to activity needed to register observers
      */
     public static void colorizeToolbar(Toolbar toolbarView, int toolbarIconsColor, Activity activity) {
         final PorterDuffColorFilter colorFilter
                 = new PorterDuffColorFilter(toolbarIconsColor, PorterDuff.Mode.SRC_ATOP);
 
-        for(int i = 0; i < toolbarView.getChildCount(); i++) {
+        for (int i = 0; i < toolbarView.getChildCount(); i++) {
             final View v = toolbarView.getChildAt(i);
 
             //Step 1 : Changing the color of back button (or open drawer button).
-            if(v instanceof ImageButton) {
+            if (v instanceof ImageButton) {
                 //Action Bar back button
-                ((ImageButton)v).getDrawable().setColorFilter(colorFilter);
+                ((ImageButton) v).getDrawable().setColorFilter(colorFilter);
             }
-            if(v instanceof ImageView) {
+            if (v instanceof ImageView) {
                 //Action Bar back button
-                if( v.getId() != R.id.pp_actionBar)
-                    ((ImageView)v).setColorFilter(colorFilter);
+                if (v.getId() != R.id.pp_actionBar)
+                    ((ImageView) v).setColorFilter(colorFilter);
             }
-            if(v instanceof MenuItem) {
-                ((MenuItem)v).getIcon().setColorFilter(colorFilter);
+            if (v instanceof MenuItem) {
+                ((MenuItem) v).getIcon().setColorFilter(colorFilter);
             }
 
-            if(v instanceof ActionMenuView) {
-                for(int j = 0; j < ((ActionMenuView)v).getChildCount(); j++) {
+            if (v instanceof ActionMenuView) {
+                for (int j = 0; j < ((ActionMenuView) v).getChildCount(); j++) {
 
                     //Step 2: Changing the color of any ActionMenuViews - icons that
                     //are not back button, nor text, nor overflow menu icon.
-                    final View innerView = ((ActionMenuView)v).getChildAt(j);
+                    final View innerView = ((ActionMenuView) v).getChildAt(j);
 
-                    if(innerView instanceof ActionMenuItemView) {
-                        int drawablesCount = ((ActionMenuItemView)innerView).getCompoundDrawables().length;
-                        for(int k = 0; k < drawablesCount; k++) {
-                            if(((ActionMenuItemView)innerView).getCompoundDrawables()[k] != null) {
+                    if (innerView instanceof ActionMenuItemView) {
+                        int drawablesCount = ((ActionMenuItemView) innerView).getCompoundDrawables().length;
+                        for (int k = 0; k < drawablesCount; k++) {
+                            if (((ActionMenuItemView) innerView).getCompoundDrawables()[k] != null) {
                                 final int finalK = k;
 
                                 //Important to set the color filter in seperate thread,
@@ -3084,12 +3155,12 @@ public class Helper {
     /**
      * It's important to set overflowDescription atribute in styles, so we can grab the reference
      * to the overflow icon. Check: res/values/styles.xml
+     *
      * @param activity
      * @param colorFilter
      */
     private static void setOverflowButtonColor(final Activity activity, final PorterDuffColorFilter colorFilter) {
-        @SuppressLint("PrivateResource")
-        final String overflowDescription = activity.getString(R.string.abc_action_menu_overflow_description);
+        @SuppressLint("PrivateResource") final String overflowDescription = activity.getString(R.string.abc_action_menu_overflow_description);
         final ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
         final ViewTreeObserver viewTreeObserver = decorView.getViewTreeObserver();
         viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -3101,9 +3172,9 @@ public class Helper {
                 if (outViews.isEmpty()) {
                     return;
                 }
-                android.support.v7.widget.AppCompatImageView overflow=(android.support.v7.widget.AppCompatImageView) outViews.get(0);
+                android.support.v7.widget.AppCompatImageView overflow = (android.support.v7.widget.AppCompatImageView) outViews.get(0);
                 overflow.setColorFilter(colorFilter);
-                removeOnGlobalLayoutListener(decorView,this);
+                removeOnGlobalLayoutListener(decorView, this);
             }
         });
     }
@@ -3111,17 +3182,16 @@ public class Helper {
     private static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
-        }
-        else {
+        } else {
             v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
         }
     }
 
-    public static void changeBatteryProfile(Context context){
+    public static void changeBatteryProfile(Context context) {
         SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, Context.MODE_PRIVATE);
         int batteryProfile = sharedpreferences.getInt(Helper.SET_BATTERY_PROFILE, Helper.BATTERY_PROFILE_NORMAL);
         SharedPreferences.Editor editor = sharedpreferences.edit();
-        switch (batteryProfile){
+        switch (batteryProfile) {
             case BATTERY_PROFILE_NORMAL:
                 editor.putBoolean(Helper.SET_LIVE_NOTIFICATIONS, true);
                 editor.putBoolean(Helper.SET_KEEP_BACKGROUND_PROCESS, true);
@@ -3141,7 +3211,7 @@ public class Helper {
         }
     }
 
-    public static String[] getLocales(Context context){
+    public static String[] getLocales(Context context) {
         String[] locale = new String[20];
         locale[0] = context.getString(R.string.default_language);
         locale[1] = context.getString(R.string.english);
@@ -3167,8 +3237,8 @@ public class Helper {
     }
 
 
-    public static String getLocalesTwoChars(int stringLocaleId){
-        switch (stringLocaleId){
+    public static String getLocalesTwoChars(int stringLocaleId) {
+        switch (stringLocaleId) {
             case R.string.default_language:
                 return Locale.getDefault().getLanguage();
             case R.string.english:
@@ -3223,10 +3293,10 @@ public class Helper {
     }
 
 
-    public static int languageSpinnerPosition(Context context){
+    public static int languageSpinnerPosition(Context context) {
         SharedPreferences sharedpreferences = context.getSharedPreferences(Helper.APP_PREFS, android.content.Context.MODE_PRIVATE);
         String defaultLocaleString = sharedpreferences.getString(Helper.SET_DEFAULT_LOCALE_NEW, "NOT_DEFINED");
-        switch (defaultLocaleString){
+        switch (defaultLocaleString) {
             case "NOT_DEFINED":
                 return 0;
             case "en":
@@ -3272,16 +3342,16 @@ public class Helper {
         }
     }
 
-    public static boolean containsCaseInsensitive(String s, List<String> l){
-        for (String string : l){
-            if (string.equalsIgnoreCase(s)){
+    public static boolean containsCaseInsensitive(String s, List<String> l) {
+        for (String string : l) {
+            if (string.equalsIgnoreCase(s)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean isTablet(Context context){
+    public static boolean isTablet(Context context) {
         return context.getResources().getBoolean(R.bool.isTablet);
     }
 }

@@ -46,6 +46,7 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -504,6 +505,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
 
 
         if ( account.getFields() != null && account.getFields().size() > 0){
+            Log.d("fields",account.getFields().toString());
             LinkedHashMap<String, String> fields = account.getFields();
             LinkedHashMap<String, Boolean> fieldsVerified = account.getFieldsVerified();
             Iterator it = fields.entrySet().iterator();
