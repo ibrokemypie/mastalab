@@ -3235,9 +3235,9 @@ public class API {
         Instance instance = new Instance();
         try {
             instance.setUri(resobj.get("uri").toString());
-            instance.setTitle(resobj.get("title").toString());
+            instance.setTitle(resobj.get("name").toString());
             instance.setDescription(resobj.get("description").toString());
-            instance.setEmail(resobj.get("email").toString());
+            instance.setEmail(resobj.getJSONObject("maintainer").get("email").toString());
             instance.setVersion(resobj.get("version").toString());
         } catch (JSONException e) {
             setDefaultError(e);
