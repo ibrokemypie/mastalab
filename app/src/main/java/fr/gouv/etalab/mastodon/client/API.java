@@ -3077,7 +3077,8 @@ public class API {
         Status status = new Status();
         try {
             status.setId(resobj.get("id").toString());
-            status.setUri(instance + "/notes" + resobj.get("id").toString());
+            status.setUri(Helper.instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
+            status.setUrl(Helper.instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
             status.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
             try {
                 status.setIn_reply_to_id(resobj.getJSONObject("reply").get("replyId").toString());
