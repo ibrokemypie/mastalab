@@ -507,32 +507,32 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
         //New data are available
         if (context == null)
             return;
-        if( status.getId() != null && statuses != null && statuses.size() > 0 && statuses.get(0)!= null
-                && Long.parseLong(status.getId()) > Long.parseLong(statuses.get(0).getId())) {
-            List<Status> tempTootResult = new ArrayList();
-            tempTootResult.add(status);
-            if( tempTootResult.size() > 0)
-                status = tempTootResult.get(0);
-            if (type == RetrieveFeedsAsyncTask.Type.HOME) {
-
-                //Makes sure the status is not already displayed
-                if( !statuses.contains(status)){
-                    //Update the id of the last toot retrieved
-                    MainActivity.lastHomeId = status.getId();
-                    statuses.add(0, status);
-                    if (!status.getAccount().getId().equals(userId)) {
-                        MainActivity.countNewStatus++;
-                    }
-                    try {
-                        ((MainActivity) context).updateHomeCounter();
-                    }catch (Exception ignored){}
-                    statusListAdapter.notifyItemInserted(0);
-                    if (textviewNoAction.getVisibility() == View.VISIBLE)
-                        textviewNoAction.setVisibility(View.GONE);
-                }
-
-            } else if (type == RetrieveFeedsAsyncTask.Type.PUBLIC || type == RetrieveFeedsAsyncTask.Type.LOCAL|| type == RetrieveFeedsAsyncTask.Type.DIRECT) {
-
+//        if( status.getId() != null && statuses != null && statuses.size() > 0 && statuses.get(0)!= null
+//                && Long.parseLong(status.getId()) > Long.parseLong(statuses.get(0).getId())) {
+//            List<Status> tempTootResult = new ArrayList();
+//            tempTootResult.add(status);
+//            if( tempTootResult.size() > 0)
+//                status = tempTootResult.get(0);
+//            if (type == RetrieveFeedsAsyncTask.Type.HOME) {
+//
+//                //Makes sure the status is not already displayed
+//                if( !statuses.contains(status)){
+//                    //Update the id of the last toot retrieved
+//                    MainActivity.lastHomeId = status.getId();
+//                    statuses.add(0, status);
+//                    if (!status.getAccount().getId().equals(userId)) {
+//                        MainActivity.countNewStatus++;
+//                    }
+//                    try {
+//                        ((MainActivity) context).updateHomeCounter();
+//                    }catch (Exception ignored){}
+//                    statusListAdapter.notifyItemInserted(0);
+//                    if (textviewNoAction.getVisibility() == View.VISIBLE)
+//                        textviewNoAction.setVisibility(View.GONE);
+//                }
+//
+//            } else if (type == RetrieveFeedsAsyncTask.Type.PUBLIC || type == RetrieveFeedsAsyncTask.Type.LOCAL|| type == RetrieveFeedsAsyncTask.Type.DIRECT) {
+//
                 status.setNew(false);
                 statuses.add(0, status);
                 int firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
@@ -542,9 +542,9 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
                     statusListAdapter.notifyDataSetChanged();
                 if (textviewNoAction.getVisibility() == View.VISIBLE)
                     textviewNoAction.setVisibility(View.GONE);
-
-            }
-        }
+//
+//            }
+//        }
     }
 
 
@@ -783,17 +783,17 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
                 if( this.statuses != null) {
                     if (this.statuses.size() == 0){
                         if( type != RetrieveFeedsAsyncTask.Type.HOME){
-                            if( Long.parseLong(statuses.get(i).getId()) > Long.parseLong(this.statuses.get(0).getId())) {
-                                inserted++;
-                                this.statuses.add(0, statuses.get(i));
-                            }
+//                            if( Long.parseLong(statuses.get(i).getId()) > Long.parseLong(this.statuses.get(0).getId())) {
+//                                inserted++;
+//                                this.statuses.add(0, statuses.get(i));
+//                            }
                         }else {
-                            if( lastReadToot != null && Long.parseLong(statuses.get(i).getId()) > Long.parseLong(lastReadToot)) {
-                                statuses.get(i).setNew(true);
-                                MainActivity.countNewStatus++;
-                                inserted++;
-                                this.statuses.add(0, statuses.get(i));
-                            }
+//                            if( lastReadToot != null && Long.parseLong(statuses.get(i).getId()) > Long.parseLong(lastReadToot)) {
+//                                statuses.get(i).setNew(true);
+//                                MainActivity.countNewStatus++;
+//                                inserted++;
+//                                this.statuses.add(0, statuses.get(i));
+//                            }
                         }
 
                     }
@@ -842,10 +842,10 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
             //Put the toot at its place in the list (id desc)
             if( !this.statuses.contains(tmpStatus) ) { //Element not already added
                 //Mark status at new ones when their id is greater than the last read toot id
-                if (type == RetrieveFeedsAsyncTask.Type.HOME && lastReadToot != null && Long.parseLong(tmpStatus.getId()) > Long.parseLong(lastReadToot)) {
-                    tmpStatus.setNew(true);
-                    MainActivity.countNewStatus++;
-                }
+//                if (type == RetrieveFeedsAsyncTask.Type.HOME && lastReadToot != null && Long.parseLong(tmpStatus.getId()) > Long.parseLong(lastReadToot)) {
+//                    tmpStatus.setNew(true);
+//                    MainActivity.countNewStatus++;
+//                }
                 tmpStatuses.add(tmpStatus);
             }
         }
@@ -855,10 +855,10 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
         int tootPerPage = sharedpreferences.getInt(Helper.SET_TOOTS_PER_PAGE, 40);
         //Display the fetch more toot button
         if( tmpStatuses.size()  >= tootPerPage) {
-            if (initialBookMark != null && !fetchMoreButtonDisplayed && tmpStatuses.size() > 0 && Long.parseLong(tmpStatuses.get(tmpStatuses.size() - 1).getId()) > Long.parseLong(initialBookMark)) {
-                tmpStatuses.get(tmpStatuses.size() - 1).setFetchMore(true);
-                fetchMoreButtonDisplayed = true;
-            }
+//            if (initialBookMark != null && !fetchMoreButtonDisplayed && tmpStatuses.size() > 0 && Long.parseLong(tmpStatuses.get(tmpStatuses.size() - 1).getId()) > Long.parseLong(initialBookMark)) {
+//                tmpStatuses.get(tmpStatuses.size() - 1).setFetchMore(true);
+//                fetchMoreButtonDisplayed = true;
+//            }
         }
         this.statuses.addAll(position, tmpStatuses);
         statusListAdapter.notifyItemRangeInserted(position, tmpStatuses.size());
