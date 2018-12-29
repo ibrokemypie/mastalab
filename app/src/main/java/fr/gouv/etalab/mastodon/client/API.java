@@ -1632,14 +1632,16 @@ public class API {
                 params.put("noteId",targetedId);
                 break;
             case FOLLOW:
-                action = String.format("/users/%s/follow", targetedId);
+                action = "/following/create";
+                params.put("userId",targetedId);
                 break;
             case REMOTE_FOLLOW:
-                action = "/follows";
-                params.put("uri", targetedId);
+                action = "/following/create";
+                params.put("userId",targetedId);
                 break;
             case UNFOLLOW:
-                action = String.format("/users/%s/unfollow", targetedId);
+                action = "/following/delete";
+                params.put("userId",targetedId);
                 break;
             case BLOCK:
                 action = String.format("/users/%s/block", targetedId);
@@ -3607,10 +3609,10 @@ public class API {
         Relationship relationship = new Relationship();
         try {
             relationship.setId(resobj.get("id").toString());
-            relationship.setFollowing(Boolean.valueOf(resobj.get("isFollowed").toString()));
-            relationship.setFollowed_by(Boolean.valueOf(resobj.get("isFollowing").toString()));
-            relationship.setBlocking(Boolean.valueOf(resobj.get("isBlocking").toString()));
-            relationship.setMuting(Boolean.valueOf(resobj.get("isMuted").toString()));
+            relationship.setFollowing(resobj.getBoolean("isFollowed"));
+            relationship.setFollowed_by(resobj.getBoolean("isFollowing"));
+            relationship.setBlocking(resobj.getBoolean("isBlocking"));
+            relationship.setMuting(resobj.getBoolean("isMuted"));
             try {
                 relationship.setMuting_notifications(Boolean.valueOf(resobj.get("muting_notifications").toString()));
             } catch (Exception ignored) {
