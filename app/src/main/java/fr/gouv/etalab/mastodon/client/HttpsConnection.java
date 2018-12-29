@@ -335,7 +335,6 @@ public class HttpsConnection {
             httpsURLConnection.setDoOutput(true);
             httpsURLConnection.setSSLSocketFactory(new TLSSocketFactory());
             httpsURLConnection.setRequestMethod("POST");
-
             httpsURLConnection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
 
 
@@ -371,8 +370,6 @@ public class HttpsConnection {
             httpURLConnection.setConnectTimeout(timeout * 1000);
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setRequestMethod("POST");
-            if (token != null)
-                httpURLConnection.setRequestProperty("Authorization", "Bearer " + token);
             httpURLConnection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
 
             httpURLConnection.getOutputStream().write(postDataBytes);
