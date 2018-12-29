@@ -3180,12 +3180,12 @@ public class API {
             try {
                 status.setFavourites_count(resobj.getJSONArray("reactionCounts").length());
             } catch (JSONException e) {
-                status.setFavourites_count(-1);
+                status.setFavourites_count(0);
             }
             try {
                 status.setReblogs_count(resobj.getJSONArray("renoteCount").length());
             } catch (JSONException e) {
-                status.setFavourites_count(-1);
+                status.setReblogs_count(0);
             }
             try {
                 status.setReplies_count(Integer.valueOf(resobj.get("repliesCount").toString()));
