@@ -3118,8 +3118,6 @@ public class API {
             }
 //            status.setLanguage(resobj.get("language").toString());
             status.setUri(instance + "/notes" + resobj.get("id").toString());
-            //TODO: replace by the value
-            status.setApplication(new Application());
 
             //Retrieves attachments
             JSONArray arrayAttachement = resobj.getJSONArray("files");
@@ -3204,13 +3202,13 @@ public class API {
 
             //Retrieve Application
             Application application = new Application();
-            try {
-                if (resobj.getJSONObject("application") != null) {
-                    application.setName(resobj.getJSONObject("application").getString("name"));
-                    application.setWebsite(resobj.getJSONObject("application").getString("website"));
-                }
-            } catch (Exception e) {
-                application = new Application();
+            if (!resobj.isNull("app") && !resobj.getJSONObject("app").isNull("name")
+                    && !resobj.getJSONObject("app").isNull("website")) {
+                try {
+                    application.setName(resobj.getJSONObject("app").getString("name"));
+                    application.setWebsite(resobj.getJSONObject("app").getString("website"));
+
+                } catch (Exception ignored) {}
             }
             status.setApplication(application);
 
@@ -3257,9 +3255,15 @@ public class API {
                 status.setReblog(parseStatuses(context, resobj.getJSONObject("renote"), instance));
             } catch (Exception ignored) {
             }
-        } catch (JSONException e) {
+        } catch (
+                JSONException e)
+
+        {
             e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (
+                ParseException e)
+
+        {
             e.printStackTrace();
         }
         return status;
