@@ -441,7 +441,6 @@ public class Helper {
      * @return String
      */
     public static String shortnameToUnicode(String input, boolean removeIfUnsupported) {
-        Log.d("input", input);
         Matcher matcher = SHORTNAME_PATTERN.matcher(input);
 
         boolean supported = Build.VERSION.SDK_INT >= 16;
