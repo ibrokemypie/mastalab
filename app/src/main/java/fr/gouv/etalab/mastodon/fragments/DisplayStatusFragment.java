@@ -171,7 +171,7 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
         //For Home timeline, fetch stored values for bookmark and last read toot
         if( type == RetrieveFeedsAsyncTask.Type.HOME) {
             initialBookMark = sharedpreferences.getString(Helper.BOOKMARK_ID + userId + instance, null);
-            initialBookMarkDate = sharedpreferences.getLong(Helper.BOOKMARK_ID + userId + instance, 0);
+            initialBookMarkDate = sharedpreferences.getLong(Helper.BOOKMARK_DATE_ID + userId + instance, 0);
             lastReadToot = sharedpreferences.getLong(Helper.LAST_READ_TOOT_ID + userId + instance, 0);
         }
         if( type == RetrieveFeedsAsyncTask.Type.TAG && tag != null) {

@@ -199,6 +199,7 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
         mainLoader.setVisibility(View.GONE);
         nextElementLoader.setVisibility(View.GONE);
         String lastReadNotifications = sharedpreferences.getString(Helper.LAST_NOTIFICATION_MAX_ID + userId + instance, null);
+        Long lastReadNotificationsDate = sharedpreferences.getLong(Helper.LAST_NOTIFICATION_MAX_DATE_ID + userId + instance, 0);
         if( apiResponse.getError() != null){
             Toasty.error(context, apiResponse.getError().getError(),Toast.LENGTH_LONG).show();
             flag_loading = false;
@@ -228,16 +229,16 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
         if( notifications != null && notifications.size() > 0) {
             for(Notification tmpNotification: notifications){
 
-//                if( lastReadNotifications != null && Long.parseLong(tmpNotification.getId()) > Long.parseLong(lastReadNotifications)) {
-//                    MainActivity.countNewNotifications++;
-//                }
+                if( lastReadNotifications != null && tmpNotification.getDate_id() > lastReadNotificationsDate) {
+                    MainActivity.countNewNotifications++;
+                }
                 this.notifications.add(tmpNotification);
             }
             if( firstLoad) {
                 //Update the id of the last notification retrieved
-//                if( MainActivity.lastNotificationId == null || Long.parseLong(notifications.get(0).getId()) > Long.parseLong(MainActivity.lastNotificationId))
-//                    MainActivity.lastNotificationId = notifications.get(0).getId();
-//                updateNotificationLastId(String.valueOf(notifications.get(0).getDate_id()));
+                if( MainActivity.lastNotificationId == null || notifications.get(0).getDate_id() > Long.parseLong(MainActivity.lastNotificationId))
+                    MainActivity.lastNotificationId = String.valueOf(notifications.get(0).getDate_id());
+                updateNotificationLastId(String.valueOf(notifications.get(0).getDate_id()));
             }
             notificationsListAdapter.notifyItemRangeInserted(previousPosition, notifications.size());
         }else {
@@ -299,7 +300,7 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
             //Makes sure the notifications is not already displayed
             if( !this.notifications.contains(notification)) {
                 //Update the id of the last notification retrieved
-                MainActivity.lastNotificationId = notification.getId();
+                MainActivity.lastNotificationId = String.valueOf(notification.getDate_id());
                 notifications.add(0, notification);
                 MainActivity.countNewNotifications++;
                 int firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
@@ -320,11 +321,11 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
 
         if( notifications != null && notifications.size() > 0) {
             for (int i = notifications.size()-1 ; i >= 0 ; i--) {
-//                if (this.notifications.size() == 0 ||
-//                        Long.parseLong(notifications.get(i).getId()) > Long.parseLong(this.notifications.get(0).getId())) {
-//                    MainActivity.countNewNotifications++;
-//                    this.notifications.add(0, notifications.get(i));
-//                }
+                if (this.notifications.size() == 0 ||
+                        notifications.get(i).getDate_id() > this.notifications.get(0).getDate_id()) {
+                    MainActivity.countNewNotifications++;
+                    this.notifications.add(0, notifications.get(i));
+                }
             }
             notificationsListAdapter.notifyDataSetChanged();
             try {
@@ -342,11 +343,12 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
     private void updateNotificationLastId(String notificationId){
 
         String lastNotif = sharedpreferences.getString(Helper.LAST_NOTIFICATION_MAX_ID + userId + instance, null);
-//        if( lastNotif == null || Long.parseLong(notificationId) > Long.parseLong(lastNotif)){
-//            MainActivity.countNewNotifications = 0;
-//            SharedPreferences.Editor editor = sharedpreferences.edit();
-//            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + userId + instance, notificationId);
-//            editor.apply();
-//        }
+        if( lastNotif == null || Long.parseLong(notificationId) > Long.parseLong(lastNotif)){
+            MainActivity.countNewNotifications = 0;
+            SharedPreferences.Editor editor = sharedpreferences.edit();
+            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + userId + instance, notificationId);
+            editor.putLong(Helper.LAST_NOTIFICATION_MAX_DATE_ID + userId + instance, Long.valueOf(notificationId));
+            editor.apply();
+        }
     }
 }
