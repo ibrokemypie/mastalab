@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -3208,7 +3209,8 @@ public class API {
                     application.setName(resobj.getJSONObject("app").getString("name"));
                     application.setWebsite(resobj.getJSONObject("app").getString("website"));
 
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
             status.setApplication(application);
 
@@ -3216,7 +3218,14 @@ public class API {
             status.setAccount(parseAccountResponse(context, resobj.getJSONObject("user"), instance));
             status.setContent(resobj.get("text").toString());
             try {
-                status.setFavourites_count(resobj.getJSONArray("reactionCounts").length());
+                JSONObject reactioncounts = resobj.getJSONObject("reactionCounts");
+                Iterator<String> keys = reactioncounts.keys();
+                int reactions = 0;
+                while(keys.hasNext()) {
+                    String key = keys.next();
+                    reactions += reactioncounts.getInt(key);
+                }
+                status.setFavourites_count(reactions);
             } catch (JSONException e) {
                 status.setFavourites_count(0);
             }
