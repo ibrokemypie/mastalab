@@ -151,7 +151,7 @@ public class NotificationsSyncJob extends Job {
         final  List<Notification> notifications = new ArrayList<>();
         int pos = 0;
         for(Notification notif: notificationsReceived){
-            if( max_id == null || Long.parseLong(notif.getId()) > Long.parseLong(max_id) ) {
+            if( max_id == null || notif.getDate_id() > Long.parseLong(max_id) ) {
                 notifications.add(pos, notif);
                 pos++;
             }
@@ -274,7 +274,7 @@ public class NotificationsSyncJob extends Job {
                                         String lastNotif = sharedpreferences.getString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), null);
                                         if( lastNotif == null || Long.parseLong(notifications.get(0).getId()) > Long.parseLong(lastNotif)){
                                             SharedPreferences.Editor editor = sharedpreferences.edit();
-                                            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), notifications.get(0).getId());
+                                            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), String.valueOf(notifications.get(0).getDate_id()));
                                             editor.apply();
                                         }
                                         return false;
@@ -287,7 +287,7 @@ public class NotificationsSyncJob extends Job {
                                         String lastNotif = sharedpreferences.getString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), null);
                                         if( lastNotif == null || Long.parseLong(notifications.get(0).getId()) > Long.parseLong(lastNotif)){
                                             SharedPreferences.Editor editor = sharedpreferences.edit();
-                                            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), notifications.get(0).getId());
+                                            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), String.valueOf(notifications.get(0).getDate_id()));
                                             editor.apply();
                                         }
                                     }

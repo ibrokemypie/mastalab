@@ -407,7 +407,7 @@ public class LiveNotificationService extends Service implements NetworkStateRece
                                                         String lastNotif = sharedpreferences.getString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), null);
                                                         if (lastNotif == null || Long.parseLong(notification.getId()) > Long.parseLong(lastNotif)) {
                                                             SharedPreferences.Editor editor = sharedpreferences.edit();
-                                                            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), notification.getId());
+                                                            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), String.valueOf(notification.getDate_id()));
                                                             editor.apply();
                                                         }
                                                         return false;
@@ -420,7 +420,7 @@ public class LiveNotificationService extends Service implements NetworkStateRece
                                                         String lastNotif = sharedpreferences.getString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), null);
                                                         if (lastNotif == null || Long.parseLong(notification.getId()) > Long.parseLong(lastNotif)) {
                                                             SharedPreferences.Editor editor = sharedpreferences.edit();
-                                                            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), notification.getId());
+                                                            editor.putString(Helper.LAST_NOTIFICATION_MAX_ID + account.getId() + account.getInstance(), String.valueOf(notification.getDate_id()));
                                                             editor.apply();
                                                         }
                                                     }
