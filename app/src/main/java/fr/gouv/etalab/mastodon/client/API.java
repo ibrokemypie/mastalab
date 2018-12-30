@@ -1250,9 +1250,9 @@ public class API {
             if (local)
                 params.put("local", true);
             if (max_id != null)
-                params.put("max_id", max_id);
+                params.put("untilId", max_id);
             if (since_id != null)
-                params.put("since_id", since_id);
+                params.put("sinceId", since_id);
             if (0 > limit || limit > 40)
                 limit = 40;
             params.put("limit", limit);
@@ -1860,9 +1860,9 @@ public class API {
         JSONObject params = new JSONObject();
         try {
             if (max_id != null)
-                params.put("max_id", max_id);
+                params.put("untilId", max_id);
             if (since_id != null)
-                params.put("since_id", since_id);
+                params.put("sinceId", since_id);
             if (0 > limit || limit > 30)
                 limit = 30;
             params.put("limit", limit);
@@ -2346,9 +2346,9 @@ public class API {
 
         HashMap<String, String> params = new HashMap<>();
         if (max_id != null)
-            params.put("max_id", max_id);
+            params.put("untilId", max_id);
         if (since_id != null)
-            params.put("since_id", since_id);
+            params.put("sinceId", since_id);
         if (0 > limit || limit > 80)
             limit = 80;
         params.put("limit", String.valueOf(limit));
