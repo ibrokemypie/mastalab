@@ -3099,6 +3099,7 @@ public class API {
             status.setUri(Helper.instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
             status.setUrl(Helper.instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
             status.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+            status.setDate_id(Helper.mstStringToDate(context, resobj.get("createdAt").toString()).getTime());
             try {
                 status.setIn_reply_to_id(resobj.getJSONObject("reply").get("replyId").toString());
                 status.setIn_reply_to_account_id(resobj.getJSONObject("reply").getJSONObject("user").get("id").toString());
@@ -3789,6 +3790,7 @@ public class API {
             notification.setId(resobj.get("id").toString());
             notification.setType(resobj.get("type").toString());
             notification.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+            notification.setDate_id(Helper.mstStringToDate(context, resobj.get("createdAt").toString()).getTime());
             notification.setAccount(parseAccountResponse(context, resobj.getJSONObject("user"), instance));
             try {
                 notification.setStatus(parseStatuses(context, resobj.getJSONObject("note"), instance));

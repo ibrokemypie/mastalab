@@ -31,9 +31,11 @@ public class Notification implements Parcelable {
     private Date created_at;
     private Account account;
     private Status status;
+    private long date_id;
 
     protected Notification(Parcel in) {
         id = in.readString();
+        date_id = in.readLong();
         type = in.readString();
         account = in.readParcelable(Account.class.getClassLoader());
         status = in.readParcelable(Status.class.getClassLoader());
@@ -101,6 +103,7 @@ public class Notification implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);
+        dest.writeLong(date_id);
         dest.writeString(type);
         dest.writeParcelable(account, flags);
         dest.writeParcelable(status, flags);
@@ -109,5 +112,13 @@ public class Notification implements Parcelable {
     @Override
     public boolean equals(Object otherNotifications) {
         return otherNotifications != null && (otherNotifications == this || otherNotifications instanceof Notification && this.getId().equals(((Notification) otherNotifications).getId()));
+    }
+
+    public long getDate_id() {
+        return date_id;
+    }
+
+    public void setDate_id(long date_id) {
+        this.date_id = date_id;
     }
 }

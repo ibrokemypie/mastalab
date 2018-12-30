@@ -123,9 +123,12 @@ public class Status implements Parcelable{
     private List<String> conversationProfilePicture;
     private String webviewURL = null;
 
+    private long date_id;
+
     private boolean isBoostAnimated = false, isFavAnimated = false;
     protected Status(Parcel in) {
         id = in.readString();
+        date_id = in.readLong();
         uri = in.readString();
         url = in.readString();
         in_reply_to_id = in.readString();
@@ -164,6 +167,7 @@ public class Status implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);
+        dest.writeLong(date_id);
         dest.writeString(uri);
         dest.writeString(url);
         dest.writeString(in_reply_to_id);
@@ -1198,5 +1202,13 @@ public class Status implements Parcelable{
 
     public void setArt_attachment(Attachment art_attachment) {
         this.art_attachment = art_attachment;
+    }
+
+    public long getDate_id() {
+        return date_id;
+    }
+
+    public void setDate_id(long date_id) {
+        this.date_id = date_id;
     }
 }
