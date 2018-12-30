@@ -190,7 +190,35 @@ public class NotificationsListAdapter extends RecyclerView.Adapter implements On
                 holder.main_container_trans.setVisibility(View.GONE);
                 holder.status_more.setVisibility(View.VISIBLE);
                 break;
-            case "reblog":
+            case "reply":
+                holder.status_action_container.setVisibility(View.VISIBLE);
+                if (notification.getStatus().getVisibility() != null) {
+                    if (notification.getAccount().getDisplay_name() != null && notification.getAccount().getDisplay_name().length() > 0)
+                        typeString = String.format("%s %s", Helper.shortnameToUnicode(notification.getAccount().getDisplay_name(), true), context.getString(R.string.notif_mention));
+                    else
+                        typeString = String.format("@%s %s", notification.getAccount().getUsername(), context.getString(R.string.notif_mention));
+                    if (theme == Helper.THEME_DARK) {
+                        if (notification.getStatus().getVisibility().equals("direct"))
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_dark_private));
+                        else
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_dark_1));
+                    } else if (theme == Helper.THEME_BLACK) {
+                        if (notification.getStatus().getVisibility().equals("direct"))
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_black_private));
+                        else
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_black_1));
+                    } else {
+                        if (notification.getStatus().getVisibility().equals("direct"))
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_light_private));
+                        else
+                            holder.card_status_container.setBackgroundColor(ContextCompat.getColor(context, R.color.notif_light_1));
+                    }
+                }
+                imgH = ContextCompat.getDrawable(context, R.drawable.ic_chat_bubble_outline);
+                holder.main_container_trans.setVisibility(View.GONE);
+                holder.status_more.setVisibility(View.VISIBLE);
+                break;
+            case "renote":
                 holder.status_action_container.setVisibility(View.GONE);
                 if( notification.getAccount().getDisplay_name() != null && notification.getAccount().getDisplay_name().length() > 0)
                     typeString = String.format("%s %s", Helper.shortnameToUnicode(notification.getAccount().getDisplay_name(), true),context.getString(R.string.notif_reblog));
@@ -207,7 +235,7 @@ public class NotificationsListAdapter extends RecyclerView.Adapter implements On
                 holder.main_container_trans.setVisibility(View.VISIBLE);
                 holder.status_more.setVisibility(View.GONE);
                 break;
-            case "favourite":
+            case "reaction":
                 holder.status_action_container.setVisibility(View.GONE);
                 if( notification.getAccount().getDisplay_name() != null && notification.getAccount().getDisplay_name().length() > 0)
                     typeString = String.format("%s %s", Helper.shortnameToUnicode(notification.getAccount().getDisplay_name(), true),context.getString(R.string.notif_favourite));

@@ -3794,7 +3794,6 @@ public class API {
                 notification.setStatus(parseStatuses(context, resobj.getJSONObject("note"), instance));
             } catch (Exception ignored) {
             }
-            notification.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (ParseException e) {

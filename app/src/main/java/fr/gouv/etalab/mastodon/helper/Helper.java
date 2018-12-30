@@ -423,6 +423,7 @@ public class Helper {
     public enum NotifType {
         FOLLLOW,
         MENTION,
+        REPLY,
         BOOST,
         FAV,
         BACKUP,

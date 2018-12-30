@@ -327,7 +327,18 @@ public class LiveNotificationService extends Service implements NetworkStateRece
                                         canSendBroadCast = false;
                                     }
                                     break;
-                                case "reblog":
+                                case "reply":
+                                    notifType = Helper.NotifType.REPLY;
+                                    if (notif_mention) {
+                                        if (notification.getAccount().getDisplay_name() != null && notification.getAccount().getDisplay_name().length() > 0)
+                                            title = String.format("%s %s", Helper.shortnameToUnicode(notification.getAccount().getDisplay_name(), true), getString(R.string.notif_mention));
+                                        else
+                                            title = String.format("@%s %s", notification.getAccount().getAcct(), getString(R.string.notif_mention));
+                                    } else {
+                                        canSendBroadCast = false;
+                                    }
+                                    break;
+                                case "renote":
                                     notifType = Helper.NotifType.BOOST;
                                     if (notif_share) {
                                         if (notification.getAccount().getDisplay_name() != null && notification.getAccount().getDisplay_name().length() > 0)
@@ -338,7 +349,7 @@ public class LiveNotificationService extends Service implements NetworkStateRece
                                         canSendBroadCast = false;
                                     }
                                     break;
-                                case "favourite":
+                                case "reaction":
                                     notifType = Helper.NotifType.FAV;
                                     if (notif_add) {
                                         if (notification.getAccount().getDisplay_name() != null && notification.getAccount().getDisplay_name().length() > 0)
