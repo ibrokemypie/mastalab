@@ -1714,7 +1714,6 @@ public class API {
             default:
                 return -1;
         }
-        Log.d("action", statusAction.toString());
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             httpsConnection.post(getAbsoluteUrl(action), 60, new JSONObject(params), prefKeyOauthTokenT);
@@ -1764,7 +1763,7 @@ public class API {
             String response = httpsConnection.post(getAbsoluteUrl("/notes/create"), 60, new JSONObject(params), prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
-            Status statusreturned = parseStatuses(context, new JSONObject(response), instance);
+            Status statusreturned = parseStatuses(context, new JSONObject(response).getJSONObject("createdNote"), instance);
             statuses.add(statusreturned);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
