@@ -3660,14 +3660,18 @@ public class API {
             try {
                 relationship.setEndorsed(Boolean.valueOf(resobj.get("endorsed").toString()));
             } catch (Exception ignored) {
-                relationship.setMuting_notifications(false);
+                relationship.setEndorsed(false);
             }
             try {
                 relationship.setShowing_reblogs(Boolean.valueOf(resobj.get("showing_reblogs").toString()));
             } catch (Exception ignored) {
-                relationship.setMuting_notifications(false);
+                relationship.setShowing_reblogs(false);
             }
-            relationship.setRequested(Boolean.valueOf(resobj.get("requested").toString()));
+            try {
+                relationship.setRequested(Boolean.valueOf(resobj.get("requested").toString()));
+            } catch (Exception ignored) {
+                relationship.setRequested(false);
+            }
         } catch (JSONException e) {
             setDefaultError(e);
         }
