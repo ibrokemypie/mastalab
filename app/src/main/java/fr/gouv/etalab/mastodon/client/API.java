@@ -3673,7 +3673,7 @@ public class API {
                 relationship.setShowing_reblogs(false);
             }
             try {
-                relationship.setRequested(Boolean.valueOf(resobj.get("requested").toString()));
+                relationship.setRequested(resobj.getBoolean("hasPendingFollowRequestFromYou"));
             } catch (Exception ignored) {
                 relationship.setRequested(false);
             }
