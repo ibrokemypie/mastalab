@@ -785,13 +785,9 @@ public class API {
         JSONObject params = new JSONObject();
         try {
             if (max_id != null)
-//                params.put("untilId", max_id);
-                if (since_id != null)
-//                params.put("sinceId", since_id);
-                    if (min_id != null)
-//                params.put("untilId", min_id);
-                        if (0 > limit || limit > 80)
-                            limit = 80;
+                params.put("untilId", max_id);
+            if (since_id != null)
+                params.put("sinceId", since_id);
             params.put("limit", limit);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -800,9 +796,11 @@ public class API {
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             String response = httpsConnection.post(getAbsoluteUrl("/notes/timeline"), 60, params, prefKeyOauthTokenT);
-            apiResponse.setSince_id(httpsConnection.getSince_id());
-            apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response), instance);
+            if( statuses != null && statuses.size() > 0) {
+                apiResponse.setSince_id(statuses.get(0).getId());
+                apiResponse.setMax_id(statuses.get(statuses.size()-1).getId());
+            }
             /*if( response != null) {
                 Thread thread = new Thread() {
                     @Override
@@ -3100,6 +3098,7 @@ public class API {
             status.setUri(Helper.instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
             status.setUrl(Helper.instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
             status.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+            status.setDate_id(Helper.mstStringToDate(context, resobj.get("createdAt").toString()).getTime());
             try {
                 status.setIn_reply_to_id(resobj.getJSONObject("reply").get("replyId").toString());
                 status.setIn_reply_to_account_id(resobj.getJSONObject("reply").getJSONObject("user").get("id").toString());
@@ -3802,6 +3801,7 @@ public class API {
             notification.setId(resobj.get("id").toString());
             notification.setType(resobj.get("type").toString());
             notification.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+            notification.setDate_id(Helper.mstStringToDate(context, resobj.get("createdAt").toString()).getTime());
             notification.setAccount(parseAccountResponse(context, resobj.getJSONObject("user"), instance));
             try {
                 notification.setStatus(parseStatuses(context, resobj.getJSONObject("note"), instance));

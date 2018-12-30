@@ -237,7 +237,7 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
                 //Update the id of the last notification retrieved
 //                if( MainActivity.lastNotificationId == null || Long.parseLong(notifications.get(0).getId()) > Long.parseLong(MainActivity.lastNotificationId))
 //                    MainActivity.lastNotificationId = notifications.get(0).getId();
-//                updateNotificationLastId(notifications.get(0).getId());
+//                updateNotificationLastId(String.valueOf(notifications.get(0).getDate_id()));
             }
             notificationsListAdapter.notifyItemRangeInserted(previousPosition, notifications.size());
         }else {
@@ -267,7 +267,7 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
             return;
         //Store last notification id to avoid to notify for those that have been already seen
         if (visible && notifications != null && notifications.size() > 0) {
-            updateNotificationLastId(notifications.get(0).getId());
+            updateNotificationLastId(String.valueOf(notifications.get(0).getDate_id()));
         }
     }
 
@@ -276,7 +276,7 @@ public class DisplayNotificationsFragment extends Fragment implements OnRetrieve
             lv_notifications.setAdapter(notificationsListAdapter);
         //Store last toot id for home timeline to avoid to notify for those that have been already seen
         if (this.notifications != null && this.notifications.size() > 0) {
-            updateNotificationLastId(this.notifications.get(0).getId());
+            updateNotificationLastId(String.valueOf(this.notifications.get(0).getDate_id()));
         }
     }
 

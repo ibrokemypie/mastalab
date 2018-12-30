@@ -167,10 +167,10 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
         mutedAccount = new TempMuteDAO(context, db).getAllTimeMuted(account);
 
         //For Home timeline, fetch stored values for bookmark and last read toot
-        if( type == RetrieveFeedsAsyncTask.Type.HOME) {
+        /*if( type == RetrieveFeedsAsyncTask.Type.HOME) {
             initialBookMark = sharedpreferences.getString(Helper.BOOKMARK_ID + userId + instance, null);
             lastReadToot = sharedpreferences.getString(Helper.LAST_READ_TOOT_ID + userId + instance, null);
-        }
+        }*/
         if( type == RetrieveFeedsAsyncTask.Type.TAG && tag != null) {
             BaseMainActivity.displayPeertube = null;
             List<TagTimeline> tagTimelines = new SearchDAO(context, db).getTimelineInfo(tag);
