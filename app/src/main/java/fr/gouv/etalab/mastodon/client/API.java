@@ -1114,14 +1114,13 @@ public class API {
 
         JSONObject params = new JSONObject();
         try {
-            if (local)
-                params.put("local", true);
+            params.put("local", local);
             if (max_id != null)
-//                params.put("untilId", max_id);
-                if (since_id != null)
-//                params.put("sinceId", since_id);
-                    if (0 > limit || limit > 40)
-                        limit = 40;
+                params.put("untilId", max_id);
+            if (since_id != null)
+                params.put("sinceId", since_id);
+            if (0 > limit || limit > 40)
+                limit = 40;
             params.put("limit", limit);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1131,13 +1130,15 @@ public class API {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             String action;
             if (instanceName == null)
-                action = getAbsoluteUrl("/notes/global-timeline");
+                action = getAbsoluteUrl("/notes");
             else
                 action = getAbsoluteUrlRemoteInstance(instanceName);
             String response = httpsConnection.post(action, 60, params, null);
-            apiResponse.setSince_id(httpsConnection.getSince_id());
-            apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response), instance);
+            if( statuses != null && statuses.size() > 0) {
+                apiResponse.setSince_id(statuses.get(0).getId());
+                apiResponse.setMax_id(statuses.get(statuses.size()-1).getId());
+            }
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
