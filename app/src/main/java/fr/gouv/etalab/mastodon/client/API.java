@@ -3511,16 +3511,20 @@ public class API {
             account.setHost(instance);
             account.setDisplay_name(resobj.get("name").toString());
 //            account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
-            if (!resobj.isNull("createdAt")) {
-                account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("createdAt")));
-            } else if (!resobj.isNull("createdAt")) {
-                account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
-            } else {
+            try {
+                if (!resobj.isNull("createdAt")) {
+                    Log.d("createdat", resobj.getString("createdAt"));
+                    account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("createdAt")));
+                } else if (!resobj.isNull("lastFetchedAt")) {
+                    account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
+                } else {
+                    throw new Exception();
+                }
+            } catch (Exception ignored) {
                 Locale userLocale;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     userLocale = context.getResources().getConfiguration().getLocales().get(0);
                 } else {
-                    //noinspection deprecation
                     userLocale = context.getResources().getConfiguration().locale;
                 }
                 String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", userLocale).format(new Date());
