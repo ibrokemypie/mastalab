@@ -210,11 +210,13 @@ public class API {
                 }
             if (privacy != null)
                 requestParams.put("isLocked", privacy == accountPrivacy.LOCKED ? "true" : "false");
+            // missing avatar and header
+            // requires uploading each file to drive then getting id
         } catch (JSONException e) {
             e.printStackTrace();
         }
         try {
-            new HttpsConnection(context).patch(getAbsoluteUrl("/i/update"), 60, requestParams, avatar, avatarName, header, headerName, prefKeyOauthTokenT);
+            new HttpsConnection(context).post(getAbsoluteUrl("/i/update"), 60, requestParams, prefKeyOauthTokenT);
         } catch (HttpsConnection.HttpsConnectionException e) {
             e.printStackTrace();
             setError(e.getStatusCode(), e);
