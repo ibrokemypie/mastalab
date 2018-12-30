@@ -3653,8 +3653,8 @@ public class API {
         Relationship relationship = new Relationship();
         try {
             relationship.setId(resobj.get("id").toString());
-            relationship.setFollowing(resobj.getBoolean("isFollowed"));
-            relationship.setFollowed_by(resobj.getBoolean("isFollowing"));
+            relationship.setFollowing(resobj.getBoolean("isFollowing"));
+            relationship.setFollowed_by(resobj.getBoolean("isFollowed"));
             relationship.setBlocking(resobj.getBoolean("isBlocking"));
             relationship.setMuting(resobj.getBoolean("isMuted"));
             try {
