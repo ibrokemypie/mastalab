@@ -3097,7 +3097,6 @@ public class API {
         try {
             status.setId(resobj.get("id").toString());
             status.setUri(Helper.instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
-            status.setUrl(Helper.instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
             status.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
             status.setDate_id(Helper.mstStringToDate(context, resobj.get("createdAt").toString()).getTime());
             try {
@@ -3118,7 +3117,6 @@ public class API {
                 status.setVisibility("public");
             }
 //            status.setLanguage(resobj.get("language").toString());
-            status.setUri(instance + "/notes" + resobj.get("id").toString());
 
             //Retrieves attachments
             JSONArray arrayAttachement = resobj.getJSONArray("files");
@@ -3173,16 +3171,15 @@ public class API {
             status.setMentions(mentions);
             //Retrieves tags
             List<Tag> tags = new ArrayList<>();
-//            JSONArray arrayTag = resobj.getJSONArray("tags");
-//            if( arrayTag != null){
-//                for(int j = 0 ; j < arrayTag.length() ; j++){
-//                    JSONObject tagObj = arrayTag.getJSONObject(j);
-//                    Tag tag = new Tag();
-//                    tag.setName(tagObj.get("name").toString());
-//                    tag.setUrl(tagObj.get("url").toString());
-//                    tags.add(tag);
-//                }
-//            }
+            JSONArray arrayTag = resobj.getJSONArray("tags");
+            if( arrayTag.length() > 0){
+                for(int j = 0 ; j < arrayTag.length() ; j++){
+                    Tag tag = new Tag();
+                    tag.setName(arrayTag.get(j).toString());
+                    tag.setUrl(Helper.instanceWithProtocol(instance) + "/tags/" + arrayTag.get(j).toString());
+                    tags.add(tag);
+                }
+            }
             status.setTags(tags);
 
             //Retrieves emjis
