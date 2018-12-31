@@ -188,7 +188,6 @@ public class API {
         return apiResponse;
     }
 
-
     /***
      * Update credential of the authenticated user *synchronously*
      * @return APIResponse
@@ -3149,26 +3148,24 @@ public class API {
             // TODO: fix mentions
             List<Mention> mentions = new ArrayList<>();
             try {
-                JSONArray arrayMention = resobj.getJSONArray("mentionedRemoteUsers");
                 JSONArray arrayID = resobj.getJSONArray("mentions");
-                if (arrayMention != null) {
-                    for (int j = 0; j < arrayMention.length(); j++) {
-                        JSONObject menObj = arrayMention.getJSONObject(j);
+                if (arrayID != null) {
+                    for (int j = 0; j < arrayID.length(); j++) {
+                        String menId = arrayID.getString(j);
                         Mention mention = new Mention();
-                        mention.setId(arrayID.get(j).toString());
-                        mention.setUrl(menObj.get("uri").toString());
-                        if (menObj.getString("host") != null) {
-                            mention.setAcct(menObj.getString("username") + "@" + menObj.getString("host"));
-                        } else {
-                            mention.setAcct(menObj.getString("username"));
-                        }
-                        mention.setUsername(menObj.get("username").toString());
+                        Account account = getAccount(menId);
+
+                        mention.setId(account.getId());
+                        mention.setUrl(account.getUrl());
+                        mention.setAcct(account.getAcct());
+                        mention.setUsername(account.getUsername());
                         mentions.add(mention);
                     }
                 }
             } catch (JSONException ignored) {
             }
             status.setMentions(mentions);
+
             //Retrieves tags
             List<Tag> tags = new ArrayList<>();
             JSONArray arrayTag = resobj.getJSONArray("tags");
@@ -3522,10 +3519,9 @@ public class API {
             account.setInstance(instance);
             account.setHost(instance);
             account.setDisplay_name(resobj.get("name").toString());
-//            account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
+            account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
             try {
                 if (!resobj.isNull("createdAt")) {
-                    Log.d("createdat", resobj.getString("createdAt"));
                     account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("createdAt")));
                 } else if (!resobj.isNull("lastFetchedAt")) {
                     account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
