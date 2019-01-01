@@ -63,6 +63,8 @@ import fr.gouv.etalab.mastodon.helper.Helper;
 import fr.gouv.etalab.mastodon.sqlite.AccountDAO;
 import fr.gouv.etalab.mastodon.sqlite.Sqlite;
 
+import static fr.gouv.etalab.mastodon.helper.Helper.instanceWithProtocol;
+
 
 /**
  * Created by Thomas on 23/04/2017.
@@ -271,7 +273,7 @@ public class API {
             e.printStackTrace();
         }
         try {
-            String response = new HttpsConnection(context).post(getAbsoluteUrl("/users/show"), 60, null, null);
+            String response = new HttpsConnection(context).post(getAbsoluteUrl("/users/show"), 60, params, null);
             account = parseAccountResponse(context, new JSONObject(response), instance);
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -797,9 +799,9 @@ public class API {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             String response = httpsConnection.post(getAbsoluteUrl("/notes/timeline"), 60, params, prefKeyOauthTokenT);
             statuses = parseStatuses(context, new JSONArray(response), instance);
-            if( statuses != null && statuses.size() > 0) {
+            if (statuses != null && statuses.size() > 0) {
                 apiResponse.setSince_id(statuses.get(0).getId());
-                apiResponse.setMax_id(statuses.get(statuses.size()-1).getId());
+                apiResponse.setMax_id(statuses.get(statuses.size() - 1).getId());
             }
             /*if( response != null) {
                 Thread thread = new Thread() {
@@ -1136,9 +1138,9 @@ public class API {
                 action = getAbsoluteUrlRemoteInstance(instanceName);
             String response = httpsConnection.post(action, 60, params, null);
             statuses = parseStatuses(context, new JSONArray(response), instance);
-            if( statuses != null && statuses.size() > 0) {
+            if (statuses != null && statuses.size() > 0) {
                 apiResponse.setSince_id(statuses.get(0).getId());
-                apiResponse.setMax_id(statuses.get(statuses.size()-1).getId());
+                apiResponse.setMax_id(statuses.get(statuses.size() - 1).getId());
             }
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
@@ -3096,7 +3098,7 @@ public class API {
         Status status = new Status();
         try {
             status.setId(resobj.get("id").toString());
-            status.setUri(Helper.instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
+            status.setUri(instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
             status.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
             status.setDate_id(Helper.mstStringToDate(context, resobj.get("createdAt").toString()).getTime());
             try {
@@ -3172,11 +3174,11 @@ public class API {
             //Retrieves tags
             List<Tag> tags = new ArrayList<>();
             JSONArray arrayTag = resobj.getJSONArray("tags");
-            if( arrayTag.length() > 0){
-                for(int j = 0 ; j < arrayTag.length() ; j++){
+            if (arrayTag.length() > 0) {
+                for (int j = 0; j < arrayTag.length(); j++) {
                     Tag tag = new Tag();
                     tag.setName(arrayTag.get(j).toString());
-                    tag.setUrl(Helper.instanceWithProtocol(instance) + "/tags/" + arrayTag.get(j).toString());
+                    tag.setUrl(instanceWithProtocol(instance) + "/tags/" + arrayTag.get(j).toString());
                     tags.add(tag);
                 }
             }
@@ -3211,14 +3213,13 @@ public class API {
             }
             status.setApplication(application);
 
-
             status.setAccount(parseAccountResponse(context, resobj.getJSONObject("user"), instance));
             status.setContent(getMessageHtml(resobj.get("text").toString()));
             try {
                 JSONObject reactioncounts = resobj.getJSONObject("reactionCounts");
                 Iterator<String> keys = reactioncounts.keys();
                 int reactions = 0;
-                while(keys.hasNext()) {
+                while (keys.hasNext()) {
                     String key = keys.next();
                     reactions += reactioncounts.getInt(key);
                 }
@@ -3507,7 +3508,7 @@ public class API {
      * @return Account
      */
     @SuppressWarnings("InfiniteRecursion")
-    private static Account parseAccountResponse(Context context, JSONObject resobj, String instance) {
+    public static Account parseAccountResponse(Context context, JSONObject resobj, String instance) {
 
         Account account = new Account();
         try {
@@ -3517,12 +3518,17 @@ public class API {
                 account.setAcct(resobj.get("username").toString() + "@" + resobj.getString("host"));
                 account.setInstance("https://" + resobj.get("host").toString());
                 account.setHost(resobj.get("host").toString());
-            } else
+            } else {
                 account.setAcct(resobj.get("username").toString());
-            account.setInstance(instance);
-            account.setHost(instance);
+                account.setInstance(instance);
+                account.setHost(instance);
+            }
             account.setDisplay_name(resobj.get("name").toString());
-//            account.setLocked(Boolean.parseBoolean(resobj.get("isLocked").toString()));
+            if (resobj.isNull("isLocked")) {
+                account.setLocked(false);
+            } else {
+                account.setLocked(resobj.getBoolean("isLocked"));
+            }
             try {
                 if (!resobj.isNull("createdAt")) {
                     Log.d("createdat", resobj.getString("createdAt"));
@@ -3572,7 +3578,7 @@ public class API {
             } catch (Exception ignored) {
                 account.setMoved_to_account(null);
             }
-            account.setUrl(instance + "/@" + account.getAcct());
+            account.setUrl(instanceWithProtocol(instance) + "/@" + account.getAcct());
             if (!resobj.isNull("avatarUrl")) {
                 account.setAvatar(resobj.get("avatarUrl").toString());
                 account.setAvatar_static(resobj.get("avatarUrl").toString());
@@ -3590,7 +3596,7 @@ public class API {
 
             LinkedHashMap<String, String> fieldsMap = new LinkedHashMap<>();
             LinkedHashMap<String, Boolean> fieldsMapVerified = new LinkedHashMap<>();
-            if (fields != null) {
+            if (fields != null && fields.length() > 0) {
                 for (int j = 0; j < fields.length(); j++) {
                     fieldsMap.put(fields.getJSONObject(j).getString("name"), fields.getJSONObject(j).getString("value"));
                     try {
@@ -3880,7 +3886,7 @@ public class API {
 
 
     private String getAbsoluteUrl(String action) {
-        return Helper.instanceWithProtocol(this.instance) + "/api" + action;
+        return instanceWithProtocol(this.instance) + "/api" + action;
     }
 
 
@@ -3896,7 +3902,7 @@ public class API {
         String html = message;
 
         html = html.replaceAll("\\n", "<br>");
-        html = html.replaceAll("(https?://(www\\.)?[a-z.0-9/]+)", "<a href=\"$1\">$1</a>");
+        html = html.replaceAll("(https?://(www\\.)?[a-zA-Z.0-9/=?&-]+)", "<a href=\"$1\">$1</a>");
         html = html.replaceAll("\\*\\*\\*([\\s\\S]+?)\\*\\*\\*", "<h3>$1</h3>");
         html = html.replaceAll("\\*\\*([\\s\\S]+?)\\*\\*", "<b>$1</b>");
         html = html.replaceAll("`([^´\\n]+?)`", "<code>$1</code>");
