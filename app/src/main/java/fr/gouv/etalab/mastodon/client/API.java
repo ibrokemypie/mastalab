@@ -3213,7 +3213,7 @@ public class API {
 
 
             status.setAccount(parseAccountResponse(context, resobj.getJSONObject("user"), instance));
-            status.setContent(resobj.get("text").toString());
+            status.setContent(getMessageHtml(resobj.get("text").toString()));
             try {
                 JSONObject reactioncounts = resobj.getJSONObject("reactionCounts");
                 Iterator<String> keys = reactioncounts.keys();
@@ -3890,6 +3890,18 @@ public class API {
 
     private String getAbsoluteUrlCommunitywiki(String action) {
         return "https://communitywiki.org/trunk" + action;
+    }
+
+    public static String getMessageHtml(String message) {
+        String html = message;
+
+        html = html.replaceAll("\\n", "<br>");
+        html = html.replaceAll("(https?://(www\\.)?\\S+)", "<a href=\"$1\">$1</a>");
+        html = html.replaceAll("\\*\\*\\*([\\s\\S]+?)\\*\\*\\*", "<h3>$1</h3>");
+        html = html.replaceAll("\\*\\*([\\s\\S]+?)\\*\\*", "<b>$1</b>");
+        html = html.replaceAll("`([^´\\n]+?)`", "<code>$1</code>");
+
+        return html;
     }
 
 }
