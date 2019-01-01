@@ -61,6 +61,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -108,6 +110,8 @@ import static fr.gouv.etalab.mastodon.helper.Helper.THEME_BLACK;
 import static fr.gouv.etalab.mastodon.helper.Helper.THEME_DARK;
 import static fr.gouv.etalab.mastodon.helper.Helper.THEME_LIGHT;
 import static fr.gouv.etalab.mastodon.helper.Helper.changeDrawableColor;
+import static fr.gouv.etalab.mastodon.helper.Helper.getLiveInstance;
+import static fr.gouv.etalab.mastodon.helper.Helper.getLiveInstanceWithProtocol;
 import static fr.gouv.etalab.mastodon.helper.Helper.withSuffix;
 
 
@@ -137,14 +141,14 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
     private ImageView account_pp;
     private TextView account_dn;
     private TextView account_un;
-    private Account account;
+    private Account account, oldaccount;
     private boolean show_boosts, show_replies;
     private boolean showMediaOnly, showPinned;
     private boolean peertubeAccount;
     private ImageView pp_actionBar;
     private String accountId;
 
-    public enum action{
+    public enum action {
         FOLLOW,
         UNFOLLOW,
         UNBLOCK,
@@ -159,7 +163,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         super.onCreate(savedInstanceState);
         SharedPreferences sharedpreferences = getSharedPreferences(Helper.APP_PREFS, android.content.Context.MODE_PRIVATE);
         int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
-        switch (theme){
+        switch (theme) {
             case Helper.THEME_LIGHT:
                 setTheme(R.style.AppTheme_NoActionBar);
                 break;
@@ -185,21 +189,39 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         account_un = findViewById(R.id.account_un);
         account_type = findViewById(R.id.account_type);
         account_bot = findViewById(R.id.account_bot);
-        if(b != null){
-            account = b.getParcelable("account");
-            if( account == null){
+        if (b != null) {
+            oldaccount = b.getParcelable("account");
+            if (oldaccount == null) {
                 accountId = b.getString("accountId");
-            }else {
-                accountId = account.getId();
+            } else {
+                accountId = oldaccount.getId();
             }
+//            try {
+//                JSONObject params = new JSONObject();
+//                params.put("userId", accountId);
+//                runOnUiThread(new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            String response = new HttpsConnection(getApplicationContext()).post(getLiveInstanceWithProtocol(getApplicationContext()) + "/api/users/show", 60, params, null);
+//                            account = API.parseAccountResponse(getApplicationContext(), new JSONObject(response), getLiveInstance(getApplicationContext()));
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+
             peertubeAccount = b.getBoolean("peertubeAccount", false);
             if (account == null) {
                 new RetrieveAccountAsyncTask(getApplicationContext(), accountId, ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
             userId = sharedpreferences.getString(Helper.PREF_KEY_ID, null);
 
-        }else{
-            Toasty.error(this,getString(R.string.toast_error_loading_account),Toast.LENGTH_LONG).show();
+        } else {
+            Toasty.error(this, getString(R.string.toast_error_loading_account), Toast.LENGTH_LONG).show();
         }
         accountUrl = null;
         show_boosts = true;
@@ -218,7 +240,6 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         account_note = findViewById(R.id.account_note);
 
 
-
         header_edit_profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -230,8 +251,8 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
 
         final ImageButton account_menu = findViewById(R.id.account_menu);
         ImageButton action_more = findViewById(R.id.action_more);
-        if( theme == THEME_LIGHT)
-            changeDrawableColor(getApplicationContext(),action_more,R.color.dark_icon);
+        if (theme == THEME_LIGHT)
+            changeDrawableColor(getApplicationContext(), action_more, R.color.dark_icon);
         account_menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -244,20 +265,20 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                 showMenu(account_menu);
             }
         });
-        if( account != null){
+        if (account != null) {
             ManageAccount();
         }
     }
 
 
-    private void ManageAccount(){
+    private void ManageAccount() {
         SharedPreferences sharedpreferences = getSharedPreferences(Helper.APP_PREFS, android.content.Context.MODE_PRIVATE);
         int theme = sharedpreferences.getInt(Helper.SET_THEME, Helper.THEME_DARK);
         accountUrl = account.getUrl();
-        if( theme == Helper.THEME_BLACK){
-            changeDrawableColor(getApplicationContext(), R.drawable.ic_lock_outline,R.color.dark_icon);
-        }else {
-            changeDrawableColor(getApplicationContext(), R.drawable.ic_lock_outline,R.color.mastodonC4);
+        if (theme == Helper.THEME_BLACK) {
+            changeDrawableColor(getApplicationContext(), R.drawable.ic_lock_outline, R.color.dark_icon);
+        } else {
+            changeDrawableColor(getApplicationContext(), R.drawable.ic_lock_outline, R.color.mastodonC4);
         }
         new RetrieveRelationshipAsyncTask(getApplicationContext(), accountId, ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -275,16 +296,16 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                         public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
                             ImageView banner_pp = findViewById(R.id.banner_pp);
                             banner_pp.setImageBitmap(resource);
-                            if( theme == THEME_LIGHT){
+                            if (theme == THEME_LIGHT) {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                                     banner_pp.setImageAlpha(80);
-                                }else {
+                                } else {
                                     banner_pp.setAlpha(80);
                                 }
-                            }else {
+                            } else {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                                     banner_pp.setImageAlpha(60);
-                                }else {
+                                } else {
                                     banner_pp.setAlpha(60);
                                 }
                             }
@@ -295,31 +316,31 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         }
         //Redraws icon for locked accounts
         final float scale = getResources().getDisplayMetrics().density;
-        if(account.isLocked()){
+        if (account.isLocked()) {
             Drawable img = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_lock_outline);
             assert img != null;
-            img.setBounds(0,0,(int) (20 * scale + 0.5f),(int) (20 * scale + 0.5f));
-            account_dn.setCompoundDrawables( img, null, null, null);
-        }else{
-            account_dn.setCompoundDrawables( null, null, null, null);
+            img.setBounds(0, 0, (int) (20 * scale + 0.5f), (int) (20 * scale + 0.5f));
+            account_dn.setCompoundDrawables(img, null, null, null);
+        } else {
+            account_dn.setCompoundDrawables(null, null, null, null);
         }
 
         //Peertube account
-        if( peertubeAccount) {
+        if (peertubeAccount) {
             account_type.setVisibility(View.VISIBLE);
         }
         //Bot account
-        if( account.isBot()){
+        if (account.isBot()) {
             account_bot.setVisibility(View.VISIBLE);
         }
 
         TextView actionbar_title = findViewById(R.id.show_account_title);
-        if( account.getAcct() != null)
+        if (account.getAcct() != null)
             actionbar_title.setText(account.getAcct());
         pp_actionBar = findViewById(R.id.pp_actionBar);
-        if( account.getAvatar() != null){
+        if (account.getAvatar() != null) {
             String url = account.getAvatar();
-            if( url.startsWith("/") ){
+            if (url.startsWith("/")) {
                 url = Helper.getLiveInstanceWithProtocol(getApplicationContext()) + account.getAvatar();
             }
             Helper.loadGiF(getApplicationContext(), url, pp_actionBar);
@@ -331,20 +352,20 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         final TextView warning_message = findViewById(R.id.warning_message);
         final SpannableString content = new SpannableString(getString(R.string.disclaimer_full));
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-        if( theme == THEME_DARK)
+        if (theme == THEME_DARK)
             content.setSpan(new ForegroundColorSpan(ContextCompat.getColor(ShowAccountActivity.this, R.color.dark_link_toot)), 0, content.length(),
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-        else if( theme == THEME_BLACK)
+        else if (theme == THEME_BLACK)
             content.setSpan(new ForegroundColorSpan(ContextCompat.getColor(ShowAccountActivity.this, R.color.black_link_toot)), 0, content.length(),
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-        else if( theme == THEME_LIGHT)
+        else if (theme == THEME_LIGHT)
             content.setSpan(new ForegroundColorSpan(ContextCompat.getColor(ShowAccountActivity.this, R.color.mastodonC4)), 0, content.length(),
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
         warning_message.setText(content);
         warning_message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if( !accountUrl.startsWith("http://") && ! accountUrl.startsWith("https://"))
+                if (!accountUrl.startsWith("http://") && !accountUrl.startsWith("https://"))
                     accountUrl = "http://" + accountUrl;
                 Helper.openBrowser(ShowAccountActivity.this, accountUrl);
             }
@@ -354,9 +375,9 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         final SQLiteDatabase db = Sqlite.getInstance(getApplicationContext(), Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
         final Account authenticatedAccount = new AccountDAO(getApplicationContext(), db).getAccountByID(userId);
         boolean isTimedMute = new TempMuteDAO(getApplicationContext(), db).isTempMuted(authenticatedAccount, accountId);
-        if( isTimedMute){
+        if (isTimedMute) {
             String date_mute = new TempMuteDAO(getApplicationContext(), db).getMuteDateByID(authenticatedAccount, accountId);
-            if( date_mute != null) {
+            if (date_mute != null) {
                 final TextView temp_mute = findViewById(R.id.temp_mute);
                 temp_mute.setVisibility(View.VISIBLE);
                 SpannableString content_temp_mute = new SpannableString(getString(R.string.timed_mute_profile, account.getAcct(), date_mute));
@@ -373,16 +394,16 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
             }
         }
         //This account was moved to another one
-        if( account.getMoved_to_account() != null){
+        if (account.getMoved_to_account() != null) {
             TextView account_moved = findViewById(R.id.account_moved);
             account_moved.setVisibility(View.VISIBLE);
-            if( theme == THEME_DARK || theme == THEME_BLACK)
-                changeDrawableColor(ShowAccountActivity.this, R.drawable.ic_card_travel,R.color.dark_icon);
+            if (theme == THEME_DARK || theme == THEME_BLACK)
+                changeDrawableColor(ShowAccountActivity.this, R.drawable.ic_card_travel, R.color.dark_icon);
             else
-                changeDrawableColor(ShowAccountActivity.this, R.drawable.ic_card_travel,R.color.black);
+                changeDrawableColor(ShowAccountActivity.this, R.drawable.ic_card_travel, R.color.black);
             Drawable imgTravel = ContextCompat.getDrawable(ShowAccountActivity.this, R.drawable.ic_card_travel);
             assert imgTravel != null;
-            imgTravel.setBounds(0,0,(int) (20 * scale + 0.5f),(int) (20  * scale + 0.5f));
+            imgTravel.setBounds(0, 0, (int) (20 * scale + 0.5f), (int) (20 * scale + 0.5f));
             account_moved.setCompoundDrawables(imgTravel, null, null, null);
             //Retrieves content and make account names clickable
             SpannableString spannableString = account.moveToText(ShowAccountActivity.this);
@@ -391,8 +412,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         }
 
 
-
-        if( account.getAcct().contains("@") )
+        if (account.getAcct().contains("@"))
             warning_message.setVisibility(View.VISIBLE);
         else
             warning_message.setVisibility(View.GONE);
@@ -400,7 +420,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
                 LinearLayout toolbarContent = findViewById(R.id.toolbar_content);
-                if( toolbarContent != null) {
+                if (toolbarContent != null) {
                     if (Math.abs(verticalOffset) - appBar.getTotalScrollRange() == 0) {
                         if (toolbarContent.getVisibility() == View.GONE)
                             toolbarContent.setVisibility(View.VISIBLE);
@@ -428,7 +448,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                     account_pp.animate()
                             .scaleY(1).scaleX(1)
                             .start();
-                    if( account.getAcct().contains("@") )
+                    if (account.getAcct().contains("@"))
                         warning_message.setVisibility(View.VISIBLE);
                     else
                         warning_message.setVisibility(View.GONE);
@@ -436,17 +456,16 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
             }
         });
         mPager = findViewById(R.id.account_viewpager);
-        if( !peertubeAccount) {
+        if (!peertubeAccount) {
             tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.toots)));
             tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.following)));
             tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.followers)));
             mPager.setOffscreenPageLimit(3);
-        }else {
+        } else {
             tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.videos)));
             tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.channels)));
             mPager.setOffscreenPageLimit(2);
         }
-
 
 
         PagerAdapter mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
@@ -461,7 +480,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
             @Override
             public void onPageSelected(int position) {
                 TabLayout.Tab tab = tabLayout.getTabAt(position);
-                if( tab != null)
+                if (tab != null)
                     tab.select();
             }
 
@@ -485,16 +504,16 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
                 Fragment fragment = null;
-                if( mPager.getAdapter() != null)
+                if (mPager.getAdapter() != null)
                     fragment = (Fragment) mPager.getAdapter().instantiateItem(mPager, tab.getPosition());
-                switch (tab.getPosition()){
+                switch (tab.getPosition()) {
                     case 0:
-                        if( displayStatusFragment != null )
+                        if (displayStatusFragment != null)
                             displayStatusFragment.scrollToTop();
                         break;
                     case 1:
                     case 2:
-                        if( fragment != null) {
+                        if (fragment != null) {
                             DisplayAccountsFragment displayAccountsFragment = ((DisplayAccountsFragment) fragment);
                             displayAccountsFragment.scrollToTop();
                         }
@@ -504,26 +523,26 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         });
 
 
-        if ( account.getFields() != null && account.getFields().size() > 0){
-            Log.d("fields",account.getFields().toString());
+        if (account.getFields() != null && account.getFields().size() > 0) {
+            Log.d("fields", account.getFields().toString());
             LinkedHashMap<String, String> fields = account.getFields();
             LinkedHashMap<String, Boolean> fieldsVerified = account.getFieldsVerified();
             Iterator it = fields.entrySet().iterator();
             int i = 1;
             LinearLayout fields_container = findViewById(R.id.fields_container);
-            if( fields_container != null)
+            if (fields_container != null)
                 fields_container.setVisibility(View.VISIBLE);
             while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry)it.next();
-                String label = (String)pair.getKey();
-                String value = (String)pair.getValue();
+                Map.Entry pair = (Map.Entry) it.next();
+                String label = (String) pair.getKey();
+                String value = (String) pair.getValue();
                 boolean verified = fieldsVerified.get(label);
 
                 LinearLayout field;
                 TextView labelView;
                 TextView valueView;
                 LinearLayout verifiedView;
-                switch(i){
+                switch (i) {
                     case 1:
                         field = findViewById(R.id.field1);
                         labelView = findViewById(R.id.label1);
@@ -555,8 +574,8 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                         verifiedView = findViewById(R.id.value1BG);
                         break;
                 }
-                if( field != null && labelView != null && valueView != null) {
-                    switch (theme){
+                if (field != null && labelView != null && valueView != null) {
+                    switch (theme) {
                         case Helper.THEME_LIGHT:
                             labelView.setBackgroundColor(ContextCompat.getColor(ShowAccountActivity.this, R.color.notif_light_2));
                             valueView.setBackgroundColor(ContextCompat.getColor(ShowAccountActivity.this, R.color.notif_light_4));
@@ -575,15 +594,15 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                     }
                     field.setVisibility(View.VISIBLE);
                     SpannableString spannableValueString;
-                    if( verified ){
-                        value =  "✓ " + value;
+                    if (verified) {
+                        value = "✓ " + value;
                         verifiedView.setBackgroundResource(R.drawable.verified);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                             valueView.setBackground(null);
                         }
                         spannableValueString = Helper.clickableElementsDescription(ShowAccountActivity.this, value);
                         spannableValueString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(ShowAccountActivity.this, R.color.verified_text)), 0, spannableValueString.toString().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }else {
+                    } else {
                         spannableValueString = Helper.clickableElementsDescription(ShowAccountActivity.this, value);
                     }
                     valueView.setText(spannableValueString, TextView.BufferType.SPANNABLE);
@@ -601,19 +620,19 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
             public boolean onLongClick(View v) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 String account_id = account.getAcct();
-                if( account_id.split("@").length == 1)
+                if (account_id.split("@").length == 1)
                     account_id += "@" + Helper.getLiveInstance(getApplicationContext());
-                ClipData clip = ClipData.newPlainText("mastodon_account_id", "@"+account_id);
-                Toasty.info(getApplicationContext(),getString(R.string.account_id_clipbloard), Toast.LENGTH_SHORT).show();
+                ClipData clip = ClipData.newPlainText("mastodon_account_id", "@" + account_id);
+                Toasty.info(getApplicationContext(), getString(R.string.account_id_clipbloard), Toast.LENGTH_SHORT).show();
                 assert clipboard != null;
                 clipboard.setPrimaryClip(clip);
                 return false;
             }
         });
-        SpannableString spannableString = Helper.clickableElementsDescription(ShowAccountActivity.this, account.getNote());
-        account.setNoteSpan(spannableString);
+//        SpannableString spannableString = Helper.clickableElementsDescription(ShowAccountActivity.this, account.getNote());
+//        account.setNoteSpan(spannableString);
         account.makeEmojisAccountProfile(ShowAccountActivity.this, ShowAccountActivity.this, account);
-        account_note.setText(account.getNoteSpan(), TextView.BufferType.SPANNABLE);
+        account_note.setText(account.getNote(), TextView.BufferType.SPANNABLE);
         account_note.setMovementMethod(LinkMovementMethod.getInstance());
         if (!peertubeAccount && tabLayout.getTabAt(0) != null && tabLayout.getTabAt(1) != null && tabLayout.getTabAt(2) != null) {
             //noinspection ConstantConditions
@@ -633,7 +652,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                             .inflate(R.menu.option_filter_toots_account, popup.getMenu());
                     Menu menu = popup.getMenu();
 
-                    if( !Helper.canPin ) {
+                    if (!Helper.canPin) {
                         popup.getMenu().findItem(R.id.action_show_pinned).setVisible(false);
                     }
                     final MenuItem itemShowPined = menu.findItem(R.id.action_show_pinned);
@@ -649,7 +668,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                     popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
                         @Override
                         public void onDismiss(PopupMenu menu) {
-                            if( displayStatusFragment != null)
+                            if (displayStatusFragment != null)
                                 displayStatusFragment.refreshFilter();
                         }
                     });
@@ -683,7 +702,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                                     show_replies = !show_replies;
                                     break;
                             }
-                            if( tabLayout.getTabAt(0) != null)
+                            if (tabLayout.getTabAt(0) != null)
                                 //noinspection ConstantConditions
                                 tabLayout.getTabAt(0).select();
                             PagerAdapter mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
@@ -703,7 +722,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
 
         }
         boolean disableGif = sharedpreferences.getBoolean(Helper.SET_DISABLE_GIF, false);
-        if( !disableGif)
+        if (!disableGif)
             Glide.with(getApplicationContext()).load(account.getAvatar()).apply(RequestOptions.circleCropTransform()).into(account_pp);
         else
             Glide.with(getApplicationContext())
@@ -740,15 +759,15 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         account_follow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if( doAction == action.NOTHING){
+                if (doAction == action.NOTHING) {
                     Toasty.info(getApplicationContext(), getString(R.string.nothing_to_do), Toast.LENGTH_LONG).show();
-                }else if( doAction == action.FOLLOW){
+                } else if (doAction == action.FOLLOW) {
                     account_follow.setEnabled(false);
                     new PostActionAsyncTask(getApplicationContext(), API.StatusAction.FOLLOW, account.getId(), ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                }else if( doAction == action.UNFOLLOW){
+                } else if (doAction == action.UNFOLLOW) {
                     account_follow.setEnabled(false);
                     new PostActionAsyncTask(getApplicationContext(), API.StatusAction.UNFOLLOW, account.getId(), ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                }else if( doAction == action.UNBLOCK){
+                } else if (doAction == action.UNBLOCK) {
                     account_follow.setEnabled(false);
                     new PostActionAsyncTask(getApplicationContext(), API.StatusAction.UNBLOCK, account.getId(), ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
@@ -757,18 +776,16 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         account_follow.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                CrossActions.doCrossAction(ShowAccountActivity.this, null, null, account, API.StatusAction.FOLLOW , null, ShowAccountActivity.this, false);
+                CrossActions.doCrossAction(ShowAccountActivity.this, null, null, account, API.StatusAction.FOLLOW, null, ShowAccountActivity.this, false);
                 return false;
             }
         });
     }
 
 
-
-
     @Override
     public void onRetrieveFeedsAccount(List<Status> statuses) {
-        if( statuses != null) {
+        if (statuses != null) {
             this.statuses.addAll(statuses);
             statusListAdapter.notifyDataSetChanged();
         }
@@ -776,14 +793,14 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
 
     @Override
     public void onRetrieveFeeds(APIResponse apiResponse) {
-        if( apiResponse.getError() != null){
-            Toasty.error(getApplicationContext(), apiResponse.getError().getError(),Toast.LENGTH_LONG).show();
+        if (apiResponse.getError() != null) {
+            Toasty.error(getApplicationContext(), apiResponse.getError().getError(), Toast.LENGTH_LONG).show();
             return;
         }
 
         pins = apiResponse.getStatuses();
         if (pins != null && pins.size() > 0) {
-            if( pins.get(0).isPinned()) {
+            if (pins.get(0).isPinned()) {
                 this.statuses.addAll(pins);
                 //noinspection ConstantConditions
                 tabLayout.getTabAt(3).setText(getString(R.string.pins_cnt, pins.size()));
@@ -796,8 +813,8 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
     @Override
     public void onRetrieveRelationship(Relationship relationship, Error error) {
 
-        if( error != null){
-            Toasty.error(getApplicationContext(), error.getError(),Toast.LENGTH_LONG).show();
+        if (error != null) {
+            Toasty.error(getApplicationContext(), error.getError(), Toast.LENGTH_LONG).show();
             return;
         }
         this.relationship = relationship;
@@ -805,7 +822,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
 
 
         //The authenticated account is followed by the account
-        if( relationship != null && relationship.isFollowed_by()){
+        if (relationship != null && relationship.isFollowed_by()) {
             TextView account_followed_by = findViewById(R.id.account_followed_by);
             account_followed_by.setVisibility(View.VISIBLE);
         }
@@ -814,31 +831,31 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
     }
 
     //Manages the visibility of the button
-    private void manageButtonVisibility(){
-        if( relationship == null)
+    private void manageButtonVisibility() {
+        if (relationship == null)
             return;
         account_follow.setEnabled(true);
-        if( account.getId() != null && account.getId().equals(userId)){
+        if (account.getId() != null && account.getId().equals(userId)) {
             account_follow.hide();
             header_edit_profile.show();
             header_edit_profile.bringToFront();
-        }else if( relationship.isBlocking()){
+        } else if (relationship.isBlocking()) {
             account_follow.setImageResource(R.drawable.ic_lock_open);
             doAction = action.UNBLOCK;
             account_follow.show();
-        }else if( relationship.isRequested()){
+        } else if (relationship.isRequested()) {
             account_follow_request.setVisibility(View.VISIBLE);
             account_follow.hide();
             doAction = action.NOTHING;
-        }else if( relationship.isFollowing()){
+        } else if (relationship.isFollowing()) {
             account_follow.setImageResource(R.drawable.ic_user_times);
             doAction = action.UNFOLLOW;
             account_follow.show();
-        }else if( !relationship.isFollowing()){
+        } else if (!relationship.isFollowing()) {
             account_follow.setImageResource(R.drawable.ic_user_plus);
             doAction = action.FOLLOW;
             account_follow.show();
-        }else{
+        } else {
             account_follow.hide();
             doAction = action.NOTHING;
         }
@@ -856,32 +873,32 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         @Override
         public Fragment getItem(int position) {
             Bundle bundle = new Bundle();
-            switch (position){
+            switch (position) {
                 case 0:
-                    if( ! peertubeAccount){
+                    if (!peertubeAccount) {
                         TabLayoutTootsFragment tabLayoutTootsFragment = new TabLayoutTootsFragment();
                         bundle.putString("targetedId", account.getId());
                         tabLayoutTootsFragment.setArguments(bundle);
                         return tabLayoutTootsFragment;
-                    }else{
+                    } else {
                         DisplayStatusFragment displayStatusFragment = new DisplayStatusFragment();
                         bundle = new Bundle();
                         bundle.putSerializable("type", RetrieveFeedsAsyncTask.Type.USER);
                         bundle.putString("targetedId", account.getId());
-                        bundle.putBoolean("showReply",false);
+                        bundle.putBoolean("showReply", false);
                         displayStatusFragment.setArguments(bundle);
                         return displayStatusFragment;
                     }
                 case 1:
-                    if( peertubeAccount){
+                    if (peertubeAccount) {
                         DisplayAccountsFragment displayAccountsFragment = new DisplayAccountsFragment();
                         bundle.putSerializable("type", RetrieveAccountsAsyncTask.Type.CHANNELS);
                         bundle.putString("targetedId", account.getId());
-                        bundle.putString("instance",account.getAcct().split("@")[1]);
-                        bundle.putString("name",account.getAcct().split("@")[0]);
+                        bundle.putString("instance", account.getAcct().split("@")[1]);
+                        bundle.putString("name", account.getAcct().split("@")[0]);
                         displayAccountsFragment.setArguments(bundle);
                         return displayAccountsFragment;
-                    }else{
+                    } else {
                         DisplayAccountsFragment displayAccountsFragment = new DisplayAccountsFragment();
                         bundle.putSerializable("type", RetrieveAccountsAsyncTask.Type.FOLLOWING);
                         bundle.putString("targetedId", account.getId());
@@ -903,7 +920,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
 
         @Override
         public int getCount() {
-            if( peertubeAccount)
+            if (peertubeAccount)
                 return 2;
             else
                 return 3;
@@ -912,23 +929,24 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
 
     @Override
     public void onRetrieveEmojiAccount(Account account) {
-        account_note.setText(account.getNoteSpan(), TextView.BufferType.SPANNABLE);
-        account_dn.setText(account.getdisplayNameSpan(), TextView.BufferType.SPANNABLE);;
-        if ( account.getFieldsSpan() != null && account.getFieldsSpan().size() > 0){
+        account_note.setText(account.getNote(), TextView.BufferType.SPANNABLE);
+        account_dn.setText(account.getdisplayNameSpan(), TextView.BufferType.SPANNABLE);
+        ;
+        if (account.getFieldsSpan() != null && account.getFieldsSpan().size() > 0) {
             HashMap<SpannableString, SpannableString> fieldsSpan = account.getFieldsSpan();
             Iterator it = fieldsSpan.entrySet().iterator();
             int i = 1;
             LinearLayout fields_container = findViewById(R.id.fields_container);
-            if( fields_container != null)
+            if (fields_container != null)
                 fields_container.setVisibility(View.VISIBLE);
             while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry)it.next();
-                SpannableString label = (SpannableString)pair.getKey();
-                SpannableString value = (SpannableString)pair.getValue();
+                Map.Entry pair = (Map.Entry) it.next();
+                SpannableString label = (SpannableString) pair.getKey();
+                SpannableString value = (SpannableString) pair.getValue();
                 LinearLayout field;
                 TextView labelView;
                 TextView valueView;
-                switch(i){
+                switch (i) {
                     case 1:
                         field = findViewById(R.id.field1);
                         labelView = findViewById(R.id.label1);
@@ -955,7 +973,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                         valueView = findViewById(R.id.value1);
                         break;
                 }
-                if( field != null && labelView != null && valueView != null) {
+                if (field != null && labelView != null && valueView != null) {
                     field.setVisibility(View.VISIBLE);
                     valueView.setText(value, TextView.BufferType.SPANNABLE);
                     valueView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -966,8 +984,8 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         }
     }
 
-    private void showMenu(View account_menu){
-        if( account == null)
+    private void showMenu(View account_menu) {
+        if (account == null)
             return;
         final PopupMenu popup = new PopupMenu(ShowAccountActivity.this, account_menu);
         popup.getMenuInflater()
@@ -977,11 +995,12 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         final boolean isOwner = account.getId().equals(userId);
         String[] splitAcct = account.getAcct().split("@");
 
-        if( splitAcct.length <= 1) {
+        if (splitAcct.length <= 1) {
             popup.getMenu().findItem(R.id.action_follow_instance).setVisible(false);
             popup.getMenu().findItem(R.id.action_block_instance).setVisible(false);
 
-        }if( isOwner) {
+        }
+        if (isOwner) {
             popup.getMenu().findItem(R.id.action_block).setVisible(false);
             popup.getMenu().findItem(R.id.action_mute).setVisible(false);
             popup.getMenu().findItem(R.id.action_mention).setVisible(false);
@@ -990,31 +1009,31 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
             popup.getMenu().findItem(R.id.action_hide_boost).setVisible(false);
             popup.getMenu().findItem(R.id.action_endorse).setVisible(false);
             popup.getMenu().findItem(R.id.action_direct_message).setVisible(false);
-            stringArrayConf =  getResources().getStringArray(R.array.more_action_owner_confirm);
-        }else {
+            stringArrayConf = getResources().getStringArray(R.array.more_action_owner_confirm);
+        } else {
             popup.getMenu().findItem(R.id.action_block).setVisible(true);
             popup.getMenu().findItem(R.id.action_mute).setVisible(true);
             popup.getMenu().findItem(R.id.action_mention).setVisible(true);
-            stringArrayConf =  getResources().getStringArray(R.array.more_action_confirm);
+            stringArrayConf = getResources().getStringArray(R.array.more_action_confirm);
         }
-        if( peertubeAccount){
+        if (peertubeAccount) {
             popup.getMenu().findItem(R.id.action_hide_boost).setVisible(false);
             popup.getMenu().findItem(R.id.action_endorse).setVisible(false);
             popup.getMenu().findItem(R.id.action_direct_message).setVisible(false);
         }
-        if( relationship != null){
-            if( !relationship.isFollowing()) {
+        if (relationship != null) {
+            if (!relationship.isFollowing()) {
                 popup.getMenu().findItem(R.id.action_hide_boost).setVisible(false);
                 popup.getMenu().findItem(R.id.action_endorse).setVisible(false);
             }
-            if(relationship.isEndorsed()){
+            if (relationship.isEndorsed()) {
                 popup.getMenu().findItem(R.id.action_endorse).setTitle(R.string.unendorse);
-            }else {
+            } else {
                 popup.getMenu().findItem(R.id.action_endorse).setTitle(R.string.endorse);
             }
-            if(relationship.isShowing_reblogs()){
+            if (relationship.isShowing_reblogs()) {
                 popup.getMenu().findItem(R.id.action_hide_boost).setTitle(getString(R.string.hide_boost, account.getUsername()));
-            }else {
+            } else {
                 popup.getMenu().findItem(R.id.action_hide_boost).setTitle(getString(R.string.show_boost, account.getUsername()));
             }
         }
@@ -1027,9 +1046,9 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                 int style;
                 if (theme == Helper.THEME_DARK) {
                     style = R.style.DialogDark;
-                } else if (theme == Helper.THEME_BLACK){
+                } else if (theme == Helper.THEME_BLACK) {
                     style = R.style.DialogBlack;
-                }else {
+                } else {
                     style = R.style.Dialog;
                 }
                 switch (item.getItemId()) {
@@ -1037,44 +1056,43 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                         String finalInstanceName = splitAcct[1];
                         final SQLiteDatabase db = Sqlite.getInstance(getApplicationContext(), Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
                         List<RemoteInstance> remoteInstances = new InstancesDAO(ShowAccountActivity.this, db).getInstanceByName(finalInstanceName);
-                        if( remoteInstances != null && remoteInstances.size() > 0 ){
-                            Toasty.info(getApplicationContext(), getString(R.string.toast_instance_already_added),Toast.LENGTH_LONG).show();
+                        if (remoteInstances != null && remoteInstances.size() > 0) {
+                            Toasty.info(getApplicationContext(), getString(R.string.toast_instance_already_added), Toast.LENGTH_LONG).show();
                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             Bundle bundle = new Bundle();
                             bundle.putInt(INTENT_ACTION, SEARCH_INSTANCE);
-                            bundle.putString(INSTANCE_NAME,finalInstanceName);
+                            bundle.putString(INSTANCE_NAME, finalInstanceName);
                             intent.putExtras(bundle);
                             startActivity(intent);
                             return true;
                         }
-                        new Thread(new Runnable(){
+                        new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 try {
-                                    if( !peertubeAccount) {
+                                    if (!peertubeAccount) {
                                         //Here we can't know if the instance is a Mastodon one or not
                                         try { //Testing Mastodon
                                             new HttpsConnection(ShowAccountActivity.this).get("https://" + finalInstanceName + "/api/v1/timelines/public?local=true", 10, null, null);
-                                        }catch (Exception ignored){
+                                        } catch (Exception ignored) {
                                             new HttpsConnection(ShowAccountActivity.this).get("https://" + finalInstanceName + "/api/v1/videos/", 10, null, null);
                                             peertubeAccount = true;
                                         }
-                                    }
-                                    else
+                                    } else
                                         new HttpsConnection(ShowAccountActivity.this).get("https://" + finalInstanceName + "/api/v1/videos/", 10, null, null);
 
                                     runOnUiThread(new Runnable() {
                                         public void run() {
                                             final SQLiteDatabase db = Sqlite.getInstance(getApplicationContext(), Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
-                                            if( !peertubeAccount)
+                                            if (!peertubeAccount)
                                                 new InstancesDAO(ShowAccountActivity.this, db).insertInstance(finalInstanceName, "MASTODON");
                                             else
                                                 new InstancesDAO(ShowAccountActivity.this, db).insertInstance(finalInstanceName, "PEERTUBE");
-                                            Toasty.success(getApplicationContext(), getString(R.string.toast_instance_followed),Toast.LENGTH_LONG).show();
+                                            Toasty.success(getApplicationContext(), getString(R.string.toast_instance_followed), Toast.LENGTH_LONG).show();
                                             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                             Bundle bundle = new Bundle();
                                             bundle.putInt(INTENT_ACTION, SEARCH_INSTANCE);
-                                            bundle.putString(INSTANCE_NAME,finalInstanceName);
+                                            bundle.putString(INSTANCE_NAME, finalInstanceName);
                                             intent.putExtras(bundle);
                                             startActivity(intent);
                                         }
@@ -1083,7 +1101,7 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                                     e.printStackTrace();
                                     runOnUiThread(new Runnable() {
                                         public void run() {
-                                            Toasty.warning(getApplicationContext(), getString(R.string.toast_instance_unavailable),Toast.LENGTH_LONG).show();
+                                            Toasty.warning(getApplicationContext(), getString(R.string.toast_instance_unavailable), Toast.LENGTH_LONG).show();
                                         }
                                     });
                                 }
@@ -1091,18 +1109,18 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                         }).start();
                         return true;
                     case R.id.action_endorse:
-                        if( relationship != null)
-                            if(relationship.isEndorsed()){
+                        if (relationship != null)
+                            if (relationship.isEndorsed()) {
                                 new PostActionAsyncTask(getApplicationContext(), API.StatusAction.UNENDORSE, account.getId(), ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                            }else {
+                            } else {
                                 new PostActionAsyncTask(getApplicationContext(), API.StatusAction.ENDORSE, account.getId(), ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             }
                         return true;
                     case R.id.action_hide_boost:
-                        if( relationship != null)
-                            if(relationship.isShowing_reblogs()){
+                        if (relationship != null)
+                            if (relationship.isShowing_reblogs()) {
                                 new PostActionAsyncTask(getApplicationContext(), API.StatusAction.HIDE_BOOST, account.getId(), ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                            }else {
+                            } else {
                                 new PostActionAsyncTask(getApplicationContext(), API.StatusAction.SHOW_BOOST, account.getId(), ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             }
                         return true;
@@ -1115,8 +1133,8 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                         startActivity(intent);
                         return true;
                     case R.id.action_open_browser:
-                        if( accountUrl != null) {
-                            if( !accountUrl.startsWith("http://") && ! accountUrl.startsWith("https://"))
+                        if (accountUrl != null) {
+                            if (!accountUrl.startsWith("http://") && !accountUrl.startsWith("https://"))
                                 accountUrl = "http://" + accountUrl;
                             Helper.openBrowser(ShowAccountActivity.this, accountUrl);
                         }
@@ -1149,17 +1167,17 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
                 }
                 builderInner.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog,int which) {
+                    public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 });
                 builderInner.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog,int which) {
+                    public void onClick(DialogInterface dialog, int which) {
                         String targetedId;
-                        if( item.getItemId() == R.id.action_block_instance){
+                        if (item.getItemId() == R.id.action_block_instance) {
                             targetedId = account.getAcct().split("@")[1];
-                        }else {
+                        } else {
                             targetedId = account.getId();
                         }
                         new PostActionAsyncTask(getApplicationContext(), doActionAccount, targetedId, ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -1172,24 +1190,25 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
         });
         popup.show();
     }
+
     @Override
-    public void onPostAction(int statusCode,API.StatusAction statusAction, String targetedId, Error error) {
-        if( error != null){
-            Toasty.error(getApplicationContext(), error.getError(),Toast.LENGTH_LONG).show();
+    public void onPostAction(int statusCode, API.StatusAction statusAction, String targetedId, Error error) {
+        if (error != null) {
+            Toasty.error(getApplicationContext(), error.getError(), Toast.LENGTH_LONG).show();
             return;
         }
         Helper.manageMessageStatusCode(getApplicationContext(), statusCode, statusAction);
-        new RetrieveRelationshipAsyncTask(getApplicationContext(), account.getId(),ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new RetrieveRelationshipAsyncTask(getApplicationContext(), account.getId(), ShowAccountActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
 
     @Override
     public void onRetrieveAccount(final Account account, Error error) {
-        if( error != null || account.getAcct() == null){
-            if( error == null)
-                Toasty.error(ShowAccountActivity.this, getString(R.string.toast_error),Toast.LENGTH_LONG).show();
+        if (error != null || account.getAcct() == null) {
+            if (error == null)
+                Toasty.error(ShowAccountActivity.this, getString(R.string.toast_error), Toast.LENGTH_LONG).show();
             else
-                Toasty.error(ShowAccountActivity.this, error.getError(),Toast.LENGTH_LONG).show();
+                Toasty.error(ShowAccountActivity.this, error.getError(), Toast.LENGTH_LONG).show();
             return;
         }
         this.account = account;
@@ -1197,12 +1216,11 @@ public class ShowAccountActivity extends BaseActivity implements OnPostActionInt
     }
 
 
-
-    public boolean showReplies(){
+    public boolean showReplies() {
         return show_replies;
     }
 
-    public boolean showBoosts(){
+    public boolean showBoosts() {
         return show_boosts;
     }
 
