@@ -3902,11 +3902,7 @@ public class API {
         String html = message;
 
         html = html.replaceAll("\\n", "<br>");
-<<<<<<< HEAD
-        html = html.replaceAll("(https?://(www\\.)?\\S+)", "<a href=\"$1\">$1</a>");
-=======
         html = html.replaceAll("(https?://(www\\.)?[a-zA-Z.0-9/=?&-]+)", "<a href=\"$1\">$1</a>");
->>>>>>> d11f05519... Fix showing account info
         html = html.replaceAll("\\*\\*\\*([\\s\\S]+?)\\*\\*\\*", "<h3>$1</h3>");
         html = html.replaceAll("\\*\\*([\\s\\S]+?)\\*\\*", "<b>$1</b>");
         html = html.replaceAll("`([^´\\n]+?)`", "<code>$1</code>");
