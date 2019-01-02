@@ -1251,13 +1251,16 @@ public class API {
         try {
             if (local)
                 params.put("local", true);
+            if (onlymedia)
+                params.put("withFiles", true);
             if (max_id != null)
                 params.put("untilId", max_id);
             if (since_id != null)
                 params.put("sinceId", since_id);
-            if (0 > limit || limit > 40)
-                limit = 40;
+            if (0 > limit || limit > 30)
+                limit = 30;
             params.put("limit", limit);
+            params.put("tag", tag.trim());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -1266,7 +1269,7 @@ public class API {
             return null;
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl(String.format("/timelines/tag/%s", tag.trim())), 60, params, prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/search_by_tag"), 60, params, null);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             statuses = parseStatuses(context, new JSONArray(response), instance);
