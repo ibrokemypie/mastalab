@@ -3894,7 +3894,7 @@ public class API {
 
 
     private String getAbsoluteUrlRemoteInstance(String instanceName) {
-        return "https://" + instanceName + "/notes/local-timeline";
+        return instanceWithProtocol(instanceName) + "/notes/local-timeline";
     }
 
     private String getAbsoluteUrlCommunitywiki(String action) {
