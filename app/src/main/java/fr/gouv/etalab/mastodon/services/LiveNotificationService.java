@@ -212,7 +212,7 @@ public class LiveNotificationService extends Service implements NetworkStateRece
             headers.add("Connection", "Keep-Alive");
             headers.add("method", "GET");
             headers.add("scheme", "https");
-            String urlKey = "wss://" + account.getInstance() + "/api/v1/streaming/?stream=user:notification&access_token=" + account.getToken();
+            String urlKey = "wss://" + account.getInstance() + "/streaming/?i=" + account.getToken();
             Uri url = Uri.parse(urlKey);
             AsyncHttpRequest.setDefaultHeaders(headers, url);
             if( webSocketFutures.containsKey(urlKey)  ){
@@ -231,7 +231,7 @@ public class LiveNotificationService extends Service implements NetworkStateRece
                     e.printStackTrace();
                 }
             }
-            AsyncHttpClient.getDefaultInstance().websocket("wss://" + account.getInstance() + "/api/v1/streaming/?stream=user:notification&access_token=" + account.getToken(), "wss", new AsyncHttpClient.WebSocketConnectCallback() {
+            AsyncHttpClient.getDefaultInstance().websocket("wss://" + account.getInstance() + "/streaming/?i=" + account.getToken(), "wss", new AsyncHttpClient.WebSocketConnectCallback() {
                 @Override
                 public void onCompleted(Exception ex, WebSocket webSocket) {
                     webSocketFutures.put(account.getAcct()+"@"+account.getInstance(), webSocket);
