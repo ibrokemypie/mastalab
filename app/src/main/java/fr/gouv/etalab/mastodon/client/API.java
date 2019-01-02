@@ -1618,112 +1618,115 @@ public class API {
     private int postAction(StatusAction statusAction, String targetedId, Status status, String comment) {
 
         String action;
-        HashMap<String, String> params = new HashMap<>();
-        switch (statusAction) {
-            case FAVOURITE:
-                action = "/notes/favorites/create";
-                params.put("noteId", targetedId);
-                break;
-            case UNFAVOURITE:
-                action = "/notes/favorites/delete";
-                params.put("noteId", targetedId);
-                break;
-            case REBLOG:
-                action = "/notes/create";
-                params.put("renoteId", targetedId);
-                break;
-            case UNREBLOG:
-                action = "/notes/delete";
-                params.put("noteId", targetedId);
-                break;
-            case FOLLOW:
-                action = "/following/create";
-                params.put("userId", targetedId);
-                break;
-            case REMOTE_FOLLOW:
-                action = "/following/create";
-                params.put("userId", targetedId);
-                break;
-            case UNFOLLOW:
-                action = "/following/delete";
-                params.put("userId", targetedId);
-                break;
-            case BLOCK:
-                action = String.format("/users/%s/block", targetedId);
-                break;
-            case BLOCK_DOMAIN:
-                action = "/domain_blocks";
-                params.put("domain", targetedId);
-                break;
-            case UNBLOCK:
-                action = String.format("/users/%s/unblock", targetedId);
-                break;
-            case MUTE:
-                action = String.format("/users/%s/mute", targetedId);
-                break;
-            case UNMUTE:
-                action = String.format("/users/%s/unmute", targetedId);
-                break;
-            case PIN:
-                action = String.format("/statuses/%s/pin", targetedId);
-                break;
-            case UNPIN:
-                action = String.format("/statuses/%s/unpin", targetedId);
-                break;
-            case ENDORSE:
-                action = String.format("/users/%s/pin", targetedId);
-                break;
-            case UNENDORSE:
-                action = String.format("/users/%s/unpin", targetedId);
-                break;
-            case SHOW_BOOST:
-                params.put("reblogs", "true");
-                action = String.format("/users/%s/follow", targetedId);
-                break;
-            case HIDE_BOOST:
-                params.put("reblogs", "false");
-                action = String.format("/users/%s/follow", targetedId);
-                break;
-            case UNSTATUS:
-                action = "/notes/delete";
-                params.put("noteId", targetedId);
-                break;
-            case AUTHORIZE:
-                action = String.format("/follow_requests/%s/authorize", targetedId);
-                break;
-            case REJECT:
-                action = String.format("/follow_requests/%s/reject", targetedId);
-                break;
-            case REPORT:
-                action = "/reports";
-                params.put("account_id", status.getAccount().getId());
-                params.put("comment", comment);
-                params.put("status_ids[]", status.getId());
-                break;
-            case CREATESTATUS:
-                action = "/notes/create";
-                params.put("text", status.getContent());
-                if (status.getIn_reply_to_id() != null)
-                    params.put("replyId", status.getIn_reply_to_id());
-                if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
-                    StringBuilder parameters = new StringBuilder();
-                    for (Attachment attachment : status.getMedia_attachments())
-                        parameters.append("media_ids[]=").append(attachment.getId()).append("&");
-                    parameters = new StringBuilder(parameters.substring(0, parameters.length() - 1).substring(12));
-                    params.put("media_ids[]", parameters.toString());
-                }
-                if (status.isSensitive())
-                    params.put("sensitive", Boolean.toString(status.isSensitive()));
-                if (status.getSpoiler_text() != null)
-                    params.put("cw", status.getSpoiler_text());
-                params.put("visibility", status.getVisibility());
-                break;
-            default:
-                return -1;
-        }
+        JSONObject params = new JSONObject();
+        try {
+            switch (statusAction) {
+                case FAVOURITE:
+                    action = "/notes/favorites/create";
+                    params.put("noteId", targetedId);
+                    break;
+                case UNFAVOURITE:
+                    action = "/notes/favorites/delete";
+                    params.put("noteId", targetedId);
+                    break;
+                case REBLOG:
+                    action = "/notes/create";
+                    params.put("renoteId", targetedId);
+                    break;
+                case UNREBLOG:
+                    action = "/notes/delete";
+                    params.put("noteId", targetedId);
+                    break;
+                case FOLLOW:
+                    action = "/following/create";
+                    params.put("userId", targetedId);
+                    break;
+                case REMOTE_FOLLOW:
+                    action = "/following/create";
+                    params.put("userId", targetedId);
+                    break;
+                case UNFOLLOW:
+                    action = "/following/delete";
+                    params.put("userId", targetedId);
+                    break;
+                case BLOCK:
+                    action = String.format("/users/%s/block", targetedId);
+                    break;
+                case BLOCK_DOMAIN:
+                    action = "/domain_blocks";
+                    params.put("domain", targetedId);
+                    break;
+                case UNBLOCK:
+                    action = String.format("/users/%s/unblock", targetedId);
+                    break;
+                case MUTE:
+                    action = String.format("/users/%s/mute", targetedId);
+                    break;
+                case UNMUTE:
+                    action = String.format("/users/%s/unmute", targetedId);
+                    break;
+                case PIN:
+                    action = String.format("/statuses/%s/pin", targetedId);
+                    break;
+                case UNPIN:
+                    action = String.format("/statuses/%s/unpin", targetedId);
+                    break;
+                case ENDORSE:
+                    action = String.format("/users/%s/pin", targetedId);
+                    break;
+                case UNENDORSE:
+                    action = String.format("/users/%s/unpin", targetedId);
+                    break;
+                case SHOW_BOOST:
+                    params.put("reblogs", "true");
+                    action = String.format("/users/%s/follow", targetedId);
+                    break;
+                case HIDE_BOOST:
+                    params.put("reblogs", "false");
+                    action = String.format("/users/%s/follow", targetedId);
+                    break;
+                case UNSTATUS:
+                    action = "/notes/delete";
+                    params.put("noteId", targetedId);
+                    break;
+                case AUTHORIZE:
+                    action = String.format("/follow_requests/%s/authorize", targetedId);
+                    break;
+                case REJECT:
+                    action = String.format("/follow_requests/%s/reject", targetedId);
+                    break;
+                case REPORT:
+                    action = "/reports";
+                    params.put("account_id", status.getAccount().getId());
+                    params.put("comment", comment);
+                    params.put("status_ids[]", status.getId());
+                    break;
+                case CREATESTATUS:
+                    action = "/notes/create";
+                    if (status.getContent().length() < 1)
+                        status.setContent(".");
+                    params.put("text", status.getContent());
+                    if (status.getIn_reply_to_id() != null)
+                        params.put("replyId", status.getIn_reply_to_id());
+                    if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
+                        JSONArray mediaIds = new JSONArray();
+                        for (Attachment attachment : status.getMedia_attachments())
+                            mediaIds.put(attachment.getId());
+                        params.put("mediaIds", mediaIds);
+                    }
+                    if (status.isSensitive())
+                        params.put("sensitive", Boolean.toString(status.isSensitive()));
+                    if (status.getSpoiler_text() != null)
+                        params.put("cw", status.getSpoiler_text());
+                    params.put("visibility", status.getVisibility());
+                    break;
+                default:
+                    return -1;
+            }
+
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            httpsConnection.post(getAbsoluteUrl(action), 60, new JSONObject(params), prefKeyOauthTokenT);
+            httpsConnection.post(getAbsoluteUrl(action), 60, params, prefKeyOauthTokenT);
             actionCode = httpsConnection.getActionCode();
             Log.d("response", String.valueOf(actionCode));
         } catch (HttpsConnection.HttpsConnectionException e) {
@@ -1733,6 +1736,9 @@ public class API {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+        } catch (JSONException e) {
             e.printStackTrace();
         }
         return actionCode;
@@ -1747,27 +1753,32 @@ public class API {
      */
     public APIResponse postStatusAction(Status status) {
 
-        HashMap<String, String> params = new HashMap<>();
-        params.put("text", status.getContent());
-        if (status.getIn_reply_to_id() != null)
-            params.put("replyId", status.getIn_reply_to_id());
-        if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
-            StringBuilder parameters = new StringBuilder();
-            for (Attachment attachment : status.getMedia_attachments())
-                parameters.append("media_ids[]=").append(attachment.getId()).append("&");
-            parameters = new StringBuilder(parameters.substring(0, parameters.length() - 1).substring(12));
-            params.put("media_ids[]", parameters.toString());
+        JSONObject params = new JSONObject();
+        try {
+            if (status.getContent().length() < 1)
+                status.setContent(".");
+            params.put("text", status.getContent());
+            if (status.getIn_reply_to_id() != null)
+                params.put("replyId", status.getIn_reply_to_id());
+            if (status.getMedia_attachments() != null && status.getMedia_attachments().size() > 0) {
+                JSONArray mediaIds = new JSONArray();
+                for (Attachment attachment : status.getMedia_attachments())
+                    mediaIds.put(attachment.getId());
+                params.put("mediaIds", mediaIds);
+            }
+            if (status.isSensitive())
+                params.put("sensitive", Boolean.toString(status.isSensitive()));
+            if (status.getSpoiler_text() != null)
+                params.put("cw", status.getSpoiler_text());
+            params.put("visibility", status.getVisibility());
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        if (status.isSensitive())
-            params.put("sensitive", Boolean.toString(status.isSensitive()));
-        if (status.getSpoiler_text() != null)
-            params.put("cw", status.getSpoiler_text());
-        params.put("visibility", status.getVisibility());
         statuses = new ArrayList<>();
 
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
-            String response = httpsConnection.post(getAbsoluteUrl("/notes/create"), 60, new JSONObject(params), prefKeyOauthTokenT);
+            String response = httpsConnection.post(getAbsoluteUrl("/notes/create"), 60, params, prefKeyOauthTokenT);
             apiResponse.setSince_id(httpsConnection.getSince_id());
             apiResponse.setMax_id(httpsConnection.getMax_id());
             Status statusreturned = parseStatuses(context, new JSONObject(response).getJSONObject("createdNote"), instance);
@@ -1946,7 +1957,7 @@ public class API {
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             String response = httpsConnection.put(getAbsoluteUrl(String.format("/media/%s", mediaId)), 240, params, prefKeyOauthTokenT);
-            attachment = parseAttachmentResponse(new JSONObject(response));
+            attachment = parseAttachmentResponse(context,new JSONObject(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -3131,6 +3142,25 @@ public class API {
                     JSONObject attObj = arrayAttachement.getJSONObject(j);
                     Attachment attachment = new Attachment();
                     attachment.setId(attObj.get("id").toString());
+                    try {
+                        if (!resobj.isNull("createdAt")) {
+                            Log.d("createdat", resobj.getString("createdAt"));
+                            attachment.setDate(Helper.mstStringToDate(context, resobj.getString("createdAt")));
+                        } else if (!resobj.isNull("lastFetchedAt")) {
+                            attachment.setDate(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
+                        } else {
+                            throw new Exception();
+                        }
+                    } catch (Exception ignored) {
+                        Locale userLocale;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            userLocale = context.getResources().getConfiguration().getLocales().get(0);
+                        } else {
+                            userLocale = context.getResources().getConfiguration().locale;
+                        }
+                        String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", userLocale).format(new Date());
+                        attachment.setDate(Helper.mstStringToDate(context, date));
+                    }
                     attachment.setPreview_url(attObj.get("thumbnailUrl").toString());
                     attachment.setRemote_url(attObj.get("url").toString());
                     attachment.setType(attObj.get("type").toString());
@@ -3761,11 +3791,30 @@ public class API {
      * @param resobj JSONObject
      * @return Relationship
      */
-    static Attachment parseAttachmentResponse(JSONObject resobj) {
+    static Attachment parseAttachmentResponse(Context context, JSONObject resobj) {
 
         Attachment attachment = new Attachment();
         try {
             attachment.setId(resobj.get("id").toString());
+            try {
+                if (!resobj.isNull("createdAt")) {
+                    Log.d("createdat", resobj.getString("createdAt"));
+                    attachment.setDate(Helper.mstStringToDate(context, resobj.getString("createdAt")));
+                } else if (!resobj.isNull("lastFetchedAt")) {
+                    attachment.setDate(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
+                } else {
+                    throw new Exception();
+                }
+            } catch (Exception ignored) {
+                Locale userLocale;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    userLocale = context.getResources().getConfiguration().getLocales().get(0);
+                } else {
+                    userLocale = context.getResources().getConfiguration().locale;
+                }
+                String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", userLocale).format(new Date());
+                attachment.setDate(Helper.mstStringToDate(context, date));
+            }
             attachment.setType(resobj.get("type").toString());
             attachment.setUrl(resobj.get("url").toString());
             try {
@@ -3789,7 +3838,8 @@ public class API {
             } catch (JSONException ignore) {
             }
 
-        } catch (JSONException ignored) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return attachment;
     }

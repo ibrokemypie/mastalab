@@ -17,6 +17,8 @@ package fr.gouv.etalab.mastodon.client.Entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+
 /**
  * Created by Thomas on 23/04/2017.
  * Manages Media
@@ -25,6 +27,7 @@ import android.os.Parcelable;
 public class Attachment implements Parcelable{
 
     private String id;
+    private Date date;
     private String type;
     private String url;
     private String remote_url;
@@ -35,6 +38,7 @@ public class Attachment implements Parcelable{
 
     public Attachment(Parcel in) {
         id = in.readString();
+        date = new Date(in.readString());
         type = in.readString();
         url = in.readString();
         remote_url = in.readString();
@@ -65,6 +69,14 @@ public class Attachment implements Parcelable{
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public String getType() {

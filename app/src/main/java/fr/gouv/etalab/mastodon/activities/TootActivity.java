@@ -1368,7 +1368,8 @@ public class TootActivity extends BaseActivity implements OnRetrieveSearcAccount
                 url = attachment.getUrl();
 
             final ImageView imageView = new ImageView(getApplicationContext());
-            imageView.setId(Integer.parseInt(attachment.getId()));
+            Long time = attachment.getDate().getTime();
+            imageView.setId(time.intValue());
 
             Glide.with(imageView.getContext())
                     .asBitmap()
@@ -1664,7 +1665,8 @@ public class TootActivity extends BaseActivity implements OnRetrieveSearcAccount
         toot_space_left.setText("0");
         if( attachments != null) {
             for (Attachment attachment : attachments) {
-                View namebar = findViewById(Integer.parseInt(attachment.getId()));
+                Long time = attachment.getDate().getTime();
+                View namebar = findViewById(time.intValue());
                 if (namebar != null && namebar.getParent() != null)
                     ((ViewGroup) namebar.getParent()).removeView(namebar);
             }

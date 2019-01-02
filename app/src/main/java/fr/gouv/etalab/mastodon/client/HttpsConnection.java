@@ -1013,7 +1013,7 @@ public class HttpsConnection {
                         });
 
 
-                        final Attachment attachment = API.parseAttachmentResponse(new JSONObject(response));
+                        final Attachment attachment = API.parseAttachmentResponse(context, new JSONObject(response));
                         responseStreamReader.close();
                         responseStream.close();
                         httpsURLConnection.getInputStream().close();
@@ -1171,7 +1171,7 @@ public class HttpsConnection {
                             }});
 
 
-                        final Attachment attachment = API.parseAttachmentResponse(new JSONObject(response));
+                        final Attachment attachment = API.parseAttachmentResponse(context, new JSONObject(response));
                         responseStreamReader.close();
                         responseStream.close();
                         httpURLConnection.getInputStream().close();
