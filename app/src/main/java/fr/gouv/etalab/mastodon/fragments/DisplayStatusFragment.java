@@ -370,7 +370,7 @@ public class DisplayStatusFragment extends Fragment implements OnRetrieveFeedsIn
             SharedPreferences.Editor editor = sharedpreferences.edit();
             if(updatedBookMark != null)
                 editor.putString(Helper.BOOKMARK_ID + userId + instance, updatedBookMark);
-                editor.putLong(Helper.BOOKMARK_DATE_ID + userId + instance, updatedBookMarkDate);
+                editor.putLong(Helper.BOOKMARK_DATE_ID, updatedBookMarkDate);
             if( lastReadToot != null)
                 editor.putLong(Helper.LAST_READ_TOOT_ID + userId + instance, lastReadToot);
             if( lastReadToot != null || updatedBookMark != null)
