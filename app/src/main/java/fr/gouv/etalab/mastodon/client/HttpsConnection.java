@@ -876,129 +876,6 @@ public class HttpsConnection {
     }
 
 
-
-
-        @SuppressWarnings("SameParameterValue")
-    void patch(String urlConnection, int timeout, JSONObject paramaters, InputStream avatar, String avatarName, InputStream header, String headerName, String token) throws IOException, NoSuchAlgorithmException, KeyManagementException, HttpsConnectionException {
-            URL url = new URL(urlConnection);
-            JSONObject param = new JSONObject();
-            if (paramaters!=null)
-                param = paramaters;
-
-            if (token != null)
-                try {
-                    param.put("i", token);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            String postData = param.toString();
-            Log.d("posturl",urlConnection);
-            Log.d("postdata",postData);
-
-            byte[] postDataBytes = postData.getBytes("UTF-8");
-
-        if( urlConnection.startsWith("https://")) {
-            if (proxy != null)
-                httpsURLConnection = (HttpsURLConnection) url.openConnection(proxy);
-            else
-                httpsURLConnection = (HttpsURLConnection) url.openConnection();
-            httpsURLConnection.setRequestProperty("User-Agent", Helper.USER_AGENT);
-            httpsURLConnection.setConnectTimeout(timeout * 1000);
-            httpsURLConnection.setSSLSocketFactory(new TLSSocketFactory());
-            if( Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT ){
-                httpsURLConnection.setRequestMethod("PATCH");
-            }else {
-                httpsURLConnection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
-                httpsURLConnection.setRequestMethod("POST");
-            }
-            if (token != null)
-                httpsURLConnection.setRequestProperty("Authorization", "Bearer " + token);
-            httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            httpsURLConnection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-            httpsURLConnection.setDoOutput(true);
-
-
-            OutputStream outputStream = httpsURLConnection.getOutputStream();
-            outputStream.write(postDataBytes);
-            if( avatar != null)
-                patchImage(urlConnection,120,imageType.AVATAR, avatar,avatarName,token);
-            if( header != null)
-                patchImage(urlConnection,120,imageType.BANNER, header,headerName,token);
-            if (httpsURLConnection.getResponseCode() >= 200 && httpsURLConnection.getResponseCode() < 400) {
-               new String(ByteStreams.toByteArray(httpsURLConnection.getInputStream()));
-            } else {
-                String error = null;
-                if( httpsURLConnection.getErrorStream() != null) {
-                    InputStream stream = httpsURLConnection.getErrorStream();
-                    if (stream == null) {
-                        stream = httpsURLConnection.getInputStream();
-                    }
-                    try (Scanner scanner = new Scanner(stream)) {
-                        scanner.useDelimiter("\\Z");
-                        error = scanner.next();
-                    }catch (Exception e){e.printStackTrace();}
-                }
-                int responseCode = httpsURLConnection.getResponseCode();
-                try {
-                    httpsURLConnection.getInputStream().close();
-                }catch (Exception ignored){}
-                throw new HttpsConnectionException(responseCode, error);
-            }
-            httpsURLConnection.getInputStream().close();
-        }else {
-            if (proxy != null)
-                httpURLConnection = (HttpsURLConnection) url.openConnection(proxy);
-            else
-                httpURLConnection = (HttpsURLConnection) url.openConnection();
-            httpURLConnection.setRequestProperty("User-Agent", Helper.USER_AGENT);
-            httpURLConnection.setConnectTimeout(timeout * 1000);
-            if( Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT ){
-                httpURLConnection.setRequestMethod("PATCH");
-            }else {
-                httpURLConnection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
-                httpURLConnection.setRequestMethod("POST");
-            }
-            if (token != null)
-                httpURLConnection.setRequestProperty("Authorization", "Bearer " + token);
-            httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            httpURLConnection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-            httpURLConnection.setDoOutput(true);
-
-
-            OutputStream outputStream = httpURLConnection.getOutputStream();
-            outputStream.write(postDataBytes);
-            if( avatar != null)
-                patchImage(urlConnection,120,imageType.AVATAR, avatar,avatarName,token);
-            if( header != null)
-                patchImage(urlConnection,120,imageType.BANNER, header,headerName,token);
-            if (httpURLConnection.getResponseCode() >= 200 && httpURLConnection.getResponseCode() < 400) {
-                new String(ByteStreams.toByteArray(httpURLConnection.getInputStream()));
-            } else {
-                String error = null;
-                if( httpURLConnection.getErrorStream() != null) {
-                    InputStream stream = httpURLConnection.getErrorStream();
-                    if (stream == null) {
-                        stream = httpURLConnection.getInputStream();
-                    }
-                    try (Scanner scanner = new Scanner(stream)) {
-                        scanner.useDelimiter("\\Z");
-                        error = scanner.next();
-                    }catch (Exception e){e.printStackTrace();}
-                }
-                int responseCode = httpURLConnection.getResponseCode();
-                try {
-                    httpURLConnection.getInputStream().close();
-                }catch (Exception ignored){}
-
-                throw new HttpsConnectionException(responseCode, error);
-            }
-            httpURLConnection.getInputStream().close();
-        }
-
-    }
-
-
     /**
      * Upload method - https only
      * @param inputStream InputStream of the file to upload
@@ -1022,7 +899,7 @@ public class HttpsConnection {
                             token = tokenUsed;
                         SQLiteDatabase db = Sqlite.getInstance(context, Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
                         Account account = new AccountDAO(context, db).getAccountByToken(token);
-                        final URL url = new URL("https://" + account.getInstance() + "/api/v1/media");
+                        final URL url = new URL("https://" + account.getInstance() + "/api/drive/files/create");
                         ByteArrayOutputStream ous = null;
                         try {
                             try {
@@ -1046,7 +923,8 @@ public class HttpsConnection {
                         lengthSent += (twoHyphens + boundary + lineEnd).getBytes().length;
                         lengthSent += (twoHyphens + boundary + twoHyphens +lineEnd).getBytes().length;
                         lengthSent += ("Content-Disposition: form-data; name=\"file\"; filename=\""+fileName+"\"" + lineEnd).getBytes().length;
-                        lengthSent += 2 * (lineEnd).getBytes().length;
+                        lengthSent += 4 * (lineEnd).getBytes().length;
+                        lengthSent += ("Content-Disposition: form-data; name=\"\"i\"\"" + lineEnd + token + boundary + twoHyphens + lineEnd).getBytes().length;
 
                         if (proxy != null)
                             httpsURLConnection = (HttpsURLConnection) url.openConnection(proxy);
@@ -1061,11 +939,9 @@ public class HttpsConnection {
                         httpsURLConnection.setUseCaches(false);
 
                         httpsURLConnection.setRequestMethod("POST");
-                        if (token != null)
-                            httpsURLConnection.setRequestProperty("Authorization", "Bearer " + token);
                         httpsURLConnection.setRequestProperty("Connection", "Keep-Alive");
                         httpsURLConnection.setRequestProperty("Cache-Control", "no-cache");
-                        httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                        httpsURLConnection.setRequestProperty("Content-Type", "multipart/form-data");
                         httpsURLConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
 
 
@@ -1098,6 +974,11 @@ public class HttpsConnection {
                             });
                             request.flush();
                         }
+                        request.writeBytes(lineEnd);
+                        request.writeBytes(twoHyphens + boundary + lineEnd);
+                        request.writeBytes("Content-Disposition: form-data; name=\"\"i\"\"" + lineEnd);
+                        request.writeBytes(lineEnd);
+                        request.writeBytes(token);
                         request.writeBytes(lineEnd);
                         request.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
                         request.flush();
@@ -1180,7 +1061,7 @@ public class HttpsConnection {
                             token = tokenUsed;
                         SQLiteDatabase db = Sqlite.getInstance(context, Sqlite.DB_NAME, null, Sqlite.DB_VERSION).open();
                         Account account = new AccountDAO(context, db).getAccountByToken(token);
-                        final URL url = new URL("http://" + account.getInstance() + "/api/v1/media");
+                        final URL url = new URL("http://" + account.getInstance() + "/api/drive/files/create");
                         ByteArrayOutputStream ous = null;
                         try {
                             try {
@@ -1202,8 +1083,9 @@ public class HttpsConnection {
                         int lengthSent = pixels.length;
                         lengthSent += (twoHyphens + boundary + lineEnd).getBytes().length;
                         lengthSent += (twoHyphens + boundary + twoHyphens +lineEnd).getBytes().length;
-                        lengthSent += ("Content-Disposition: form-data; name=\"file\";filename=\""+fileName+"\"" + lineEnd).getBytes().length;
-                        lengthSent += 2 * (lineEnd).getBytes().length;
+                        lengthSent += ("Content-Disposition: form-data; name=\"file\"; filename=\""+fileName+"\"" + lineEnd).getBytes().length;
+                        lengthSent += 4 * (lineEnd).getBytes().length;
+                        lengthSent += ("Content-Disposition: form-data; name=\"\"i\"\"" + lineEnd + token + boundary + twoHyphens + lineEnd).getBytes().length;
 
                         if( proxy !=null )
                             httpURLConnection = (HttpURLConnection)url.openConnection(proxy);
@@ -1217,8 +1099,6 @@ public class HttpsConnection {
                         httpURLConnection.setUseCaches(false);
 
                         httpURLConnection.setRequestMethod("POST");
-                        if (token != null)
-                            httpURLConnection.setRequestProperty("Authorization", "Bearer " + token);
                         httpURLConnection.setRequestProperty("Connection", "Keep-Alive");
                         httpURLConnection.setRequestProperty("Cache-Control", "no-cache");
                         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -1253,6 +1133,11 @@ public class HttpsConnection {
                                 }});
                             request.flush();
                         }
+                        request.writeBytes(lineEnd);
+                        request.writeBytes(twoHyphens + boundary + lineEnd);
+                        request.writeBytes("Content-Disposition: form-data; name=\"\"i\"\"" + lineEnd);
+                        request.writeBytes(lineEnd);
+                        request.writeBytes(token);
                         request.writeBytes(lineEnd);
                         request.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
                         request.flush();

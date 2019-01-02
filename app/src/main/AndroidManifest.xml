@@ -37,7 +37,8 @@
         android:hardwareAccelerated="true"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/AppThemeDark">
+        android:theme="@style/AppThemeDark"
+        android:usesCleartextTraffic="true">
 
         <service
             android:name=".services.LiveNotificationService"
