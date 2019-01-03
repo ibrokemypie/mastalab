@@ -3952,7 +3952,7 @@ public class API {
         String html = message;
 
         html = html.replaceAll("\\n", "<br>");
-        html = html.replaceAll("((?:http|ftp|mailto)s?:\\/\\/[a-zA-Z.0-9/=?&+_-]+)", "<a href=\"$1\">$1</a>");
+        html = html.replaceAll("((?:http|ftp|mailto)s?:\\/\\/[a-zA-Z.0-9/=?&+_(),@:;'\"$!*-]+)", "<a href=\"$1\">$1</a>");
         html = html.replaceAll("\\*\\*\\*([\\s\\S]+?)\\*\\*\\*", "<h3>$1</h3>");
         html = html.replaceAll("\\*\\*([\\s\\S]+?)\\*\\*", "<b>$1</b>");
         html = html.replaceAll("`([^´\\n]+?)`", "<code>$1</code>");
