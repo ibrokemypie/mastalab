@@ -84,7 +84,7 @@ public class Attachment implements Parcelable{
     }
 
     public void setType(String type) {
-        this.type = type;
+        this.type = type.split("/",2)[0];
     }
 
     public String getUrl() {
@@ -127,6 +127,7 @@ public class Attachment implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);
+        dest.writeString(date.toString());
         dest.writeString(type);
         dest.writeString(url);
         dest.writeString(remote_url);

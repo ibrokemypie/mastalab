@@ -3113,8 +3113,13 @@ public class API {
         try {
             status.setId(resobj.get("id").toString());
             status.setUri(instanceWithProtocol(instance) + "/notes/" + resobj.get("id").toString());
-            status.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
-            status.setDate_id(Helper.mstStringToDate(context, resobj.get("createdAt").toString()).getTime());
+            try {
+                status.setCreated_at(Helper.mstStringToDate(context, resobj.get("createdAt").toString()));
+                status.setDate_id(Helper.mstStringToDate(context, resobj.get("createdAt").toString()).getTime());
+            } catch (JSONException e) {
+                status.setCreated_at(new Date());
+                status.setDate_id(new Date().getTime());
+            }
             try {
                 status.setIn_reply_to_id(resobj.getJSONObject("reply").get("replyId").toString());
                 status.setIn_reply_to_account_id(resobj.getJSONObject("reply").getJSONObject("user").get("id").toString());
@@ -3151,14 +3156,7 @@ public class API {
                             throw new Exception();
                         }
                     } catch (Exception ignored) {
-                        Locale userLocale;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            userLocale = context.getResources().getConfiguration().getLocales().get(0);
-                        } else {
-                            userLocale = context.getResources().getConfiguration().locale;
-                        }
-                        String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", userLocale).format(new Date());
-                        attachment.setDate(Helper.mstStringToDate(context, date));
+                        attachment.setDate(new Date());
                     }
                     attachment.setPreview_url(attObj.get("thumbnailUrl").toString());
                     attachment.setRemote_url(attObj.get("url").toString());
@@ -3570,14 +3568,7 @@ public class API {
                     throw new Exception();
                 }
             } catch (Exception ignored) {
-                Locale userLocale;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    userLocale = context.getResources().getConfiguration().getLocales().get(0);
-                } else {
-                    userLocale = context.getResources().getConfiguration().locale;
-                }
-                String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", userLocale).format(new Date());
-                account.setCreated_at(Helper.mstStringToDate(context, date));
+                account.setCreated_at(new Date());
             }
             if (!resobj.isNull("followersCount")) {
                 account.setFollowers_count(resobj.getInt("followersCount"));
@@ -3658,8 +3649,6 @@ public class API {
                 account.setEmojis(new ArrayList<>());
             }
         } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
             e.printStackTrace();
         }
         return account;
@@ -3803,14 +3792,7 @@ public class API {
                     throw new Exception();
                 }
             } catch (Exception ignored) {
-                Locale userLocale;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    userLocale = context.getResources().getConfiguration().getLocales().get(0);
-                } else {
-                    userLocale = context.getResources().getConfiguration().locale;
-                }
-                String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", userLocale).format(new Date());
-                attachment.setDate(Helper.mstStringToDate(context, date));
+                attachment.setDate(new Date());
             }
             attachment.setType(resobj.get("type").toString());
             attachment.setUrl(resobj.get("url").toString());
