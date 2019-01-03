@@ -1724,20 +1724,20 @@ public class API {
                     return -1;
             }
 
-        try {
-            HttpsConnection httpsConnection = new HttpsConnection(context);
-            httpsConnection.post(getAbsoluteUrl(action), 60, params, prefKeyOauthTokenT);
-            actionCode = httpsConnection.getActionCode();
-            Log.d("response", String.valueOf(actionCode));
-        } catch (HttpsConnection.HttpsConnectionException e) {
-            setError(e.getStatusCode(), e);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        }
+            try {
+                HttpsConnection httpsConnection = new HttpsConnection(context);
+                httpsConnection.post(getAbsoluteUrl(action), 60, params, prefKeyOauthTokenT);
+                actionCode = httpsConnection.getActionCode();
+                Log.d("response", String.valueOf(actionCode));
+            } catch (HttpsConnection.HttpsConnectionException e) {
+                setError(e.getStatusCode(), e);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -1957,7 +1957,7 @@ public class API {
         try {
             HttpsConnection httpsConnection = new HttpsConnection(context);
             String response = httpsConnection.put(getAbsoluteUrl(String.format("/media/%s", mediaId)), 240, params, prefKeyOauthTokenT);
-            attachment = parseAttachmentResponse(context,new JSONObject(response));
+            attachment = parseAttachmentResponse(context, new JSONObject(response));
         } catch (HttpsConnection.HttpsConnectionException e) {
             setError(e.getStatusCode(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -3144,7 +3144,6 @@ public class API {
                     attachment.setId(attObj.get("id").toString());
                     try {
                         if (!resobj.isNull("createdAt")) {
-                            Log.d("createdat", resobj.getString("createdAt"));
                             attachment.setDate(Helper.mstStringToDate(context, resobj.getString("createdAt")));
                         } else if (!resobj.isNull("lastFetchedAt")) {
                             attachment.setDate(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
@@ -3564,7 +3563,6 @@ public class API {
             }
             try {
                 if (!resobj.isNull("createdAt")) {
-                    Log.d("createdat", resobj.getString("createdAt"));
                     account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("createdAt")));
                 } else if (!resobj.isNull("lastFetchedAt")) {
                     account.setCreated_at(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
@@ -3798,7 +3796,6 @@ public class API {
             attachment.setId(resobj.get("id").toString());
             try {
                 if (!resobj.isNull("createdAt")) {
-                    Log.d("createdat", resobj.getString("createdAt"));
                     attachment.setDate(Helper.mstStringToDate(context, resobj.getString("createdAt")));
                 } else if (!resobj.isNull("lastFetchedAt")) {
                     attachment.setDate(Helper.mstStringToDate(context, resobj.getString("lastFetchedAt")));
